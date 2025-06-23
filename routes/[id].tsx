@@ -14,12 +14,9 @@ interface NotePageProps {
     message?: string;
 }
 
-// link structure vailnote.xyz/[id]?auth=firstAuth
-// example: /q3amne384x?auth=a2igj6ci
 export const handler: Handlers<NotePageProps> = {
     async GET(_req, ctx) {
         const { id } = ctx.params;
-
         const url = new URL(_req.url);
         const firstAuth = url.searchParams.get("auth");
 
