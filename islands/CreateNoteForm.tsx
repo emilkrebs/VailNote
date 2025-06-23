@@ -4,6 +4,7 @@ import { useState } from "preact/hooks";
 import CopyContent from "./CopyContent.tsx";
 import PasswordInput from "./PasswordInput.tsx";
 import PenIcon from "../components/PenIcon.tsx";
+import { generateRandomId } from "../types/types.ts";
 
 
 interface CreateNoteData {
@@ -74,9 +75,10 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
         const notePassword = formData.get("notePassword")?.toString() || "";
         const expiresIn = formData.get("expiresIn")?.toString() || "";
         const replaceContent = formData.get("replaceContent")?.toString() || "";
+        const firstAuth = generateRandomId(8);
 
         try {
-            const encryptedContent = await encryptNoteContent(noteContent, notePassword);
+            const encryptedContent = await encryptNoteContent(noteContent, notePassword ? notePassword : firstAuth);
             const requestBody = {
                 content: encryptedContent.encrypted,
                 password: notePassword ? await hashPassword(notePassword) : null,
@@ -93,7 +95,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 
             const result = await response.json();
             if (response.ok) {
-                onCreate(result.noteId, result.message, result.noteLink);
+                onCreate(result.noteId, result.message, `${result.noteLink}?auth=${firstAuth}`);
                 form.reset();
             } else {
                 onError(result.error || "Failed to create note.");

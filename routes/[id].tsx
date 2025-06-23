@@ -8,15 +8,21 @@ import Header from "../components/Header.tsx";
 import PenIcon from "../components/PenIcon.tsx";
 
 interface NotePageProps {
-    note: Note;
+    note?: Note;
     passwordRequired?: boolean;
 
     message?: string;
 }
 
+// link structure vailnote.xyz/[id]?auth=firstAuth
+// example: /q3amne384x?auth=a2igj6ci
 export const handler: Handlers<NotePageProps> = {
     async GET(_req, ctx) {
         const { id } = ctx.params;
+
+        const url = new URL(_req.url);
+        const firstAuth = url.searchParams.get("auth");
+
         const note = await noteDatabase.getNoteById(id);
 
         if (!note) {
@@ -31,18 +37,26 @@ export const handler: Handlers<NotePageProps> = {
             });
         }
 
-        const decryptedNote: Note = {
-            ...note,
-            content: await decryptNoteContent(note.content, note.iv, note.id),
-        };
+        try {
+            const decryptedNote: Note = {
+                ...note,
+                content: await decryptNoteContent(note.content, note.iv, firstAuth || note.id),
+            };
 
-        await noteDatabase.deleteNote(id);
+            await noteDatabase.deleteNote(id);
 
-        return ctx.render({
-            note: decryptedNote,
-            passwordRequired: false,
-            message: "This note has been destroyed. It will not be retrievable again.",
-        });
+            return ctx.render({
+                note: decryptedNote,
+                passwordRequired: false,
+                message: "This note has been destroyed. It will not be retrievable again.",
+            });
+        }
+        catch (error) {
+            return ctx.render({
+                passwordRequired: false,
+                message: "Failed to decrypt note content. It may have been tampered with or is invalid.",
+            });
+        }
     },
     async POST(req, ctx) {
         const { id } = ctx.params;
@@ -62,7 +76,6 @@ export const handler: Handlers<NotePageProps> = {
                 message: "Incorrect password. Please try again."
             });
         }
-
         const result: Note = {
             ...note,
             content: await decryptNoteContent(note.content, note.iv, password)
@@ -82,7 +95,25 @@ export default function NotePage(ctx: PageProps<NotePageProps>) {
     const { note, passwordRequired, message } = ctx.data;
 
     if (!note) {
-        return <div class="text-center text-red-500">Note not found.</div>;
+        return (
+            <>
+                <Header title={`Note Not Found`} />
+                <div class="flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16">
+                    <h1 class="text-4xl font-bold">VailNote</h1>
+                    <p class="mt-2 text-lg text-gray-200">Open-Source, Encrypted Note Sharing</p>
+                    <div class="flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8">
+                        <div class="flex flex-col gap-2 mt-6 p-8 rounded-2xl shadow-xl w-full bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600">
+                            <h2 class="text-3xl font-bold text-white mb-2">Note Not Found</h2>
+                            <p class="text-gray-300">{message || "The note you are looking for does not exist."}</p>
+
+                            <a href="/" class="w-fit mt-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl font-semibold text-lg shadow-lg hover:from-blue-600 hover:to-blue-800 transition-colors">
+                                Go Back Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
     }
 
     if (passwordRequired) {

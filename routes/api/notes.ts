@@ -10,7 +10,6 @@ export const handler = async (req: Request): Promise<Response> => {
     }
 
     const { content, iv, password, expiresAt } = await req.json();
-    console.log("Received data:", { content, iv, password, expiresAt });
     if (!content || content === "" || !iv || !expiresAt) {
         return new Response("Content, IV, and expiration time are required", { status: 400 });
     }

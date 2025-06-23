@@ -23,3 +23,8 @@ export function formatExpiration(expiresIn: string): Date {
 	const ms = expirationMap[expiresIn] ?? expirationMap["24h"];
 	return new Date(now.getTime() + ms);
 }
+
+
+export function generateRandomId(length: number = 16): string {
+	return Math.random().toString(36).substring(2, length + 2);
+}
