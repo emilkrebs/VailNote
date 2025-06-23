@@ -1,6 +1,7 @@
 import { MongoClient } from "mongodb";
-import { DatabaseLogger, TerminalColors } from "../utils/logging.ts";
+import { TerminalColors } from "../utils/logging.ts";
 import { Note } from "../types/types.ts";
+import { DatabaseLogger } from "./database-logger.ts";
 
 export class NoteDatabase {
 	BASE_URI: string;
@@ -30,14 +31,11 @@ export class NoteDatabase {
 		await rooms.createIndex({ "id": 1 }, { unique: true });
 	}
 
-    async createNote(note: Note): Promise<void> {
-        const db = this._client.db(this.DATA_SOURCE);
-        const notes = db.collection<Note>(this.COLLECTION);
-        await notes.insertOne(note);
-        this.logger.log(TerminalColors.format(`Note created with id: &8(${note.id})&r`));
-    }
-
     async insertNote(note: Note): Promise<void> {
+		if (!this.isNoteValid(note)) {
+			return this.logger.error(TerminalColors.format(`Invalid note provided. &8(${JSON.stringify(note)})&r`));
+		}
+		
         const db = this._client.db(this.DATA_SOURCE);
         const notes = db.collection<Note>(this.COLLECTION);
         await notes.insertOne(note);
@@ -61,6 +59,12 @@ export class NoteDatabase {
         });
     }
 
+	isNoteValid(note: Note): boolean {
+		if (!note || !note.id || !note.content || note.content === "" || !note.expiresAt) {
+			return false;
+		}
+		return true;
+	}
 
 	/**
 	 * Generate a note id that is not already in use

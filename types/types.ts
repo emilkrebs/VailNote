@@ -2,8 +2,7 @@
 export interface Note {
 	id: string;
 	content: string;
-	createdAt: Date;
-	
+
 	iv: string; // Initialization vector for encryption
 	expiresAt: Date; 
 	password?: string; // Optional password hash for private notes

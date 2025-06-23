@@ -5,8 +5,10 @@
 import * as $_id_ from "./routes/[id].tsx";
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
+import * as $api_notes from "./routes/api/notes.ts";
 import * as $index from "./routes/index.tsx";
 import * as $CopyContent from "./islands/CopyContent.tsx";
+import * as $CreateNoteForm from "./islands/CreateNoteForm.tsx";
 import * as $PasswordInput from "./islands/PasswordInput.tsx";
 import type { Manifest } from "$fresh/server.ts";
 
@@ -15,10 +17,12 @@ const manifest = {
     "./routes/[id].tsx": $_id_,
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
+    "./routes/api/notes.ts": $api_notes,
     "./routes/index.tsx": $index,
   },
   islands: {
     "./islands/CopyContent.tsx": $CopyContent,
+    "./islands/CreateNoteForm.tsx": $CreateNoteForm,
     "./islands/PasswordInput.tsx": $PasswordInput,
   },
   baseUrl: import.meta.url,
