@@ -151,7 +151,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
                     <option value="1h">1 hour</option>
                     <option value="6h">6 hours</option>
                     <option value="12h">12 hours</option>
-                    <option value="24h">24 hours</option>
+                    <option value="24h" selected>24 hours</option>
                     <option value="3d">3 days</option>
                     <option value="7d">7 days</option>
                 </select>
