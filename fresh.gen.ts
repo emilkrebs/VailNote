@@ -2,32 +2,32 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
-import * as $_id_ from "./routes/[id].tsx";
-import * as $_404 from "./routes/_404.tsx";
-import * as $_app from "./routes/_app.tsx";
-import * as $api_notes from "./routes/api/notes.ts";
-import * as $index from "./routes/index.tsx";
-import * as $privacy from "./routes/privacy.tsx";
-import * as $CopyContent from "./islands/CopyContent.tsx";
-import * as $CreateNoteForm from "./islands/CreateNoteForm.tsx";
-import * as $PasswordInput from "./islands/PasswordInput.tsx";
-import type { Manifest } from "$fresh/server.ts";
+import * as $_id_ from './routes/[id].tsx';
+import * as $_404 from './routes/_404.tsx';
+import * as $_app from './routes/_app.tsx';
+import * as $api_notes from './routes/api/notes.ts';
+import * as $index from './routes/index.tsx';
+import * as $privacy from './routes/privacy.tsx';
+import * as $CopyContent from './islands/CopyContent.tsx';
+import * as $CreateNoteForm from './islands/CreateNoteForm.tsx';
+import * as $PasswordInput from './islands/PasswordInput.tsx';
+import type { Manifest } from '$fresh/server.ts';
 
 const manifest = {
-  routes: {
-    "./routes/[id].tsx": $_id_,
-    "./routes/_404.tsx": $_404,
-    "./routes/_app.tsx": $_app,
-    "./routes/api/notes.ts": $api_notes,
-    "./routes/index.tsx": $index,
-    "./routes/privacy.tsx": $privacy,
-  },
-  islands: {
-    "./islands/CopyContent.tsx": $CopyContent,
-    "./islands/CreateNoteForm.tsx": $CreateNoteForm,
-    "./islands/PasswordInput.tsx": $PasswordInput,
-  },
-  baseUrl: import.meta.url,
+	routes: {
+		'./routes/[id].tsx': $_id_,
+		'./routes/_404.tsx': $_404,
+		'./routes/_app.tsx': $_app,
+		'./routes/api/notes.ts': $api_notes,
+		'./routes/index.tsx': $index,
+		'./routes/privacy.tsx': $privacy,
+	},
+	islands: {
+		'./islands/CopyContent.tsx': $CopyContent,
+		'./islands/CreateNoteForm.tsx': $CreateNoteForm,
+		'./islands/PasswordInput.tsx': $PasswordInput,
+	},
+	baseUrl: import.meta.url,
 } satisfies Manifest;
 
 export default manifest;

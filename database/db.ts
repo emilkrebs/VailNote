@@ -1,10 +1,9 @@
+import '$std/dotenv/load.ts';
+import { NoteDatabase } from './note-database.ts';
 
-import "$std/dotenv/load.ts";
-import { NoteDatabase } from "./note-database.ts";
-
-const uri = Deno.env.get("BASE_URI"); 
+const uri = Deno.env.get('BASE_URI');
 if (!uri) {
-	throw new Error("BASE_URI is not set");
+	throw new Error('BASE_URI is not set');
 }
 
 export const noteDatabase = new NoteDatabase(uri);

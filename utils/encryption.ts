@@ -28,7 +28,7 @@ export class AESEncryption {
 		const dataBytes = this._encoder.encode(data);
 		const encryptedData = await crypto.subtle.encrypt(
 			{
-				name: "AES-GCM",
+				name: 'AES-GCM',
 				iv: getAESEncryptionIV(iv),
 			},
 			this._cryptoKey!,
@@ -44,7 +44,7 @@ export class AESEncryption {
 		this.checkSetup();
 		const decryptedData = await crypto.subtle.decrypt(
 			{
-				name: "AES-GCM",
+				name: 'AES-GCM',
 				iv: getAESEncryptionIV(iv),
 			},
 			this._cryptoKey!,
@@ -55,7 +55,7 @@ export class AESEncryption {
 
 	private checkSetup() {
 		if (!this.isSetup()) {
-			throw new Error("Encryption not setup");
+			throw new Error('Encryption not setup');
 		}
 	}
 }
@@ -97,11 +97,11 @@ export function generateEncryptionIv(): Uint8Array {
 
 export function getAESEncryptionKey(key: string): Promise<CryptoKey> {
 	return crypto.subtle.importKey(
-		"raw",
+		'raw',
 		base64ToUint8Array(key),
-		"AES-GCM",
+		'AES-GCM',
 		true,
-		["encrypt", "decrypt"],
+		['encrypt', 'decrypt'],
 	);
 }
 
@@ -110,41 +110,54 @@ export function getAESEncryptionIV(iv: string): Uint8Array {
 }
 
 /**
-	 * Encrypt note content using a password
-	 * @param content The note content
-	 * @param password The password
-	 * @returns { encrypted: string, iv: string }
-	 */
-	export async function encryptNoteContent(content: string, password: string): Promise<{ encrypted: string, iv: string }> {
-        // Hash the password to get a 32-byte key (SHA-256)
-        const keyBuffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(password));
-        const keyBase64 = uint8ArrayToBase64(new Uint8Array(keyBuffer));
+ * Encrypt note content using a password
+ * @param content The note content
+ * @param password The password
+ * @returns { encrypted: string, iv: string }
+ */
+export async function encryptNoteContent(
+	content: string,
+	password: string,
+): Promise<{ encrypted: string; iv: string }> {
+	// Hash the password to get a 32-byte key (SHA-256)
+	const keyBuffer = await crypto.subtle.digest(
+		'SHA-256',
+		new TextEncoder().encode(password),
+	);
+	const keyBase64 = uint8ArrayToBase64(new Uint8Array(keyBuffer));
 
-        // Generate a random IV
-        const ivBytes = generateEncryptionIv();
-        const ivBase64 = uint8ArrayToBase64(ivBytes);
+	// Generate a random IV
+	const ivBytes = generateEncryptionIv();
+	const ivBase64 = uint8ArrayToBase64(ivBytes);
 
-        // Encrypt the content
-        const aes = new AESEncryption();
-        await aes.setup(keyBase64);
-        const encrypted = await aes.encrypt(content, ivBase64);
+	// Encrypt the content
+	const aes = new AESEncryption();
+	await aes.setup(keyBase64);
+	const encrypted = await aes.encrypt(content, ivBase64);
 
-        return { encrypted, iv: ivBase64 };
-    }
+	return { encrypted, iv: ivBase64 };
+}
 
-	/** * Decrypt note content using a password
-	 * @param encrypted The encrypted note content
-	 * @param iv The initialization vector used during encryption
-	 * @param password The password used for encryption
-	 * @return The decrypted note content
-	 */
-	export async function decryptNoteContent(encrypted: string, iv: string, password: string): Promise<string> {
-		// Hash the password to get a 32-byte key (SHA-256)
-		const keyBuffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(password));
-		const keyBase64 = uint8ArrayToBase64(new Uint8Array(keyBuffer));
+/** * Decrypt note content using a password
+ * @param encrypted The encrypted note content
+ * @param iv The initialization vector used during encryption
+ * @param password The password used for encryption
+ * @return The decrypted note content
+ */
+export async function decryptNoteContent(
+	encrypted: string,
+	iv: string,
+	password: string,
+): Promise<string> {
+	// Hash the password to get a 32-byte key (SHA-256)
+	const keyBuffer = await crypto.subtle.digest(
+		'SHA-256',
+		new TextEncoder().encode(password),
+	);
+	const keyBase64 = uint8ArrayToBase64(new Uint8Array(keyBuffer));
 
-		// Decrypt the content
-		const aes = new AESEncryption();
-		await aes.setup(keyBase64);
-		return await aes.decrypt(encrypted, iv);
-	}
+	// Decrypt the content
+	const aes = new AESEncryption();
+	await aes.setup(keyBase64);
+	return await aes.decrypt(encrypted, iv);
+}

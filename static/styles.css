@@ -1,29 +1,34 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url("https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;600&family=Fira+Mono&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;600&family=Fira+Mono&display=swap');
 
 :root {
-    --animation-time: 360s;
+	--animation-time: 360s;
 }
 
-
 .background-animate {
-    background-size: 300%;
+	background-size: 300%;
 
-    -webkit-animation: animateBackground var(--animation-time) ease alternate infinite;
-    -moz-animation: animateBackground var(--animation-time)  ease alternate infinite;
-    animation: animateBackground var(--animation-time) ease alternate infinite;
+	-webkit-animation: animateBackground var(--animation-time) ease alternate infinite;
+	-moz-animation: animateBackground var(--animation-time) ease alternate infinite;
+	animation: animateBackground var(--animation-time) ease alternate infinite;
 
-    background-image: linear-gradient(45deg, #2563eb 0%, #10b981 46%, #2563eb 62%, #1e293b 100%);
+	background-image: linear-gradient(
+		45deg,
+		#2563eb 0%,
+		#10b981 46%,
+		#2563eb 62%,
+		#1e293b 100%
+	);
 }
 
 @keyframes animateBackground {
-    0%, 100% {
-        background-position: 0% 50%;
-    }
+	0%, 100% {
+		background-position: 0% 50%;
+	}
 
-    50% {
-        background-position: 100% 50%;
-    }
+	50% {
+		background-position: 100% 50%;
+	}
 }
