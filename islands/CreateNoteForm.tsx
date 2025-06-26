@@ -213,13 +213,13 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 
 			<div class='mt-4 text-sm text-gray-400'>
 				<p>
-					Notes are encrypted with AES-256 and can be protected with a password. They will self-destruct after the
+					Notes are encrypted with AES-GCM and can be protected with a password. They will self-destruct after the
 					specified time or after being viewed.
 				</p>
 				<p>
 					<span class='font-semibold'>Note:</span>{' '}
 					If you set a password, the password will be used to encrypt the note content. If you do not set a password,
-					the note will be encrypted with a unique id.
+					the note will be encrypted with a unique id or authentication key.
 				</p>
 			</div>
 		</form>

@@ -8,6 +8,7 @@ import Header from '../components/Header.tsx';
 import PenIcon from '../components/PenIcon.tsx';
 import { Button } from '../components/Button.tsx';
 import HomeButton from '../components/HomeButton.tsx';
+import Message from '../components/Message.tsx';
 
 interface NotePageProps {
 	note?: Note;
@@ -194,7 +195,7 @@ function ConfirmViewNote({ note }: { note: Note }) {
 						<input type='hidden' name='id' value={note.id} />
 						<input type='hidden' name='confirm' value='true' />
 						<Button type='submit'>
-							Confirm & View Note
+							Destroy & View Note
 						</Button>
 					</form>
 				</div>
@@ -218,17 +219,8 @@ function ViewNoteConfirmed(
 						<PenIcon />
 						Note Details
 					</h2>
-					{message && (
-						<div
-							class={`p-4 rounded-lg border transition-all ${
-								note.id
-									? 'bg-green-600/20 border-green-400 text-green-200'
-									: 'bg-red-600/20 border-red-400 text-red-200'
-							}`}
-						>
-							<span class='font-medium'>{message}</span>
-						</div>
-					)}
+					<Message message={message} type={note.id ? 'success' : 'error'} />
+
 					<h2 class='text-xl font-semibold text-white mt-2'>
 						Content
 					</h2>
@@ -276,7 +268,10 @@ function PasswordProtectedNote({ message }: { message?: string }) {
 							</svg>
 							Enter Password
 						</h2>
-						<p class='mt-1 text-gray-300 text-base'>{message}</p>
+						<Message message={message} type='info' />
+						<p class='mt-2 text-gray-400'>
+							To view and destroy this note, please enter the correct password. A failed attempt will not destroy the note.
+						</p>
 						<form method='POST' class='mt-8 space-y-5' autoComplete='off'>
 							<input type='hidden' name='confirm' value='true' />
 							<div>
