@@ -40,17 +40,17 @@ Every possible step where I think it might be insecure, given the possibility th
 7. The server will generate a random link using the following structure: `https://domain.com/[noteId]`
 
 
-### Receiving the Note
+### Viewing the Note
 
 1. If no password is required, the server will ask for confirmation first.
-2. When confirmed, the server will encrypt the note using the auth key (if provided) or note ID
-3. If successful, the server will send the encrypted note to the client (!)
+2. When confirmed, the server will decrypt the note using the auth key (if provided) or note ID
+3. If successful, the server will send the decrypted note to the client (!) and destroy the note.
 
 1. If a password is required, the server will prompt a login form.
 2. The password will be sent as plain text (!) to the server and hashed using SHA-256
 3. The server will compare the password hash to the SHA-256 password.
-4. If successful, the server will encrypt the content using the SHA-256 password.
-5. The server sends the encrypted note to the client (!)
+4. The server will decrypt the content using the SHA-256 password and destroy the note.
+3. If successful, the server will send the decrypted note to the client (!) and destroy the note.
 
 
 
