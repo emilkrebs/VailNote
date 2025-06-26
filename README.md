@@ -2,6 +2,8 @@
   <a href="https://github.com/emilkrebs/VailNote" target="_blank" rel="noopener noreferrer">
    <img width="256" alt="WatchLock Logo" src="./static/logo.png">
  </a>
+
+  [![Made with Fresh](https://fresh.deno.dev/fresh-badge-dark.svg)](https://fresh.deno.dev)
 </div>
 
 # About
