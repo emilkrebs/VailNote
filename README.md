@@ -17,3 +17,5 @@ VailNote is **non-javascript compatible**, however JavaScript is highly recommen
 # Screenshots
 
 ![Create Note](https://github.com/user-attachments/assets/8d1edd52-1342-4efd-944c-6fe794c91042)
+
+![Password Protection](https://github.com/user-attachments/assets/e35b84b1-2ad8-4e0d-b474-fe66ee5d56ab)
