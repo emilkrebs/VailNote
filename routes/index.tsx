@@ -1,4 +1,5 @@
 import { Handlers, PageProps } from '$fresh/server.ts';
+import Header from '../components/Header.tsx';
 import { noteDatabase } from '../database/db.ts';
 import CreateNote from '../islands/CreateNoteForm.tsx';
 import { formatExpiration } from '../types/types.ts';
@@ -54,15 +55,18 @@ export const handler: Handlers = {
 
 export default function Home({ data }: PageProps) {
 	return (
-		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-8 md:py-16'>
-			<h1 class='text-4xl font-bold'>VailNote</h1>
-			<p class='mt-2 text-lg text-gray-200'>
-				Open-Source, Encrypted Note Sharing
-			</p>
+		<>
+			<Header title='Home' description='VailNote is a secure and open-source note-sharing application.' />
+			<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-8 md:py-16'>
+				<h1 class='text-4xl font-bold'>VailNote</h1>
+				<p class='mt-2 text-lg text-gray-200'>
+					Open-Source, Encrypted Note Sharing
+				</p>
 
-			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-2 md:px-4 py-4 md:py-8'>
-				<CreateNote data={data} />
+				<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-2 md:px-4 py-4 md:py-8'>
+					<CreateNote data={data} />
+				</div>
 			</div>
-		</div>
+		</>
 	);
 }

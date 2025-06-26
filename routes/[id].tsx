@@ -79,16 +79,17 @@ export const handler: Handlers<NotePageProps> = {
 		const password = formData.get('password') as string;
 		const confirm = formData.get('confirm') === 'true';
 
-		const passwordHash = await getPasswordHash(password);
+		const passwordHash = password ? await getPasswordHash(password) : undefined;
 
 		const passwordProtected = password && password.trim() !== '';
 
 		const note = await noteDatabase.getNoteById(id);
+
 		if (!note) {
 			return ctx.renderNotFound();
 		}
 
-		if (passwordProtected && note.password && !await compareHash(passwordHash, note.password)) {
+		if (passwordProtected && note.password && passwordHash && !await compareHash(passwordHash, note.password)) {
 			// Password is required and does not match
 			return ctx.render({
 				note: note,
@@ -109,7 +110,8 @@ export const handler: Handlers<NotePageProps> = {
 
 		try {
 			const url = new URL(req.url);
-			const firstAuth = url.searchParams.get('auth');
+			const firstAuthParameter = url.searchParams.get('auth'); // may not exist if note was created without javascript
+			const firstAuth = firstAuthParameter ? firstAuthParameter : id;
 
 			const encryptionKey = passwordProtected ? passwordHash : firstAuth;
 
