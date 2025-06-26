@@ -1,7 +1,11 @@
-# Fresh project
+<div id="logo" align="center">
+  <a href="https://github.com/emilkrebs/VailNote" target="_blank" rel="noopener noreferrer">
+   <img width="256" alt="WatchLock Logo" src="./static/logo.png">
+ </a>
+</div>
 
-Your new Fresh project is ready to go. You can follow the Fresh "Getting Started" guide here:
-https://fresh.deno.dev/docs/getting-started
+# About
+
 
 # Screenshots
 
