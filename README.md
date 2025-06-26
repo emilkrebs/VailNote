@@ -68,6 +68,7 @@ Every possible step where I think it might be insecure, given the possibility th
 
 # Screenshots
 
-![Create Note](https://github.com/user-attachments/assets/8d1edd52-1342-4efd-944c-6fe794c91042)
+![Home Page](https://github.com/user-attachments/assets/df9f2627-7433-400c-95a6-d916ec73cce3)
 
-![Password Protection](https://github.com/user-attachments/assets/e35b84b1-2ad8-4e0d-b474-fe66ee5d56ab)
+![Password Protection](https://github.com/user-attachments/assets/d0f99811-30e0-4e17-8f71-a8c01ddb6af4)
+
