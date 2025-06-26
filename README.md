@@ -72,3 +72,5 @@ Every possible step where I think it might be insecure, given the possibility th
 
 ![Password Protection](https://github.com/user-attachments/assets/d0f99811-30e0-4e17-8f71-a8c01ddb6af4)
 
+![Content Page](https://github.com/user-attachments/assets/097ccb7e-20e3-45b4-a561-8aa299160c68)
+
