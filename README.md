@@ -41,6 +41,7 @@ Every possible step where I think it might be insecure, given the possibility th
 3. If the document is valid, the server will generate a random note ID, hash the password again using salted hashing (bcrypt), and store the note in the database.
 4. The server will generate a random link using the following structure: `https://vailnote.com/[noteId]`
 
+Note: SSL will handle the encryption. If disabled the sensitive data might be compromised.
 
 ### Viewing the Note
 
