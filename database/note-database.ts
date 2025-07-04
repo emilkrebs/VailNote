@@ -22,7 +22,7 @@ export class NoteDatabase {
 		this._client = new MongoClient(uri);
 		this.logger.log(
 			TerminalColors.format(
-				`Succesfully connected to database. &8(${this.BASE_URI})&r`,
+				`Successfully connected to database. &8(${this.BASE_URI})&r`,
 			),
 		);
 	}

@@ -1,5 +1,20 @@
 import { asset } from '$fresh/runtime.ts';
 export default function Footer() {
+	const links = [
+		{
+			href: 'https://emilkrebs.dev/imprint',
+			label: 'Imprint',
+		},
+		{
+			href: '/privacy',
+			label: 'Privacy Policy',
+		},
+		{
+			href: '/terms',
+			label: 'Terms of Service',
+		}
+	]
+
 	return (
 		<footer class='bg-gray-800 text-white py-4'>
 			<div class='container mx-auto flex flex-col md:flex-row items-center justify-between px-4'>
@@ -34,20 +49,18 @@ export default function Footer() {
 							Emil Krebs
 						</a>
 					</span>
-					<span class='text-gray-400'>|</span>
-					<a
-						href='https://emilkrebs.dev/imprint'
-						class='text-sm underline hover:text-blue-300 transition-colors'
-					>
-						Imprint
-					</a>
-					<span class='text-gray-400'>|</span>
-					<a
-						href='/privacy'
-						class='text-sm underline hover:text-blue-300 transition-colors'
-					>
-						Privacy Policy
-					</a>
+					{links.map((link, idx) => (
+						<>
+							<span class='text-gray-400' key={`sep-${idx}`}>|</span>
+							<a
+								href={link.href}
+								class='text-sm underline hover:text-blue-300 transition-colors'
+								key={link.label}
+							>
+								{link.label}
+							</a>
+						</>
+					))}
 				</div>
 			</div>
 		</footer>

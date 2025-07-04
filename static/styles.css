@@ -37,3 +37,28 @@ body {
 		background-position: 100% 50%;
 	}
 }
+
+
+/* Markdown Styles */
+.markdown-body {
+	font-size: 1rem;
+	line-height: 1.6;
+	color: #e2e8f0;
+}
+
+.markdown-body a {
+	color: #60a5fa;
+	text-decoration: underline;
+}
+
+.markdown-body ul {
+	list-style-type: disc;
+}
+
+.markdown-body ol {
+	list-style-type: decimal;
+}
+
+.markdown-body svg {
+	filter: invert(1);
+}

@@ -36,11 +36,10 @@ export default function CreateNote({ data }: { data: CreateNoteData }) {
 
 			{formData.message && (
 				<div
-					class={`mt-6 p-4 rounded-lg border transition-all ${
-						formData.noteId
-							? 'bg-green-600/20 border-green-400 text-green-200'
-							: 'bg-red-600/20 border-red-400 text-red-200'
-					}`}
+					class={`mt-6 p-4 rounded-lg border transition-all ${formData.noteId
+						? 'bg-green-600/20 border-green-400 text-green-200'
+						: 'bg-red-600/20 border-red-400 text-red-200'
+						}`}
 				>
 					<span class='font-medium'>{formData.message}</span>
 
@@ -176,28 +175,28 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 
 			{
 				/* Advanced options
-                    <details class="mt-4 bg-gray-800 rounded-lg p-4">
-                        <summary class="cursor-pointer text-white font-semibold">
-                            Advanced Options
-                        </summary>
-                        <div class="mt-2 space-y-3">
-                            <div>
-                                <label class="block text-white text-lg font-semibold" htmlFor="replaceContent">
-                                    Replace Content (Silent Destruction)
-                                </label>
-                                <p class="text-gray-400 text-sm mb-2">
-                                    This option allows you to replace the content of the note with other content after the note has been viewed. This is useful to ensure noone else knows the content of the note has been viewed.
-                                </p>
-                                <textarea
-                                    name="replaceContent"
-                                    id="replaceContent"
-                                    class="w-full h-32 p-3 border border-gray-600 rounded-xl bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 transition"
-                                    placeholder="Enter new content here..."
-                                ></textarea>
-                            </div>
-                        </div>
-                    </details>
-                */
+					<details class="mt-4 bg-gray-800 rounded-lg p-4">
+						<summary class="cursor-pointer text-white font-semibold">
+							Advanced Options
+						</summary>
+						<div class="mt-2 space-y-3">
+							<div>
+								<label class="block text-white text-lg font-semibold" htmlFor="replaceContent">
+									Replace Content (Silent Destruction)
+								</label>
+								<p class="text-gray-400 text-sm mb-2">
+									This option allows you to replace the content of the note with other content after the note has been viewed. This is useful to ensure noone else knows the content of the note has been viewed.
+								</p>
+								<textarea
+									name="replaceContent"
+									id="replaceContent"
+									class="w-full h-32 p-3 border border-gray-600 rounded-xl bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 transition"
+									placeholder="Enter new content here..."
+								></textarea>
+							</div>
+						</div>
+					</details>
+				*/
 			}
 			<Button type='submit'>
 				Save Note
@@ -207,7 +206,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 				<p>
 					⚠ You have JavaScript disabled. Notes will now be encrypted on the server side. Enable JavaScript for
 					client-side encryption.
-					<a href='/privacy#note-on-javascript-usage' class='underline mx-1'>Learn more</a>
+					<a href='/privacy#javascript-usage' class='underline mx-1'>Learn more</a>
 				</p>
 			</noscript>
 
@@ -215,11 +214,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 				<p>
 					Notes are encrypted with AES-GCM and can be protected with a password. They will self-destruct after the
 					specified time or after being viewed.
-				</p>
-				<p>
-					<span class='font-semibold'>Note:</span>{' '}
-					If you set a password, the password will be used to encrypt the note content. If you do not set a password,
-					the note will be encrypted with a unique id or authentication key.
+					<a href='/privacy#javascript-usage' class='underline mx-2'>Learn more</a>
 				</p>
 			</div>
 		</form>

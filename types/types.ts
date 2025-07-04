@@ -20,10 +20,22 @@ const expirationMap: Record<string, number> = {
 
 export function formatExpiration(expiresIn: string): Date {
 	const now = new Date();
-	const ms = expirationMap[expiresIn] ?? expirationMap['24h'];
+	
+	// Validate input and use default if invalid
+	if (typeof expiresIn !== 'string' || !expirationMap[expiresIn]) {
+		expiresIn = '24h';
+	}
+	
+	const ms = expirationMap[expiresIn];
 	return new Date(now.getTime() + ms);
 }
 
 export function generateRandomId(length: number = 16): string {
-	return Math.random().toString(36).substring(2, length + 2);
+	// Use crypto.getRandomValues for cryptographically secure random IDs
+	const array = new Uint8Array(Math.ceil(length * 3 / 4));
+	crypto.getRandomValues(array);
+	return btoa(String.fromCharCode(...array))
+		.replace(/[+/]/g, c => c === '+' ? '-' : '_')
+		.replace(/=/g, '')
+		.substring(0, length);
 }

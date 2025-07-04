@@ -1,20 +1,22 @@
 <div id="logo" align="center">
   <a href="https://github.com/emilkrebs/VailNote" target="_blank" rel="noopener noreferrer">
-   <img width="256" alt="WatchLock Logo" src="./static/logo.png">
+   <img width="256" alt="VailNote Logo" src="./static/logo.png">
  </a>
 
   [![Made with Fresh](https://fresh.deno.dev/fresh-badge-dark.svg)](https://fresh.deno.dev)
 </div>
 
+
 # About
 
-VailNote is a simple, **open-source** note-sharing app designed for **maximum privacy**. All notes are encrypted  using modern encryption technology before being stored, ensuring that no one else can access them. The app is built with a focus on user-friendliness and security.
+VailNote is a simple, **open-source** note-sharing app designed for **maximum privacy**. All notes are encrypted using modern encryption technology before being stored, ensuring that no one else can access them. The app is built with a focus on user-friendliness and security.
 
 VailNote is **non-JavaScript compatible**; however, JavaScript is highly recommended for maximizing security and usability.
 
 > [!NOTE]\
-> Safety and transparency are the number one priority. VailNote is made to be as secure as possible while still being easy to use and compatible with most clients.
+> Safety and transparency are our top priorities. VailNote is made to be as secure as possible while still being easy to use and compatible with most clients.
 > I highly encourage you to look into the architecture to ensure your safety!
+
 
 # How does VailNote work?
 
@@ -30,14 +32,14 @@ Every possible step where I think it might be insecure, given the possibility th
 4. The client will send the encrypted content, hashed password, and expiration time to the server.
 6. If the document is valid, the server will generate a random note ID, hash the password again using salted hashing (bcrypt), and store the note in the database.
 7. The server will send a successful response containing the new note ID.
-8. The client will generate a valid link using the note ID and local auth key using the following structure: `https://domain.com/[noteId]?auth=[authKey]`
+8. The client will generate a valid link using the note ID and local auth key using the following structure: `https://vailnote.com/[noteId]?auth=[authKey]`
 
 ### Non-JavaScript
 1. The password and content will be sent to the server as plain text (!)
 2. The server will hash the password with SHA-256 and encrypt the content using the password hash. 
   - If no password is provided, the server will use the unique noteID for encryption (!)
-6. If the document is valid, the server will generate a random note ID, hash the password again using salted hashing (bcrypt), and store the note in the database.
-7. The server will generate a random link using the following structure: `https://domain.com/[noteId]`
+3. If the document is valid, the server will generate a random note ID, hash the password again using salted hashing (bcrypt), and store the note in the database.
+4. The server will generate a random link using the following structure: `https://vailnote.com/[noteId]`
 
 
 ### Viewing the Note
@@ -53,12 +55,11 @@ Every possible step where I think it might be insecure, given the possibility th
 3. If successful, the server will send the decrypted note to the client (!) and destroy the note.
 
 
-
 ## Known Issues
 
 (None)
 
-[Add Issue](https://github.com/emilkrebs/Nitrado-Bot/issues/new)
+[Add Issue](https://github.com/emilkrebs/VailNote/issues/new)
 
 
 

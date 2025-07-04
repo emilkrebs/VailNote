@@ -27,7 +27,7 @@ async function getPasswordHash(password: string): Promise<string> {
 	return sha256Hash;
 }
 
-async function encryptNoteAndDestroy(note: Note, encryptionKey: string, confirm: boolean): Promise<Note> {
+async function decryptNoteAndDestroy(note: Note, encryptionKey: string, confirm: boolean): Promise<Note> {
 	if (!confirm) {
 		throw new Error('Please confirm you want to view and destroy this note.');
 	}
@@ -90,7 +90,12 @@ export const handler: Handlers<NotePageProps> = {
 			return ctx.renderNotFound();
 		}
 
-		if (passwordProtected && note.password && passwordHash && !await compareHash(passwordHash, note.password)) {
+		// Always perform hash comparison even if note has no password to prevent timing attacks
+		const isPasswordValid = note.password && passwordHash ? 
+			await compareHash(passwordHash, note.password) : 
+			!note.password && !passwordProtected;
+
+		if (note.password && (!passwordProtected || !isPasswordValid)) {
 			// Password is required and does not match
 			return ctx.render({
 				note: note,
@@ -125,7 +130,7 @@ export const handler: Handlers<NotePageProps> = {
 				});
 			}
 
-			const result = await encryptNoteAndDestroy(note, encryptionKey, confirm);
+			const result = await decryptNoteAndDestroy(note, encryptionKey, confirm);
 
 			return ctx.render({
 				note: result,
