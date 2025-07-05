@@ -27,6 +27,9 @@ export class NoteDatabase {
 		);
 	}
 
+	/**
+	 * Initialize the database connection and create necessary indexes
+	 */
 	async init() {
 		await this._client.connect();
 		this.logger.log(
@@ -37,6 +40,19 @@ export class NoteDatabase {
 
 		await rooms.createIndex({ 'expiresAt': 1 }, { expireAfterSeconds: 1 });
 		await rooms.createIndex({ 'id': 1 }, { unique: true });
+	}
+
+
+	/**
+	 * Close the database connection
+	 */
+	async close(): Promise<void> {
+		if (this._client) {
+			await this._client.close();
+			this.logger.log(
+				TerminalColors.format(`Database connection closed. &8(${this.BASE_URI})&r`),
+			);
+		}
 	}
 
 	async insertNote(note: Note): Promise<void> {

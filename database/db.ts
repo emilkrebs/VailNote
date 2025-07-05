@@ -11,3 +11,7 @@ export const noteDatabase = new NoteDatabase(uri);
 export async function initializeDatabase() {
 	await noteDatabase.init();
 }
+
+export async function closeDatabase() {
+	await noteDatabase.close();
+}

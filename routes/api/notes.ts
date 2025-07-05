@@ -27,6 +27,8 @@ export const handler = async (req: Request): Promise<Response> => {
 
 	const { content, iv, password, expiresAt } = await req.json();
 	
+	// TODO: Create a validate note function
+
 	// Input validation and size limits
 	if (!content || content === '' || !iv || !expiresAt) {
 		return new Response('Content, IV, and expiration time are required', {

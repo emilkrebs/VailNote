@@ -9,7 +9,19 @@ import '$std/dotenv/load.ts';
 import { start } from '$fresh/server.ts';
 import manifest from './fresh.gen.ts';
 import config from './fresh.config.ts';
-import { initializeDatabase } from './database/db.ts';
+import { closeDatabase, initializeDatabase } from './database/db.ts';
 
 await initializeDatabase();
+
+// Graceful shutdown handling
+const handleShutdown = async () => {
+	console.log('Received shutdown signal, closing database connection...');
+	await closeDatabase();
+	Deno.exit(0);
+};
+
+// Listen for shutdown signals
+Deno.addSignalListener('SIGINT', handleShutdown);
+Deno.addSignalListener('SIGTERM', handleShutdown);
+
 await start(manifest, config);
