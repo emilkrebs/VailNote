@@ -16,6 +16,7 @@ import { generateHash } from '../../utils/hashing.ts';
 */
 
 
+
 export const handler = async (req: Request): Promise<Response> => {
 	if (req.method !== 'POST' && req.method !== 'GET') {
 		return new Response('Method not allowed', { status: 405 });
@@ -27,23 +28,6 @@ export const handler = async (req: Request): Promise<Response> => {
 
 	const { content, iv, password, expiresAt } = await req.json();
 	
-	// TODO: Create a validate note function
-
-	// Input validation and size limits
-	if (!content || content === '' || !iv || !expiresAt) {
-		return new Response('Content, IV, and expiration time are required', {
-			status: 400,
-		});
-	}
-	
-	// Security: Limit input sizes to prevent DoS
-	if (content.length > 1024 * 1024) { // 1MB limit
-		return new Response('Content too large (max 1MB)', { status: 413 });
-	}
-	
-	if (password && password.length > 1024) { // 1KB password limit
-		return new Response('Password too long', { status: 400 });
-	}
 
 	const noteId = await noteDatabase.generateNoteId();
 
@@ -59,7 +43,20 @@ export const handler = async (req: Request): Promise<Response> => {
 		expiresAt: formatExpiration(expiresAt),
 	};
 
-	await noteDatabase.insertNote(result);
+	const insertResult = await noteDatabase.insertNote(result);
+
+	if (!insertResult.success) {
+		return new Response(
+			JSON.stringify({
+				message: 'Failed to save note',
+				error: insertResult.error,
+			}),
+			{
+				headers: { 'Content-Type': 'application/json' },
+				status: 500,
+			},
+		);
+	}
 
 	return new Response(
 		JSON.stringify({

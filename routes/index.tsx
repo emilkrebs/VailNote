@@ -22,34 +22,34 @@ export const handler: Handlers = {
 			return ctx.render({ message: 'Please enter a note.' });
 		}
 
-		try {
-			const noteId = await noteDatabase.generateNoteId();
+		const noteId = await noteDatabase.generateNoteId();
 
-			const { encrypted: encryptedContent, iv } = await encryptNoteContent(
-				noteContent,
-				password ? passwordSHA256 : noteId,
-			);
+		const { encrypted: encryptedContent, iv } = await encryptNoteContent(
+			noteContent,
+			password ? passwordSHA256 : noteId,
+		);
 
-			await noteDatabase.insertNote({
-				id: noteId,
-				content: encryptedContent,
-				expiresAt: formatExpiration(expiresIn),
-				password: password ? await generateHash(passwordSHA256) : undefined,
-				iv: iv,
-			});
+		const insertResult = await noteDatabase.insertNote({
+			id: noteId,
+			content: encryptedContent,
+			expiresAt: formatExpiration(expiresIn),
+			password: password ? await generateHash(passwordSHA256) : undefined,
+			iv: iv,
+		});
 
+		if (!insertResult.success) {
 			return ctx.render({
-				message: 'Note saved successfully!',
-				noteId: noteId,
-				noteLink: `${ctx.url}${noteId}`,
-			});
-		} catch (_err) {
-			return ctx.render({
-				message: 'Failed to save note. Please try again later.',
+				message: `Failed to save note: ${insertResult.error}`,
 				noteId: null,
 				noteLink: '',
 			});
 		}
+
+		return ctx.render({
+			message: 'Note saved successfully!',
+			noteId: noteId,
+			noteLink: `${ctx.url}${noteId}`,
+		});
 	},
 };
 

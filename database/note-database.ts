@@ -3,6 +3,16 @@ import { TerminalColors } from '../utils/logging.ts';
 import { Note } from '../types/types.ts';
 import { DatabaseLogger } from './database-logger.ts';
 
+export interface ValidateNoteResult {
+	success: boolean;
+	message?: string;
+}
+
+export interface InsertNoteResult {
+	success: boolean;
+	error?: string;
+}
+
 export class NoteDatabase {
 	BASE_URI: string;
 	DATA_SOURCE: string;
@@ -55,22 +65,18 @@ export class NoteDatabase {
 		}
 	}
 
-	async insertNote(note: Note): Promise<void> {
-		if (!this.isNoteValid(note)) {
-			return this.logger.error(
-				TerminalColors.format(
-					`Invalid note provided. &8(${JSON.stringify(note)})&r`,
-				),
-			);
+
+	async insertNote(note: Note): Promise<InsertNoteResult> {
+		const validationResult = this.validateNote(note);
+		if (!validationResult.success) {
+			return { success: false, error: validationResult.message };
 		}
 
 		const db = this._client.db(this.DATA_SOURCE);
 		const notes = db.collection<Note>(this.COLLECTION);
 		await notes.insertOne(note);
 
-		this.logger.log(
-			TerminalColors.format(`Note inserted with id: &8(${note.id})&r`),
-		);
+		return { success: true };
 	}
 
 	async deleteNote(id: string): Promise<void> {
@@ -89,15 +95,23 @@ export class NoteDatabase {
 		});
 	}
 
-	isNoteValid(note: Note): boolean {
-		if (
-			!note || !note.id || !note.content || note.content === '' ||
-			!note.expiresAt
-		) {
-			return false;
+	validateNote(data: Note): ValidateNoteResult {
+		if (!data.content || !data.iv || !data.expiresAt) {
+			return { success: false, message: 'Content, IV, and expiration time are required' };
 		}
-		return true;
-	}
+
+		// Security: Limit input sizes to prevent DoS
+		if (data.content.length > 1024 * 1024) { // 1MB limit
+			return { success: false, message: 'Content too large (max 1MB)' };
+		}
+
+		if (data.password && data.password.length > 1024) { // 1KB password limit
+			return { success: false, message: 'Password too long' };
+		}
+
+		return { success: true };
+	};
+
 
 	/**
 	 * Generate a note id that is not already in use
