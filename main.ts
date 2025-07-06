@@ -10,10 +10,12 @@ import { start } from '$fresh/server.ts';
 import manifest from './fresh.gen.ts';
 import config from './fresh.config.ts';
 import { closeDatabase, initializeDatabase } from './database/db.ts';
+import { defaultArcRateLimiter } from './utils/rate-limiting/arc-rate-limiter.ts';
 
 // Only initialize database if not in build mode
 if (!Deno.env.get('BUILD_MODE')) {
 	await initializeDatabase();
+	defaultArcRateLimiter.init();
 }
 
 // Graceful shutdown handling

@@ -1,3 +1,4 @@
+import { initTailwind } from '$fresh/plugins/tailwind/compiler.ts';
 import { generateSHA256Hash } from '../hashing.ts';
 
 interface ArcEntry {
@@ -27,6 +28,9 @@ export class ArcRateLimiter {
 		this.maxRequests = maxRequests;
 		this.windowMs = windowMs;
 		this.blockDurationMs = blockDurationMs;
+	}
+
+    init() {
 		this.startPeriodicCleanup();
 	}
 
