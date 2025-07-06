@@ -1,21 +1,47 @@
-name: Deploy
+name: Test and Deploy
 
 on:
-  workflow_run:
-    workflows: ["Deno with MongoDB Test Database"]
-    branches: [main]
-    types: 
-      - completed
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+  id-token: write # Needed for auth with Deno Deploy
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v4
+        
+      - name: Install Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.12.0
+        with:
+          mongodb-version: 8.0
+
+      - name: Run linter
+        run: deno lint
+
+      - name: Run tests
+        run: deno test -A
+        env: 
+          TEST_BASE_URI: mongodb://localhost:27017/vailnote_test
+          BASE_URI: mongodb://localhost:27017/vailnote_test
+
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write # Needed for auth with Deno Deploy
-      contents: read # Needed to clone the repository
-
+    needs: test  # Only run after test job succeeds
+    
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -38,5 +64,3 @@ jobs:
           project: "vailnote"
           entrypoint: "main.ts"
           root: "."
-          
-          
