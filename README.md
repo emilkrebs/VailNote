@@ -95,6 +95,7 @@ Note: SSL will handle the encryption. If disabled the sensitive data might be co
 ## Installation & Development
 
 ### Prerequisites
+
 - [Deno](https://deno.land/) v1.34 or later
 - MongoDB instance
 
