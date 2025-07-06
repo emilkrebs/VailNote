@@ -12,7 +12,7 @@ import config from './fresh.config.ts';
 import { closeDatabase, initializeDatabase } from './database/db.ts';
 
 // Only initialize database if not in build mode
-if (Deno.env.get('DENO_DEPLOYMENT_ID') || !Deno.env.get('BUILD_MODE')) {
+if (!Deno.env.get('BUILD_MODE')) {
 	await initializeDatabase();
 }
 
@@ -23,10 +23,9 @@ const handleShutdown = async () => {
 	Deno.exit(0);
 };
 
-// Listen for shutdown signals (only in non-build environment)
-if (Deno.env.get('DENO_DEPLOYMENT_ID') || !Deno.env.get('BUILD_MODE')) {
+
+if (!Deno.env.get('BUILD_MODE')) {
 	Deno.addSignalListener('SIGINT', handleShutdown);
-	// SIGTERM might not be available in all environments
 	try {
 		Deno.addSignalListener('SIGTERM', handleShutdown);
 	} catch {
