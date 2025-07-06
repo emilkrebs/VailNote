@@ -91,9 +91,9 @@ export const handler: Handlers<NotePageProps> = {
 		}
 
 		// Always perform hash comparison even if note has no password to prevent timing attacks
-		const isPasswordValid = note.password && passwordHash ? 
-			await compareHash(passwordHash, note.password) : 
-			!note.password && !passwordProtected;
+		const isPasswordValid = note.password && passwordHash
+			? await compareHash(passwordHash, note.password)
+			: !note.password && !passwordProtected;
 
 		if (note.password && (!passwordProtected || !isPasswordValid)) {
 			// Password is required and does not match
@@ -275,7 +275,8 @@ function PasswordProtectedNote({ message }: { message?: string }) {
 						</h2>
 						<Message message={message} type='info' />
 						<p class='mt-2 text-gray-400'>
-							To view and destroy this note, please enter the correct password. A failed attempt will not destroy the note.
+							To view and destroy this note, please enter the correct password. A failed attempt will not destroy the
+							note.
 						</p>
 						<form method='POST' class='mt-8 space-y-5' autoComplete='off'>
 							<input type='hidden' name='confirm' value='true' />

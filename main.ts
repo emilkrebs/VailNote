@@ -23,7 +23,6 @@ const handleShutdown = async () => {
 	Deno.exit(0);
 };
 
-
 if (!Deno.env.get('BUILD_MODE')) {
 	Deno.addSignalListener('SIGINT', handleShutdown);
 	try {

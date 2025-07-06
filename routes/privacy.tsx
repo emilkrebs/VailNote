@@ -1,7 +1,7 @@
 import { Handlers, PageProps } from '$fresh/server.ts';
 import Header from '../components/Header.tsx';
 import HomeButton from '../components/HomeButton.tsx';
-import { CSS, render } from "@deno/gfm";
+import { CSS, render } from '@deno/gfm';
 
 interface Page {
 	markdown: string;
@@ -40,7 +40,7 @@ export default function Privacy({ data }: PageProps<Page | null>) {
 				<div class='flex items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8 gap-8'>
 					<div class='flex flex-col gap-4 p-8 rounded-2xl shadow-xl w-full bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600'>
 						<div
-							class="markdown-body"
+							class='markdown-body'
 							// deno-lint-ignore react-no-danger
 							dangerouslySetInnerHTML={{ __html: render(data?.markdown) }}
 						/>

@@ -12,8 +12,8 @@ export default function Footer() {
 		{
 			href: '/terms',
 			label: 'Terms of Service',
-		}
-	]
+		},
+	];
 
 	return (
 		<footer class='bg-gray-800 text-white py-4'>

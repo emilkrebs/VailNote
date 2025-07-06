@@ -8,7 +8,7 @@ import { generateHash } from '../../utils/hashing.ts';
     * - POST: Creates a new note with the provided content, IV, password, and expiration time.
     *
     * Note: The content should be encrypted before sending to this endpoint and the password should be hashed with SHA-256.
-    * 
+    *
     * TODO: Add rate limiting to prevent abuse:
     * - Limit requests per IP (e.g., 10 notes per minute)
     * - Implement exponential backoff for failed attempts
@@ -25,7 +25,6 @@ export const handler = async (req: Request): Promise<Response> => {
 	}
 
 	const { content, iv, password, expiresAt } = await req.json();
-	
 
 	const noteId = await noteDatabase.generateNoteId();
 

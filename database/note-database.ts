@@ -52,7 +52,6 @@ export class NoteDatabase {
 		await rooms.createIndex({ 'id': 1 }, { unique: true });
 	}
 
-
 	/**
 	 * Close the database connection
 	 */
@@ -64,7 +63,6 @@ export class NoteDatabase {
 			);
 		}
 	}
-
 
 	async insertNote(note: Note): Promise<InsertNoteResult> {
 		const validationResult = this.validateNote(note);
@@ -110,8 +108,7 @@ export class NoteDatabase {
 		}
 
 		return { success: true };
-	};
-
+	}
 
 	/**
 	 * Generate a note id that is not already in use

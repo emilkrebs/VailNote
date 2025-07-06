@@ -36,12 +36,15 @@ export default function CreateNote({ data }: { data: CreateNoteData }) {
 
 			{formData.message && (
 				<div
-					class={`mt-6 p-4 rounded-lg border transition-all ${formData.noteId
-						? 'bg-green-600/20 border-green-400 text-green-200'
-						: 'bg-red-600/20 border-red-400 text-red-200'
-						}`}
+					class={`mt-6 p-4 rounded-lg border transition-all ${
+						formData.noteId
+							? 'bg-green-600/20 border-green-400 text-green-200'
+							: 'bg-red-600/20 border-red-400 text-red-200'
+					}`}
 				>
-					<span class='font-medium' title={formData.noteId ? "Note ID: " + formData.noteId : undefined}>{formData.message}</span>
+					<span class='font-medium' title={formData.noteId ? 'Note ID: ' + formData.noteId : undefined}>
+						{formData.message}
+					</span>
 
 					{formData.noteId && (
 						<CopyContent
