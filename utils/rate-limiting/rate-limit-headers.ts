@@ -52,7 +52,7 @@ export function generateRateLimitBlockedHeaders(
 		'X-RateLimit-Limit': maxRequests.toString(),
 		'X-RateLimit-Remaining': '0',
 		'X-RateLimit-Reset': resetTime.toISOString(),
-		'Retry-After': rateLimitResult.retryAfter?.toString() || '60',
+		'Retry-After': rateLimitResult.retryAfter?.toString() || Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000).toString(),
 	};
 }
 
