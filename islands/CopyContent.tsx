@@ -16,7 +16,7 @@ export default function CopyContent(
 			await navigator.clipboard.writeText(content);
 			setCopied(true);
 			setTimeout(() => setCopied(false), 1500);
-		} catch (e) {
+		} catch (_e) {
 			setCopied(false);
 		}
 	};

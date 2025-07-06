@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 let isLoggingEnabled = false;
 
 export function enableLogging() {
