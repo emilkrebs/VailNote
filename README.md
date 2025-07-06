@@ -16,7 +16,25 @@ focus on user-friendliness and security.
 VailNote is **non-JavaScript compatible**; however, JavaScript is highly recommended for maximizing security and
 usability.
 
-> [!NOTE]\
+## Features
+
+- 🔒 **End-to-end encryption** (JavaScript mode)
+- 🗂️ **Self-destructing notes** - automatically deleted after viewing
+- 🔑 **Optional password protection**
+- ⏰ **Configurable expiration times** (10 minutes to 30 days)
+- 🚫 **No tracking or analytics**
+- 📱 **No-JavaScript fallback** for maximum compatibility
+- 🛡️ **Privacy-preserving rate limiting** using Anonymous Rate-Limited Credentials (ARC)
+
+## Tech Stack
+
+- **Framework**: [Fresh](https://fresh.deno.dev) (Deno)
+- **Runtime**: Deno
+- **Database**: MongoDB
+- **Encryption**: AES-GCM with SHA-256 key derivation
+- **Frontend**: Tailwind CSS & Preact
+
+> [!NOTE]
 > Safety and transparency are our top priorities. VailNote is made to be as secure as possible while still being easy to
 > use and compatible with most clients. I highly encourage you to look into the architecture to ensure your safety!
 
@@ -73,6 +91,43 @@ Note: SSL will handle the encryption. If disabled the sensitive data might be co
 (None)
 
 [Add Issue](https://github.com/emilkrebs/VailNote/issues/new)
+
+## Installation & Development
+
+### Prerequisites
+
+- [Deno](https://deno.land/) v1.34 or later
+- MongoDB instance
+
+### Local Development
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/emilkrebs/VailNote.git
+   cd VailNote
+   ```
+
+2. Set up environment variables:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your MongoDB URI and other settings
+   ```
+
+3. Start the development server:
+   ```bash
+   deno task start
+   ```
+
+4. Open [http://localhost:8000](http://localhost:8000) in your browser
+
+### Environment Variables
+
+- `BASE_URI` - MongoDB connection string
+- `PORT` - Server port (default: 8000)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
 # Architecture Diagram
 

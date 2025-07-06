@@ -29,13 +29,24 @@ collects, uses, and protects your information when you use our secure note-shari
 - **Notes Content:**\
   The encrypted content of your notes is temporarily stored on our servers until it is viewed or expires.
 
+- **Rate Limiting Data (ARC System):**\
+  We use Anonymous Rate-Limited Credentials (ARC) to prevent abuse. This system processes your IP address and browser
+  headers to generate anonymous, daily-rotating tokens. Raw IP addresses are never stored - only hashed, anonymous
+  tokens that cannot be reverse-engineered to reveal your identity.
+
+- **Technical Headers:**\
+  Standard HTTP headers (User-Agent, Accept headers) may be processed as fallback identifiers for rate limiting when IP
+  addresses are unavailable.
+
 ## Use of Your Information
 
 - **Service Delivery:**\
   Encrypted note data is used solely to deliver your notes to recipients.
 
 - **Security:**\
-  Technical logs may be used to detect and prevent abuse or attacks.
+  We use Anonymous Rate-Limited Credentials (ARC) to prevent abuse and attacks. This system creates anonymous tokens
+  from your network identifier without storing your actual IP address. Rate limiting data is automatically deleted
+  daily.
 
 - **No Marketing or Profiling:**\
   We do not use your data for marketing, profiling, or advertising.
@@ -43,6 +54,7 @@ collects, uses, and protects your information when you use our secure note-shari
 ## Data Retention and Deletion
 
 - Notes are deleted automatically after being viewed or after their set expiration time.
+- Rate limiting tokens are automatically deleted daily and cannot be linked across days.
 - You may delete a note at any time using the provided link before it expires.
 
 ## Zero-Knowledge Guarantee
@@ -54,6 +66,18 @@ your device (when JavaScript is enabled). We never have access to your passwords
 
 When JavaScript is enabled, your notes are encrypted in your browser before being sent to our servers.\
 If you disable JavaScript, encryption happens on the server side, and you must trust us to handle your data securely.
+
+## Anonymous Rate Limiting (ARC)
+
+VailNote uses Anonymous Rate-Limited Credentials (ARC) to prevent abuse while protecting your privacy:
+
+- **IP Processing**: Your IP address is processed to create anonymous tokens but is never stored
+- **Daily Rotation**: Tokens automatically rotate daily, preventing long-term tracking
+- **No Linkability**: Previous tokens cannot be linked to current tokens
+- **Automatic Cleanup**: All rate limiting data is deleted automatically after 24 hours
+- **Headers Included**: Rate limit information is provided in response headers for transparency
+
+For technical details, see our [ARC Rate Limiting Documentation](docs/ARC_RATE_LIMITING.md).
 
 ## Cookies and Tracking
 
