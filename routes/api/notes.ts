@@ -15,8 +15,6 @@ import { generateHash } from '../../utils/hashing.ts';
     * - Consider CAPTCHA for suspicious activity
 */
 
-
-
 export const handler = async (req: Request): Promise<Response> => {
 	if (req.method !== 'POST' && req.method !== 'GET') {
 		return new Response('Method not allowed', { status: 405 });

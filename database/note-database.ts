@@ -138,4 +138,13 @@ export class NoteDatabase {
 
 		return id;
 	}
+
+	async clearAllNotes(): Promise<void> {
+		const db = this._client.db(this.DATA_SOURCE);
+		const notes = db.collection<Note>(this.COLLECTION);
+		await notes.deleteMany({});
+		this.logger.log(
+			TerminalColors.format(`All notes cleared from database. &8(${this.BASE_URI})&r`),
+		);
+	}
 }

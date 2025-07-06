@@ -6,9 +6,12 @@ if (!uri) {
 	throw new Error('BASE_URI is not set');
 }
 
-export const noteDatabase = new NoteDatabase(uri);
+export let noteDatabase = new NoteDatabase(uri);
 
-export async function initializeDatabase() {
+export async function initializeDatabase(testInstance?: NoteDatabase) {
+	if (testInstance) {
+		noteDatabase = testInstance;
+	}
 	await noteDatabase.init();
 }
 

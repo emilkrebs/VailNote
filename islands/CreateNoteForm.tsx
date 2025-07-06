@@ -41,7 +41,7 @@ export default function CreateNote({ data }: { data: CreateNoteData }) {
 						: 'bg-red-600/20 border-red-400 text-red-200'
 						}`}
 				>
-					<span class='font-medium'>{formData.message}</span>
+					<span class='font-medium' title={formData.noteId ? "Note ID: " + formData.noteId : undefined}>{formData.message}</span>
 
 					{formData.noteId && (
 						<CopyContent
