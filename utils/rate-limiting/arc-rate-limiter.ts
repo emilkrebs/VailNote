@@ -149,7 +149,7 @@ export class ArcRateLimiter {
 	 */
 	private getDailySalt(): string {
 		const today = new Date();
-		return `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+		return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
 	}
 
 	/**
