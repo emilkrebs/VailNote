@@ -3,8 +3,10 @@ import Header from '../components/Header.tsx';
 import { noteDatabase } from '../database/db.ts';
 import CreateNote from '../islands/CreateNoteForm.tsx';
 import { formatExpiration } from '../types/types.ts';
+import { defaultArcRateLimiter } from '../utils/rate-limiting/arc-rate-limiter.ts';
 import { encryptNoteContent } from '../utils/encryption.ts';
 import { generateHash, generateSHA256Hash } from '../utils/hashing.ts';
+import { generateRateLimitHeaders } from '../utils/rate-limiting/rate-limit-headers.ts';
 
 export const handler: Handlers = {
 	GET(_req, ctx) {
@@ -12,6 +14,19 @@ export const handler: Handlers = {
 	},
 	async POST(req, ctx) {
 		// this endpoint is only used to create a note when the client does not have JavaScript enabled
+
+		const rateLimitResult = await defaultArcRateLimiter.checkRateLimit(req);
+
+		if (!rateLimitResult.allowed) {
+			return ctx.render({
+				message: 'Rate limit exceeded. Please try again later in a few minutes.',
+				noteId: null,
+				noteLink: '',
+			}, {
+				headers: generateRateLimitHeaders(rateLimitResult),
+			});
+		}
+
 		const form = await req.formData();
 		const noteContent = form.get('noteContent') as string;
 		const password = form.get('notePassword') as string;

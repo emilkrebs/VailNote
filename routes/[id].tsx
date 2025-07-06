@@ -9,6 +9,8 @@ import PenIcon from '../components/PenIcon.tsx';
 import { Button } from '../components/Button.tsx';
 import HomeButton from '../components/HomeButton.tsx';
 import Message from '../components/Message.tsx';
+import { defaultArcRateLimiter } from '../utils/rate-limiting/arc-rate-limiter.ts';
+import { generateRateLimitHeaders } from '../utils/rate-limiting/rate-limit-headers.ts';
 
 interface NotePageProps {
 	note?: Note;
@@ -75,6 +77,17 @@ export const handler: Handlers<NotePageProps> = {
 	},
 
 	async POST(req, ctx) {
+		const rateLimitResult = await defaultArcRateLimiter.checkRateLimit(req);
+		if (!rateLimitResult.allowed) {
+			return ctx.render({
+				message: 'Rate limit exceeded. Please try again later.',
+				note: undefined,
+				passwordRequired: false,
+				confirmed: false,
+			}, {
+				headers: generateRateLimitHeaders(rateLimitResult),
+			});
+		}
 		const { id } = ctx.params;
 		const formData = await req.formData();
 		const password = formData.get('password') as string;
@@ -102,6 +115,8 @@ export const handler: Handlers<NotePageProps> = {
 				passwordRequired: true,
 				message: 'Incorrect password. Please try again.',
 				confirmed: false,
+			}, {
+				headers: generateRateLimitHeaders(rateLimitResult),
 			});
 		}
 
@@ -152,7 +167,7 @@ export default function NotePage(ctx: PageProps<NotePageProps>) {
 	const { note, passwordRequired, message, confirmed } = ctx.data;
 
 	if (!note) {
-		return <NoteNotFoundPage message={message} />;
+		return <NoteErrorPage message={message} />;
 	}
 
 	if (passwordRequired) {
@@ -309,7 +324,7 @@ function PasswordProtectedNote({ message }: { message?: string }) {
 	);
 }
 
-function NoteNotFoundPage({ message }: { message?: string }) {
+function NoteErrorPage({ message }: { message?: string }) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
 			<h1 class='text-4xl font-bold'>VailNote</h1>
@@ -318,7 +333,7 @@ function NoteNotFoundPage({ message }: { message?: string }) {
 			</p>
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
 				<div class='flex flex-col mt-6 p-8 rounded-2xl shadow-xl w-full bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600'>
-					<h2 class='text-3xl font-bold text-white mb-2'>Note Not Found</h2>
+					<h2 class='text-3xl font-bold text-white mb-2'>Error</h2>
 					<p class='text-gray-300'>
 						{message || 'The note you are looking for does not exist.'}
 					</p>

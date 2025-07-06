@@ -1,6 +1,8 @@
 import { noteDatabase } from '../../database/db.ts';
 import { formatExpiration, Note } from '../../types/types.ts';
 import { generateHash } from '../../utils/hashing.ts';
+import { defaultArcRateLimiter } from '../../utils/rate-limiting/arc-rate-limiter.ts';
+import { mergeWithRateLimitHeaders } from '../../utils/rate-limiting/rate-limit-headers.ts';
 
 /* used for client side note creation and encryption
     * This endpoint handles both GET and POST requests.
@@ -9,11 +11,12 @@ import { generateHash } from '../../utils/hashing.ts';
     *
     * Note: The content should be encrypted before sending to this endpoint and the password should be hashed with SHA-256.
     *
-    * TODO: Add rate limiting to prevent abuse:
-    * - Limit requests per IP (e.g., 10 notes per minute)
-    * - Implement exponential backoff for failed attempts
-    * - Consider CAPTCHA for suspicious activity
-*/
+    * Rate Limiting (ARC - Anonymous Rate-Limited Credentials):
+    * - Limit: 10 requests per minute per client
+    * - Block duration: 5 minutes for rate limit violations
+    * - Privacy-preserving: Uses anonymous tokens with daily rotation
+    * - No IP address storage: Only hashed, rotated tokens are kept
+    */
 
 export const handler = async (req: Request): Promise<Response> => {
 	if (req.method !== 'POST' && req.method !== 'GET') {
@@ -22,6 +25,27 @@ export const handler = async (req: Request): Promise<Response> => {
 
 	if (req.method === 'GET') {
 		return new Response('GET method not implemented', { status: 501 });
+	}
+
+	const rateLimitResult = await defaultArcRateLimiter.checkRateLimit(req);
+
+	if (!rateLimitResult.allowed) {
+		const resetTime = new Date(rateLimitResult.resetTime);
+
+		return new Response(
+			JSON.stringify({
+				message: 'Rate limit exceeded. Please try again later.',
+				resetTime: resetTime.toISOString(),
+				retryAfter: rateLimitResult.retryAfter,
+			}),
+			{
+				headers: mergeWithRateLimitHeaders(
+					{ 'Content-Type': 'application/json' },
+					rateLimitResult,
+				),
+				status: 429,
+			},
+		);
 	}
 
 	const { content, iv, password, expiresAt } = await req.json();
@@ -49,7 +73,10 @@ export const handler = async (req: Request): Promise<Response> => {
 				error: insertResult.error,
 			}),
 			{
-				headers: { 'Content-Type': 'application/json' },
+				headers: mergeWithRateLimitHeaders(
+					{ 'Content-Type': 'application/json' },
+					rateLimitResult,
+				),
 				status: 500,
 			},
 		);
@@ -62,7 +89,10 @@ export const handler = async (req: Request): Promise<Response> => {
 			noteLink: `${new URL(req.url).origin}/${noteId}`,
 		}),
 		{
-			headers: { 'Content-Type': 'application/json' },
+			headers: mergeWithRateLimitHeaders(
+				{ 'Content-Type': 'application/json' },
+				rateLimitResult,
+			),
 			status: 201,
 		},
 	);
