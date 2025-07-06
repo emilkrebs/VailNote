@@ -1,9 +1,11 @@
 name: Deploy
+
 on:
-  push:
-    branches: main
-  pull_request:
-    branches: main
+  workflow_run:
+    workflows: ["Deno with MongoDB Test Database"]
+    branches: [main]
+    types: 
+      - completed
 
 jobs:
   deploy:
