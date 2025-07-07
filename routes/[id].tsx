@@ -1,5 +1,4 @@
 import { Handlers, PageProps } from '$fresh/server.ts';
-import { noteDatabase } from '../database/db.ts';
 import { Note } from '../types/types.ts';
 import { compareHash, generateSHA256Hash } from '../utils/hashing.ts';
 import PasswordInput from '../islands/PasswordInput.tsx';
@@ -9,8 +8,9 @@ import PenIcon from '../components/PenIcon.tsx';
 import { Button } from '../components/Button.tsx';
 import HomeButton from '../components/HomeButton.tsx';
 import Message from '../components/Message.tsx';
-import { defaultArcRateLimiter } from '../utils/rate-limiting/arc-rate-limiter.ts';
 import { generateRateLimitHeaders } from '../utils/rate-limiting/rate-limit-headers.ts';
+import { getNoteDatabase } from '../database/db.ts';
+import { getDefaultArcRateLimiter } from '../utils/rate-limiting/rate-limiter.ts';
 
 interface NotePageProps {
 	note?: Note;
@@ -39,7 +39,7 @@ async function decryptNoteAndDestroy(note: Note, encryptionKey: string, confirm:
 	}
 
 	const decryptedContent = await decryptNoteContent(note.content, note.iv, encryptionKey);
-	await noteDatabase.deleteNote(note.id);
+	await getNoteDatabase().deleteNote(note.id);
 
 	return {
 		...note,
@@ -54,7 +54,7 @@ export const handler: Handlers<NotePageProps> = {
 			return ctx.renderNotFound();
 		}
 
-		const note = await noteDatabase.getNoteById(id);
+		const note = await getNoteDatabase().getNoteById(id);
 		if (!note) {
 			return ctx.renderNotFound();
 		}
@@ -77,7 +77,7 @@ export const handler: Handlers<NotePageProps> = {
 	},
 
 	async POST(req, ctx) {
-		const rateLimitResult = await defaultArcRateLimiter.checkRateLimit(req);
+		const rateLimitResult = await getDefaultArcRateLimiter().checkRateLimit(req);
 		if (!rateLimitResult.allowed) {
 			return ctx.render({
 				message: 'Rate limit exceeded. Please try again later.',
@@ -97,7 +97,7 @@ export const handler: Handlers<NotePageProps> = {
 
 		const passwordProtected = password && password.trim() !== '';
 
-		const note = await noteDatabase.getNoteById(id);
+		const note = await getNoteDatabase().getNoteById(id);
 
 		if (!note) {
 			return ctx.renderNotFound();

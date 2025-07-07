@@ -1,6 +1,6 @@
 # Terms of Service
 
-_Last updated: July 4, 2025_
+_Last updated: July 7, 2025_
 
 ## Acceptance of Terms
 
@@ -91,12 +91,6 @@ expenses arising from:
 - Your use of the Service
 - Your violation of these Terms
 - Your violation of any applicable laws or third-party rights
-
-## Termination
-
-- You may stop using VailNote at any time
-- We may terminate or suspend access to the Service immediately for violations of these Terms
-- Upon termination, your right to use the Service ceases immediately
 
 ## Governing Law
 

@@ -27,9 +27,6 @@ export class ArcRateLimiter {
 		this.maxRequests = maxRequests;
 		this.windowMs = windowMs;
 		this.blockDurationMs = blockDurationMs;
-	}
-
-	init() {
 		this.startPeriodicCleanup();
 	}
 
@@ -178,7 +175,7 @@ export class ArcRateLimiter {
 	private startPeriodicCleanup(): void {
 		this.cleanupTimer = setInterval(() => {
 			this.cleanup();
-		}, 10 * 60 * 1000); // Every 10 minutes
+		}, 30 * 60 * 1000); // Every 30 minutes
 	}
 
 	/**
@@ -218,9 +215,3 @@ export class ArcRateLimiter {
 		this.store.clear();
 	}
 }
-
-export const defaultArcRateLimiter = new ArcRateLimiter(
-	10, // 10 requests per minute
-	60 * 1000, // 1 minute window
-	5 * 60 * 1000, // 5 minute block
-);

@@ -1,6 +1,6 @@
 # Privacy Policy
 
-_Last updated: July 4, 2025_
+_Last updated: July 7, 2025_
 
 Your privacy and security are our top priorities. This Privacy Policy explains how VailNote (“we”, “us”, or “our”)
 collects, uses, and protects your information when you use our secure note-sharing application.
@@ -76,8 +76,6 @@ VailNote uses Anonymous Rate-Limited Credentials (ARC) to prevent abuse while pr
 - **No Linkability**: Previous tokens cannot be linked to current tokens
 - **Automatic Cleanup**: All rate limiting data is deleted automatically after 24 hours
 - **Headers Included**: Rate limit information is provided in response headers for transparency
-
-For technical details, see our [ARC Rate Limiting Documentation](docs/ARC_RATE_LIMITING.md).
 
 ## Cookies and Tracking
 

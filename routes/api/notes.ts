@@ -1,8 +1,8 @@
-import { noteDatabase } from '../../database/db.ts';
+import { getNoteDatabase } from '../../database/db.ts';
 import { formatExpiration, Note } from '../../types/types.ts';
 import { generateHash } from '../../utils/hashing.ts';
-import { defaultArcRateLimiter } from '../../utils/rate-limiting/arc-rate-limiter.ts';
 import { mergeWithRateLimitHeaders } from '../../utils/rate-limiting/rate-limit-headers.ts';
+import { getDefaultArcRateLimiter } from '../../utils/rate-limiting/rate-limiter.ts';
 
 /* used for client side note creation and encryption
     * This endpoint handles both GET and POST requests.
@@ -27,7 +27,7 @@ export const handler = async (req: Request): Promise<Response> => {
 		return new Response('GET method not implemented', { status: 501 });
 	}
 
-	const rateLimitResult = await defaultArcRateLimiter.checkRateLimit(req);
+	const rateLimitResult = await getDefaultArcRateLimiter().checkRateLimit(req);
 
 	if (!rateLimitResult.allowed) {
 		const resetTime = new Date(rateLimitResult.resetTime);
@@ -50,7 +50,7 @@ export const handler = async (req: Request): Promise<Response> => {
 
 	const { content, iv, password, expiresAt } = await req.json();
 
-	const noteId = await noteDatabase.generateNoteId();
+	const noteId = await getNoteDatabase().generateNoteId();
 
 	// if password is provided, hash it (password should be hashed with SHA-256 before sending to this endpoint)
 	const passwordHash = password ? await generateHash(password) : undefined;
@@ -64,7 +64,7 @@ export const handler = async (req: Request): Promise<Response> => {
 		expiresAt: formatExpiration(expiresAt),
 	};
 
-	const insertResult = await noteDatabase.insertNote(result);
+	const insertResult = await getNoteDatabase().insertNote(result);
 
 	if (!insertResult.success) {
 		return new Response(

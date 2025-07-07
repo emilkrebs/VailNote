@@ -1,12 +1,12 @@
 import { Handlers, PageProps } from '$fresh/server.ts';
 import Header from '../components/Header.tsx';
-import { noteDatabase } from '../database/db.ts';
 import CreateNote from '../islands/CreateNoteForm.tsx';
 import { formatExpiration } from '../types/types.ts';
-import { defaultArcRateLimiter } from '../utils/rate-limiting/arc-rate-limiter.ts';
 import { encryptNoteContent } from '../utils/encryption.ts';
 import { generateHash, generateSHA256Hash } from '../utils/hashing.ts';
 import { generateRateLimitHeaders } from '../utils/rate-limiting/rate-limit-headers.ts';
+import { getNoteDatabase } from '../database/db.ts';
+import { getDefaultArcRateLimiter } from '../utils/rate-limiting/rate-limiter.ts';
 
 export const handler: Handlers = {
 	GET(_req, ctx) {
@@ -15,7 +15,7 @@ export const handler: Handlers = {
 	async POST(req, ctx) {
 		// this endpoint is only used to create a note when the client does not have JavaScript enabled
 
-		const rateLimitResult = await defaultArcRateLimiter.checkRateLimit(req);
+		const rateLimitResult = await getDefaultArcRateLimiter().checkRateLimit(req);
 
 		if (!rateLimitResult.allowed) {
 			return ctx.render({
@@ -37,14 +37,14 @@ export const handler: Handlers = {
 			return ctx.render({ message: 'Please enter a note.' });
 		}
 
-		const noteId = await noteDatabase.generateNoteId();
+		const noteId = await getNoteDatabase().generateNoteId();
 
 		const { encrypted: encryptedContent, iv } = await encryptNoteContent(
 			noteContent,
 			password ? passwordSHA256 : noteId,
 		);
 
-		const insertResult = await noteDatabase.insertNote({
+		const insertResult = await getNoteDatabase().insertNote({
 			id: noteId,
 			content: encryptedContent,
 			expiresAt: formatExpiration(expiresIn),
