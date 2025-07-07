@@ -1,6 +1,6 @@
 # Privacy Policy
 
-_Last updated: July 4, 2025_
+_Last updated: July 7, 2025_
 
 Your privacy and security are our top priorities. This Privacy Policy explains how VailNote (“we”, “us”, or “our”)
 collects, uses, and protects your information when you use our secure note-sharing application.
