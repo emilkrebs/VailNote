@@ -12,7 +12,7 @@ export function initializeArcRateLimiter() {
 
 export function getDefaultArcRateLimiter(): ArcRateLimiter {
 	if (!defaultArcRateLimiter) {
-		throw new Error('ARC Rate Limiter not initialized. Call init() first.');
+		throw new Error('ARC Rate Limiter not initialized. Call initializeArcRateLimiter() first.');
 	}
 	return defaultArcRateLimiter;
 }
