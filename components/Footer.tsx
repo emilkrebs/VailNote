@@ -16,6 +16,7 @@ export default function Footer() {
 		{
 			href: 'https://github.com/emilkrebs/VailNote/wiki',
 			label: 'Wiki',
+			external: true,
 		},
 	];
 
@@ -66,6 +67,8 @@ export default function Footer() {
 									href={link.href}
 									class='underline hover:text-blue-300 transition-colors px-1'
 									key={link.label}
+									target={link.external ? '_blank' : '_self'}
+									rel={link.external ? 'noopener noreferrer' : undefined}
 								>
 									{link.label}
 								</a>

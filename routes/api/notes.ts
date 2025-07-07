@@ -1,4 +1,4 @@
-import { noteDatabase } from '../../database/db.ts';
+import { getNoteDatabase } from '../../database/db.ts';
 import { formatExpiration, Note } from '../../types/types.ts';
 import { generateHash } from '../../utils/hashing.ts';
 import { defaultArcRateLimiter } from '../../utils/rate-limiting/arc-rate-limiter.ts';
@@ -50,7 +50,7 @@ export const handler = async (req: Request): Promise<Response> => {
 
 	const { content, iv, password, expiresAt } = await req.json();
 
-	const noteId = await noteDatabase.generateNoteId();
+	const noteId = await getNoteDatabase().generateNoteId();
 
 	// if password is provided, hash it (password should be hashed with SHA-256 before sending to this endpoint)
 	const passwordHash = password ? await generateHash(password) : undefined;
@@ -64,7 +64,7 @@ export const handler = async (req: Request): Promise<Response> => {
 		expiresAt: formatExpiration(expiresAt),
 	};
 
-	const insertResult = await noteDatabase.insertNote(result);
+	const insertResult = await getNoteDatabase().insertNote(result);
 
 	if (!insertResult.success) {
 		return new Response(
