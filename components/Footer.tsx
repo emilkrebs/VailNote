@@ -13,6 +13,10 @@ export default function Footer() {
 			href: '/terms',
 			label: 'Terms of Service',
 		},
+		{
+			href: 'https://github.com/emilkrebs/VailNote/wiki',
+			label: 'Wiki',
+		},
 	];
 
 	return (
