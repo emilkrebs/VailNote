@@ -16,6 +16,8 @@ focus on user-friendliness and security.
 VailNote is **non-JavaScript compatible**; however, JavaScript is highly recommended for maximizing security and
 usability.
 
+🔗 See VailNote in action at [vailnote.com](https://vailnote.com).
+
 ## Features
 
 - 🔒 **End-to-end encryption** (JavaScript mode)

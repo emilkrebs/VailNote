@@ -77,8 +77,6 @@ VailNote uses Anonymous Rate-Limited Credentials (ARC) to prevent abuse while pr
 - **Automatic Cleanup**: All rate limiting data is deleted automatically after 24 hours
 - **Headers Included**: Rate limit information is provided in response headers for transparency
 
-For technical details, see our [ARC Rate Limiting Documentation](docs/ARC_RATE_LIMITING.md).
-
 ## Cookies and Tracking
 
 We do **not** use cookies, trackers, or third-party analytics.

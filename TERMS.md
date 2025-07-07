@@ -92,12 +92,6 @@ expenses arising from:
 - Your violation of these Terms
 - Your violation of any applicable laws or third-party rights
 
-## Termination
-
-- You may stop using VailNote at any time
-- We may terminate or suspend access to the Service immediately for violations of these Terms
-- Upon termination, your right to use the Service ceases immediately
-
 ## Governing Law
 
 These Terms shall be governed by and construed in accordance with applicable law, without regard to conflict of law
