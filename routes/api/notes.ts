@@ -1,8 +1,8 @@
 import { getNoteDatabase } from '../../database/db.ts';
 import { formatExpiration, Note } from '../../types/types.ts';
 import { generateHash } from '../../utils/hashing.ts';
-import { defaultArcRateLimiter } from '../../utils/rate-limiting/arc-rate-limiter.ts';
 import { mergeWithRateLimitHeaders } from '../../utils/rate-limiting/rate-limit-headers.ts';
+import { getDefaultArcRateLimiter } from '../../utils/rate-limiting/rate-limiter.ts';
 
 /* used for client side note creation and encryption
     * This endpoint handles both GET and POST requests.
@@ -27,7 +27,7 @@ export const handler = async (req: Request): Promise<Response> => {
 		return new Response('GET method not implemented', { status: 501 });
 	}
 
-	const rateLimitResult = await defaultArcRateLimiter.checkRateLimit(req);
+	const rateLimitResult = await getDefaultArcRateLimiter().checkRateLimit(req);
 
 	if (!rateLimitResult.allowed) {
 		const resetTime = new Date(rateLimitResult.resetTime);

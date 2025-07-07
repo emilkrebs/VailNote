@@ -1,6 +1,6 @@
 import '$std/dotenv/load.ts';
+import { defaultLogger } from '../utils/logging.ts';
 import { NoteDatabase } from './note-database.ts';
-
 
 let noteDatabase: NoteDatabase | undefined = undefined;
 
@@ -8,7 +8,6 @@ export async function initializeDatabase(testInstance?: NoteDatabase) {
 	if (testInstance) {
 		noteDatabase = testInstance;
 	} else {
-		
 		const uri = Deno.env.get('BASE_URI');
 		if (!uri) {
 			throw new Error('BASE_URI is not set');
@@ -31,6 +30,6 @@ export async function closeDatabase() {
 		await noteDatabase.close();
 		noteDatabase = undefined;
 	} else {
-		console.warn('No database connection to close.');
+		defaultLogger.warn('No database connection to close.');
 	}
 }

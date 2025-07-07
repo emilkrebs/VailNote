@@ -1,14 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
-let isLoggingEnabled = false;
-
-export function enableLogging() {
-	isLoggingEnabled = true;
-}
 
 export function log(...data: any[]) {
-	if (isLoggingEnabled) {
-		console.log(...data);
-	}
+	console.log(...data);
 }
 
 export class Logger {
@@ -91,3 +84,5 @@ export class TerminalColors {
 		});
 	}
 }
+
+export const defaultLogger = new Logger();

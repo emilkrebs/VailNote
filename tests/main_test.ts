@@ -10,6 +10,7 @@ import { encryptNoteContent } from '../utils/encryption.ts';
 // let's just use the global database but ensure proper cleanup
 import { closeDatabase, initializeDatabase } from '../database/db.ts';
 import { TestNoteDatabase } from './test-database.ts';
+import { initializeArcRateLimiter } from '../utils/rate-limiting/rate-limiter.ts';
 
 const hostname = '127.0.0.1';
 
@@ -26,7 +27,7 @@ const testNoteData = {
 
 // Array to store created note IDs and their passwords
 const createdNotes: { id: string; password: string; content: string }[] = [];
-
+initializeArcRateLimiter();
 Deno.test('HTTP assert test.', async (t) => {
 	// Create and use test database for this test
 	const testDatabase = await TestNoteDatabase.getInstance();

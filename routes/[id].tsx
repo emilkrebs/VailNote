@@ -8,9 +8,9 @@ import PenIcon from '../components/PenIcon.tsx';
 import { Button } from '../components/Button.tsx';
 import HomeButton from '../components/HomeButton.tsx';
 import Message from '../components/Message.tsx';
-import { defaultArcRateLimiter } from '../utils/rate-limiting/arc-rate-limiter.ts';
 import { generateRateLimitHeaders } from '../utils/rate-limiting/rate-limit-headers.ts';
 import { getNoteDatabase } from '../database/db.ts';
+import { getDefaultArcRateLimiter } from '../utils/rate-limiting/rate-limiter.ts';
 
 interface NotePageProps {
 	note?: Note;
@@ -77,7 +77,7 @@ export const handler: Handlers<NotePageProps> = {
 	},
 
 	async POST(req, ctx) {
-		const rateLimitResult = await defaultArcRateLimiter.checkRateLimit(req);
+		const rateLimitResult = await getDefaultArcRateLimiter().checkRateLimit(req);
 		if (!rateLimitResult.allowed) {
 			return ctx.render({
 				message: 'Rate limit exceeded. Please try again later.',

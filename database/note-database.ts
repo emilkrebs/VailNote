@@ -30,11 +30,6 @@ export class NoteDatabase {
 			TerminalColors.format(`Connecting to database. &8(${this.BASE_URI})&r`),
 		);
 		this._client = new MongoClient(uri);
-		this.logger.log(
-			TerminalColors.format(
-				`Successfully connected to database. &8(${this.BASE_URI})&r`,
-			),
-		);
 	}
 
 	/**
@@ -43,7 +38,9 @@ export class NoteDatabase {
 	async init() {
 		await this._client.connect();
 		this.logger.log(
-			TerminalColors.format(`Connected to database. &8(${this.BASE_URI})&r`),
+			TerminalColors.format(
+				`Successfully connected to database. &8(${this.BASE_URI})&r`,
+			),
 		);
 		const db = this._client.db(this.DATA_SOURCE);
 		const rooms = db.collection<Note>(this.COLLECTION);

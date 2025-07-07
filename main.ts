@@ -10,17 +10,18 @@ import { start } from '$fresh/server.ts';
 import manifest from './fresh.gen.ts';
 import config from './fresh.config.ts';
 import { closeDatabase, initializeDatabase } from './database/db.ts';
-import { defaultArcRateLimiter } from './utils/rate-limiting/arc-rate-limiter.ts';
+import { initializeArcRateLimiter } from './utils/rate-limiting/rate-limiter.ts';
+import { defaultLogger } from './utils/logging.ts';
 
 // Only initialize database if not in build mode
 if (!Deno.env.get('BUILD_MODE')) {
 	await initializeDatabase();
-	defaultArcRateLimiter.init();
+	initializeArcRateLimiter();
 }
 
 // Graceful shutdown handling
 const handleShutdown = async () => {
-	console.log('Received shutdown signal, closing database connection...');
+	defaultLogger.log('Received shutdown signal, closing database connection...');
 	await closeDatabase();
 	Deno.exit(0);
 };
@@ -30,7 +31,7 @@ if (!Deno.env.get('BUILD_MODE')) {
 	try {
 		Deno.addSignalListener('SIGTERM', handleShutdown);
 	} catch {
-		console.warn('SIGTERM signal not available, ignoring.');
+		defaultLogger.warn('SIGTERM signal not available, ignoring.');
 	}
 }
 
