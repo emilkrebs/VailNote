@@ -110,10 +110,6 @@ Note: SSL will handle the encryption. If disabled the sensitive data might be co
    ```
 
 2. Set up environment variables:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your MongoDB URI and other settings
-   ```
 
 3. Start the development server:
    ```bash
@@ -125,8 +121,8 @@ Note: SSL will handle the encryption. If disabled the sensitive data might be co
 ### Environment Variables
 
 - `BASE_URI` - MongoDB connection string
-- `PORT` - Server port (default: 8000)
-
+- `TEST_BASE_URI` - MongoDB test database connection string
+  
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
