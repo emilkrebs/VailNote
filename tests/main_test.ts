@@ -85,7 +85,7 @@ Deno.test('Note submission test.', async (t) => {
 			const passwordSHA256 = await generateSHA256Hash(testNoteData.password);
 			const encryptedContent = await encryptNoteContent(
 				testNoteData.content,
-				testNoteData.password, // Encrypt using the plain password
+				passwordSHA256, // Encrypt using the hashed password
 			);
 
 			const resp = await handler(
