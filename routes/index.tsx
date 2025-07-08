@@ -5,18 +5,23 @@ import { formatExpiration } from '../types/types.ts';
 import { encryptNoteContent } from '../utils/encryption.ts';
 import { generateHash, generateSHA256Hash } from '../utils/hashing.ts';
 import { generateRateLimitHeaders } from '../utils/rate-limiting/rate-limit-headers.ts';
-import { getNoteDatabase } from '../database/db.ts';
-import { getDefaultArcRateLimiter } from '../utils/rate-limiting/rate-limiter.ts';
+import { State } from './_middleware.ts';
 
-export const handler: Handlers = {
+
+interface HomeData {
+	message: string;
+	noteId?: string | null;
+	noteLink?: string;
+}
+
+export const handler: Handlers<HomeData, State> = {
 	GET(_req, ctx) {
 		return ctx.render({ message: '' });
 	},
 	async POST(req, ctx) {
 		// this endpoint is only used to create a note when the client does not have JavaScript enabled
-
-		const rateLimitResult = await getDefaultArcRateLimiter().checkRateLimit(req);
-
+		const rateLimitResult = await ctx.state.context.getRateLimiter().checkRateLimit(req);
+		const noteDatabase = ctx.state.context.getNoteDatabase();
 		if (!rateLimitResult.allowed) {
 			return ctx.render({
 				message: 'Rate limit exceeded. Please try again later in a few minutes.',
@@ -37,7 +42,7 @@ export const handler: Handlers = {
 			return ctx.render({ message: 'Please enter a note.' });
 		}
 
-		const noteId = await getNoteDatabase().generateNoteId();
+		const noteId = await noteDatabase.generateNoteId();
 
 		// encrypt note content using the provided plain password or a random auth token
 		const encryptedContent = await encryptNoteContent(
@@ -45,7 +50,7 @@ export const handler: Handlers = {
 			password ? password : noteId,
 		);
 
-		const insertResult = await getNoteDatabase().insertNote({
+		const insertResult = await noteDatabase.insertNote({
 			id: noteId,
 			content: encryptedContent.encrypted,
 			expiresAt: formatExpiration(expiresIn),

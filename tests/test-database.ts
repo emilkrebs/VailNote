@@ -22,24 +22,23 @@ export class TestNoteDatabase {
 
 	static async cleanup(): Promise<void> {
 		if (this.instance) {
-			await this.instance.close();
+			try {
+				await this.instance.close();
+			} catch (error) {
+				console.error('Error closing database:', error);
+			}
 			this.instance = null;
 		}
 	}
 
-	/**
-	 * Clear all test data from the database
-	 */
-	static async clearTestData(): Promise<void> {
+	static async reset(): Promise<void> {
+		await this.cleanup();
+		// Force a new instance on next getInstance call
+	}
+
+	static async clearAllNotes(): Promise<void> {
 		if (this.instance) {
 			await this.instance.clearAllNotes();
 		}
-	}
-
-	/**
-	 * Reset the test database instance (force recreate on next getInstance call)
-	 */
-	static reset(): void {
-		this.instance = null;
 	}
 }

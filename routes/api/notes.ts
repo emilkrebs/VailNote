@@ -1,8 +1,8 @@
-import { getNoteDatabase } from '../../database/db.ts';
+import { FreshContext } from '$fresh/server.ts';
 import { formatExpiration, Note } from '../../types/types.ts';
 import { generateHash } from '../../utils/hashing.ts';
 import { mergeWithRateLimitHeaders } from '../../utils/rate-limiting/rate-limit-headers.ts';
-import { getDefaultArcRateLimiter } from '../../utils/rate-limiting/rate-limiter.ts';
+import { State } from '../_middleware.ts';
 
 /* used for client side note creation and encryption
     * This endpoint handles both GET and POST requests.
@@ -18,7 +18,7 @@ import { getDefaultArcRateLimiter } from '../../utils/rate-limiting/rate-limiter
     * - No IP address storage: Only hashed, rotated tokens are kept
     */
 
-export const handler = async (req: Request): Promise<Response> => {
+export const handler = async (req: Request, ctx: FreshContext<State>): Promise<Response> => {
 	if (req.method !== 'POST' && req.method !== 'GET') {
 		return new Response('Method not allowed', { status: 405 });
 	}
@@ -27,7 +27,8 @@ export const handler = async (req: Request): Promise<Response> => {
 		return new Response('GET method not implemented', { status: 501 });
 	}
 
-	const rateLimitResult = await getDefaultArcRateLimiter().checkRateLimit(req);
+	const rateLimitResult = await ctx.state.context.getRateLimiter().checkRateLimit(req);
+	const noteDatabase = ctx.state.context.getNoteDatabase();
 
 	if (!rateLimitResult.allowed) {
 		const resetTime = new Date(rateLimitResult.resetTime);
@@ -50,7 +51,7 @@ export const handler = async (req: Request): Promise<Response> => {
 
 	const { content, iv, password, expiresAt } = await req.json();
 
-	const noteId = await getNoteDatabase().generateNoteId();
+	const noteId = await noteDatabase.generateNoteId();
 
 	// if password is provided, hash it (password should be hashed with SHA-256 before sending to this endpoint)
 	const passwordHash = password ? await generateHash(password) : undefined;
@@ -64,7 +65,7 @@ export const handler = async (req: Request): Promise<Response> => {
 		expiresAt: formatExpiration(expiresAt),
 	};
 
-	const insertResult = await getNoteDatabase().insertNote(result);
+	const insertResult = await noteDatabase.insertNote(result);
 
 	if (!insertResult.success) {
 		return new Response(

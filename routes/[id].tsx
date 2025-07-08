@@ -9,8 +9,8 @@ import { Button } from '../components/Button.tsx';
 import HomeButton from '../components/HomeButton.tsx';
 import Message from '../components/Message.tsx';
 import { generateRateLimitHeaders } from '../utils/rate-limiting/rate-limit-headers.ts';
-import { getNoteDatabase } from '../database/db.ts';
-import { getDefaultArcRateLimiter } from '../utils/rate-limiting/rate-limiter.ts';
+import { State } from './_middleware.ts';
+import { NoteDatabase } from '../database/note-database.ts';
 
 interface NotePageProps {
 	note?: Note;
@@ -19,6 +19,7 @@ interface NotePageProps {
 
 	message?: string;
 }
+
 
 async function getPasswordHash(password: string): Promise<string> {
 	if (!password || password.trim() === '') {
@@ -29,7 +30,7 @@ async function getPasswordHash(password: string): Promise<string> {
 	return sha256Hash;
 }
 
-async function decryptNoteAndDestroy(note: Note, encryptionKey: string, confirm: boolean): Promise<Note> {
+async function decryptNoteAndDestroy(noteDatabase: NoteDatabase, note: Note, encryptionKey: string, confirm: boolean): Promise<Note> {
 	if (!confirm) {
 		throw new Error('Please confirm you want to view and destroy this note.');
 	}
@@ -39,7 +40,7 @@ async function decryptNoteAndDestroy(note: Note, encryptionKey: string, confirm:
 	}
 
 	const decryptedContent = await decryptNoteContent(note.content, note.iv, encryptionKey);
-	await getNoteDatabase().deleteNote(note.id);
+	await noteDatabase.deleteNote(note.id);
 
 	return {
 		...note,
@@ -47,14 +48,15 @@ async function decryptNoteAndDestroy(note: Note, encryptionKey: string, confirm:
 	};
 }
 
-export const handler: Handlers<NotePageProps> = {
+export const handler: Handlers<NotePageProps, State> = {
 	async GET(_req, ctx) {
 		const { id } = ctx.params;
 		if (!id) {
 			return ctx.renderNotFound();
 		}
+		const noteDatabase = ctx.state.context.getNoteDatabase();
+		const note = await noteDatabase.getNoteById(id);
 
-		const note = await getNoteDatabase().getNoteById(id);
 		if (!note) {
 			return ctx.renderNotFound();
 		}
@@ -77,7 +79,9 @@ export const handler: Handlers<NotePageProps> = {
 	},
 
 	async POST(req, ctx) {
-		const rateLimitResult = await getDefaultArcRateLimiter().checkRateLimit(req);
+		const rateLimitResult = await ctx.state.context.getRateLimiter().checkRateLimit(req);
+		const noteDatabase = ctx.state.context.getNoteDatabase();
+
 		if (!rateLimitResult.allowed) {
 			return ctx.render({
 				message: 'Rate limit exceeded. Please try again later.',
@@ -97,7 +101,7 @@ export const handler: Handlers<NotePageProps> = {
 
 		const passwordProtected = password && password.trim() !== '';
 
-		const note = await getNoteDatabase().getNoteById(id);
+		const note = await noteDatabase.getNoteById(id);
 
 		if (!note) {
 			return ctx.renderNotFound();
@@ -146,7 +150,7 @@ export const handler: Handlers<NotePageProps> = {
 				});
 			}
 
-			const result = await decryptNoteAndDestroy(note, encryptionKey, confirm);
+			const result = await decryptNoteAndDestroy(noteDatabase, note, encryptionKey, confirm);
 
 			return ctx.render({
 				note: result,

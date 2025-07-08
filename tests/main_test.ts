@@ -6,11 +6,9 @@ import { assertMatch } from '$std/assert/assert_match.ts';
 import { generateSHA256Hash } from '../utils/hashing.ts';
 import { encryptNoteContent } from '../utils/encryption.ts';
 
-// Since we can't easily mock the global database in the routes,
-// let's just use the global database but ensure proper cleanup
-import { closeDatabase, initializeDatabase } from '../database/db.ts';
 import { TestNoteDatabase } from './test-database.ts';
-import { initializeArcRateLimiter } from '../utils/rate-limiting/rate-limiter.ts';
+import { Context } from '../routes/_middleware.ts';
+
 
 const hostname = '127.0.0.1';
 
@@ -27,11 +25,12 @@ const testNoteData = {
 
 // Array to store created note IDs and their passwords
 const createdNotes: { id: string; password: string; content: string }[] = [];
-initializeArcRateLimiter();
+
 Deno.test('HTTP assert test.', async (t) => {
 	// Create and use test database for this test
 	const testDatabase = await TestNoteDatabase.getInstance();
-	await initializeDatabase(testDatabase);
+	await Context.init(testDatabase);
+	await TestNoteDatabase.cleanup();
 
 	try {
 		const handler = await createHandler(manifest, config);
@@ -41,16 +40,17 @@ Deno.test('HTTP assert test.', async (t) => {
 			assertEquals(resp.status, 200);
 		});
 	} finally {
-		await closeDatabase();
+		await Context.instance().cleanup();
 		await TestNoteDatabase.cleanup();
+		await TestNoteDatabase.clearAllNotes();
 	}
 });
 
 Deno.test('Note submission test.', async (t) => {
 	// Create test database and clear any existing data
 	const testDatabase = await TestNoteDatabase.getInstance();
-	await initializeDatabase(testDatabase);
-	await TestNoteDatabase.clearTestData();
+	await Context.init(testDatabase);
+	await TestNoteDatabase.cleanup();
 
 	try {
 		const handler = await createHandler(manifest, config);
@@ -110,7 +110,7 @@ Deno.test('Note submission test.', async (t) => {
 		});
 	} finally {
 		// Cleanup the global database connection
-		await closeDatabase();
+		await Context.instance().cleanup();
 		await TestNoteDatabase.cleanup();
 	}
 });
@@ -120,7 +120,7 @@ Deno.test('Note submission test.', async (t) => {
 Deno.test('Read created notes', async () => {
 	// Create and use test database
 	const testDatabase = await TestNoteDatabase.getInstance();
-	await initializeDatabase(testDatabase);
+	await Context.init(testDatabase);
 
 	try {
 		const handler = await createHandler(manifest, config);
@@ -146,7 +146,8 @@ Deno.test('Read created notes', async () => {
 			}
 		}
 	} finally {
-		await closeDatabase();
+		await Context.instance().cleanup();
 		await TestNoteDatabase.cleanup();
+		await TestNoteDatabase.clearAllNotes();
 	}
 });
