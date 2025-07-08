@@ -5,10 +5,7 @@ import { assertEquals } from '$std/assert/assert_equals.ts';
 import { assertMatch } from '$std/assert/assert_match.ts';
 import { generateSHA256Hash } from '../utils/hashing.ts';
 import { encryptNoteContent } from '../utils/encryption.ts';
-
-import { TestNoteDatabase } from './test-database.ts';
 import { Context } from '../routes/_middleware.ts';
-
 
 const hostname = '127.0.0.1';
 
@@ -23,36 +20,27 @@ const testNoteData = {
 	expiresIn: '1 hour',
 };
 
-// Array to store created note IDs and their passwords
-const createdNotes: { id: string; password: string; content: string }[] = [];
+Deno.test({
+	name: 'HTTP assert test.',
+	fn: async (t) => {
+		Deno.env.set('TEST_MODE', 'true');
 
-Deno.test('HTTP assert test.', async (t) => {
-	// Create and use test database for this test
-	const testDatabase = await TestNoteDatabase.getInstance();
-	await Context.init(testDatabase);
-	await TestNoteDatabase.cleanup();
-
-	try {
 		const handler = await createHandler(manifest, config);
-
 		await t.step('#1 GET /', async () => {
 			const resp = await handler(new Request(`http://${hostname}/`), CONN_INFO);
 			assertEquals(resp.status, 200);
 		});
-	} finally {
-		await Context.instance().cleanup();
-		await TestNoteDatabase.cleanup();
-		await TestNoteDatabase.clearAllNotes();
-	}
+	},
+	sanitizeResources: false,
+	sanitizeOps: false,
 });
 
-Deno.test('Note submission test.', async (t) => {
-	// Create test database and clear any existing data
-	const testDatabase = await TestNoteDatabase.getInstance();
-	await Context.init(testDatabase);
-	await TestNoteDatabase.cleanup();
+Deno.test({
+	name: 'Note submission and retrieval test.',
+	fn: async (t) => {
+		// Array to store created note IDs and their passwords for this test
+		const createdNotes: { id: string; password: string; content: string }[] = [];
 
-	try {
 		const handler = await createHandler(manifest, config);
 
 		await t.step('#2 POST (No JavaScript) /', async () => {
@@ -108,46 +96,32 @@ Deno.test('Note submission test.', async (t) => {
 			assertEquals(data.message, 'Note saved successfully!');
 			assertEquals(resp.status, 201);
 		});
-	} finally {
-		// Cleanup the global database connection
-		await Context.instance().cleanup();
-		await TestNoteDatabase.cleanup();
-	}
-});
 
-/* Test reading created notes
-*/
-Deno.test('Read created notes', async () => {
-	// Create and use test database
-	const testDatabase = await TestNoteDatabase.getInstance();
-	await Context.init(testDatabase);
+		// Test reading created notes
+		await t.step('#4 Read created notes', async () => {
+			for (const note of createdNotes) {
+				console.log(`Testing note ID: ${note.id}`);
+				if (note.password) {
+					const formData = new FormData();
+					formData.append('password', note.password);
+					formData.append('confirm', 'true');
 
-	try {
-		const handler = await createHandler(manifest, config);
+					const resp = await handler(
+						new Request(`http://${hostname}/${note.id}`, {
+							method: 'POST',
+							body: formData,
+						}),
+						CONN_INFO,
+					);
 
-		for (const note of createdNotes) {
-			console.log(`Testing note ID: ${note.id}`);
-			if (note.password) {
-				const formData = new FormData();
-				formData.append('password', note.password);
-				formData.append('confirm', 'true');
-
-				const resp = await handler(
-					new Request(`http://${hostname}/${note.id}`, {
-						method: 'POST',
-						body: formData,
-					}),
-					CONN_INFO,
-				);
-
-				const result = await resp.text();
-				assertMatch(result, new RegExp(note.content));
-				assertEquals(resp.status, 200);
+					const result = await resp.text();
+					assertMatch(result, new RegExp(note.content));
+					assertEquals(resp.status, 200);
+				}
 			}
-		}
-	} finally {
-		await Context.instance().cleanup();
-		await TestNoteDatabase.cleanup();
-		await TestNoteDatabase.clearAllNotes();
-	}
+		});
+		Context.instance().cleanup(); // Cleanup context after the test
+	},
+	sanitizeResources: false,
+	sanitizeOps: false,
 });

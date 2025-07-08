@@ -1,9 +1,16 @@
 import { FreshContext } from "$fresh/server.ts";
 import { NoteDatabase } from '../database/note-database.ts';
+import { TEST_MODE } from '../fresh.config.ts';
 import { ArcRateLimiter } from '../utils/rate-limiting/arc-rate-limiter.ts';
 
 export interface State {
     context: Context;
+}
+
+export interface ContextOptions {
+    testMode: boolean;
+    databaseUri: string;
+    testDatabaseUri: string;
 }
 
 export class Context {
@@ -16,46 +23,49 @@ export class Context {
     }
 
 
-    public static async init(testDatabase?: NoteDatabase) {
+    public static async init(options: ContextOptions) {
         if (Context.context) {
             Context.context.cleanup();
         }
         Context.context = new Context();
-        await Context.context.initializeResources(testDatabase);
+        await Context.context.initializeResources(options);
     }
 
-    private async initializeResources(testDatabase?: NoteDatabase) {
+    private async initializeResources(options: ContextOptions) {
         try {
-            if (testDatabase) {
-                this.noteDatabase = testDatabase;
-            } else {
-                this.noteDatabase = new NoteDatabase(this.getBaseUri());
+            const uri = options.testMode ? options.testDatabaseUri : options.databaseUri;
+            if (!uri) {
+                throw new Error('Database URI must be provided in options');
             }
-
-            this.rateLimiter = this.getDefaultArcRateLimiter();
-            await this.noteDatabase.init(); 
+            this.noteDatabase = new NoteDatabase(uri);
+            this.rateLimiter = this.getDefaultArcRateLimiter(options.testMode);
+            await this.noteDatabase.init();
         } catch (error) {
             throw new Error(`Failed to initialize context: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
-    private getBaseUri(): string {
-        const uri = Deno.env.get('BASE_URI');
+    private getBaseUri(testMode: boolean): string {
+        const uri = testMode ? Deno.env.get('TEST_BASE_URI') : Deno.env.get('BASE_URI');
+        if (!uri && testMode) {
+            throw new Error('TEST_BASE_URI environment variable is not set in test mode');
+        }
         if (!uri) {
             throw new Error('BASE_URI environment variable is not set');
         }
         return uri;
     }
 
-    private getDefaultArcRateLimiter(): ArcRateLimiter {
+    private getDefaultArcRateLimiter(testMode: boolean = false): ArcRateLimiter {
         if (this.rateLimiter) {
             return this.rateLimiter; // Return existing instance if already initialized
         }
+
         return new ArcRateLimiter(
             10, // 10 requests per minute
             60 * 1000, // 1 minute window
             5 * 60 * 1000, // 5 minute block
-            true, // Disable periodic cleanup in test mode
+            !testMode, // Disable periodic cleanup in test mode
         );
     }
 
