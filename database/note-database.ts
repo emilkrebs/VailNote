@@ -54,10 +54,17 @@ export class NoteDatabase {
 	 */
 	async close(): Promise<void> {
 		if (this._client) {
-			await this._client.close();
-			this.logger.log(
-				TerminalColors.format(`Database connection closed. &8(${this.BASE_URI})&r`),
-			);
+			try {
+				// Force close the client and wait for it to complete
+				await this._client.close();
+				this.logger.log(
+					TerminalColors.format(`Database connection closed. &8(${this.BASE_URI})&r`),
+				);
+			} catch (error) {
+				this.logger.log(
+					TerminalColors.format(`Error closing database connection: ${error} &8(${this.BASE_URI})&r`),
+				);
+			}
 		}
 	}
 

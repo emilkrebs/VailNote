@@ -5,9 +5,9 @@
 		"cli": "echo \"import '\\$fresh/src/dev/cli.ts'\" | deno run --unstable -A -",
 		"manifest": "deno task cli manifest $(pwd)",
 		"start": "deno run -A --watch=static/,routes/ dev.ts",
-		"build": "deno run -A dev.ts build",
+		"build": "BUILD_MODE=true deno run -A dev.ts build",
 		"preview": "deno run -A main.ts",
-		"test": "deno test --allow-read --allow-env --allow-net --allow-sys",
+		"test": "TEST_MODE=true deno test --allow-read --allow-env --allow-net --allow-sys",
 		"update": "deno run -A -r https://fresh.deno.dev/update ."
 	},
 	"lint": {

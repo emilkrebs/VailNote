@@ -23,11 +23,15 @@ export class ArcRateLimiter {
 		maxRequests = 10,
 		windowMs = 60 * 1000, // 1 minute
 		blockDurationMs = 5 * 60 * 1000, // 5 minutes
+		enablePeriodicCleanup = true, // Allow disabling periodic cleanup for tests
 	) {
 		this.maxRequests = maxRequests;
 		this.windowMs = windowMs;
 		this.blockDurationMs = blockDurationMs;
-		this.startPeriodicCleanup();
+
+		if (enablePeriodicCleanup) {
+			this.startPeriodicCleanup();
+		}
 	}
 
 	/**

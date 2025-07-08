@@ -5,18 +5,22 @@ import { formatExpiration } from '../types/types.ts';
 import { encryptNoteContent } from '../utils/encryption.ts';
 import { generateHash, generateSHA256Hash } from '../utils/hashing.ts';
 import { generateRateLimitHeaders } from '../utils/rate-limiting/rate-limit-headers.ts';
-import { getNoteDatabase } from '../database/db.ts';
-import { getDefaultArcRateLimiter } from '../utils/rate-limiting/rate-limiter.ts';
+import { State } from './_middleware.ts';
 
-export const handler: Handlers = {
+interface HomeData {
+	message: string;
+	noteId?: string | null;
+	noteLink?: string;
+}
+
+export const handler: Handlers<HomeData, State> = {
 	GET(_req, ctx) {
 		return ctx.render({ message: '' });
 	},
 	async POST(req, ctx) {
 		// this endpoint is only used to create a note when the client does not have JavaScript enabled
-
-		const rateLimitResult = await getDefaultArcRateLimiter().checkRateLimit(req);
-
+		const rateLimitResult = await ctx.state.context.getRateLimiter().checkRateLimit(req);
+		const noteDatabase = ctx.state.context.getNoteDatabase();
 		if (!rateLimitResult.allowed) {
 			return ctx.render({
 				message: 'Rate limit exceeded. Please try again later in a few minutes.',
@@ -29,7 +33,7 @@ export const handler: Handlers = {
 
 		const form = await req.formData();
 		const noteContent = form.get('noteContent') as string;
-		const password = form.get('notePassword') as string;
+		const password = form.get('notePassword') as string; // the plain password is never submitted to the server
 		const expiresIn = form.get('expiresIn') as string;
 		const passwordSHA256 = await generateSHA256Hash(password);
 
@@ -37,19 +41,20 @@ export const handler: Handlers = {
 			return ctx.render({ message: 'Please enter a note.' });
 		}
 
-		const noteId = await getNoteDatabase().generateNoteId();
+		const noteId = await noteDatabase.generateNoteId();
 
-		const { encrypted: encryptedContent, iv } = await encryptNoteContent(
+		// encrypt note content using the provided plain password or a random auth token
+		const encryptedContent = await encryptNoteContent(
 			noteContent,
-			password ? passwordSHA256 : noteId,
+			password ? password : noteId,
 		);
 
-		const insertResult = await getNoteDatabase().insertNote({
+		const insertResult = await noteDatabase.insertNote({
 			id: noteId,
-			content: encryptedContent,
+			content: encryptedContent.encrypted,
 			expiresAt: formatExpiration(expiresIn),
-			password: password ? await generateHash(passwordSHA256) : undefined,
-			iv: iv,
+			password: password ? await generateHash(passwordSHA256) : undefined, // Password should be hashed with SHA-256 before sending and is not used for encryption
+			iv: encryptedContent.iv,
 		});
 
 		if (!insertResult.success) {

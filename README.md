@@ -122,7 +122,7 @@ Note: SSL will handle the encryption. If disabled the sensitive data might be co
 
 - `BASE_URI` - MongoDB connection string
 - `TEST_BASE_URI` - MongoDB test database connection string
-  
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
