@@ -134,7 +134,8 @@ export const handler: Handlers<NotePageProps> = {
 			const firstAuthParameter = url.searchParams.get('auth'); // may not exist if note was created without javascript
 			const firstAuth = firstAuthParameter ? firstAuthParameter : id;
 
-			const encryptionKey = passwordProtected ? passwordHash : firstAuth;
+			// use the plain password if provided, otherwise use the firstAuth token
+			const encryptionKey = passwordProtected ? password : firstAuth;
 
 			if (!encryptionKey) {
 				return ctx.render({

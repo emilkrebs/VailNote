@@ -29,7 +29,7 @@ export const handler: Handlers = {
 
 		const form = await req.formData();
 		const noteContent = form.get('noteContent') as string;
-		const password = form.get('notePassword') as string;
+		const password = form.get('notePassword') as string; // the plain password is never submitted to the server
 		const expiresIn = form.get('expiresIn') as string;
 		const passwordSHA256 = await generateSHA256Hash(password);
 
@@ -39,17 +39,18 @@ export const handler: Handlers = {
 
 		const noteId = await getNoteDatabase().generateNoteId();
 
-		const { encrypted: encryptedContent, iv } = await encryptNoteContent(
+		// encrypt note content using the provided plain password or a random auth token
+		const encryptedContent = await encryptNoteContent(
 			noteContent,
-			password ? passwordSHA256 : noteId,
+			password ? password : noteId,
 		);
 
 		const insertResult = await getNoteDatabase().insertNote({
 			id: noteId,
-			content: encryptedContent,
+			content: encryptedContent.encrypted,
 			expiresAt: formatExpiration(expiresIn),
 			password: password ? await generateHash(passwordSHA256) : undefined,
-			iv: iv,
+			iv: encryptedContent.iv,
 		});
 
 		if (!insertResult.success) {

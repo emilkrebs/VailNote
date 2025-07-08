@@ -76,23 +76,23 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 		const formData = new FormData(form);
 
 		const noteContent = formData.get('noteContent')?.toString() || '';
-		const notePassword = formData.get('notePassword')?.toString() || '';
+		const notePassword = formData.get('notePassword')?.toString() || ''; // the plain password is never submitted to the server
 		const expiresIn = formData.get('expiresIn')?.toString() || '';
-		const replaceContent = formData.get('replaceContent')?.toString() || '';
 		const firstAuth = generateRandomId(8);
 		const passwordSHA256 = await generateSHA256Hash(notePassword);
 
 		try {
+			// encrypt the note content using the provided plain password or a random auth token
 			const encryptedContent = await encryptNoteContent(
 				noteContent,
-				notePassword ? passwordSHA256 : firstAuth,
+				notePassword ? notePassword : firstAuth,
 			);
+
 			const requestBody = {
 				content: encryptedContent.encrypted,
 				password: notePassword ? passwordSHA256 : null,
 				expiresAt: expiresIn,
 				iv: encryptedContent.iv,
-				replaceContent: replaceContent || undefined,
 			};
 
 			const response = await fetch('/api/notes', {
@@ -176,31 +176,6 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 				</select>
 			</div>
 
-			{
-				/* Advanced options
-					<details class="mt-4 bg-gray-800 rounded-lg p-4">
-						<summary class="cursor-pointer text-white font-semibold">
-							Advanced Options
-						</summary>
-						<div class="mt-2 space-y-3">
-							<div>
-								<label class="block text-white text-lg font-semibold" htmlFor="replaceContent">
-									Replace Content (Silent Destruction)
-								</label>
-								<p class="text-gray-400 text-sm mb-2">
-									This option allows you to replace the content of the note with other content after the note has been viewed. This is useful to ensure noone else knows the content of the note has been viewed.
-								</p>
-								<textarea
-									name="replaceContent"
-									id="replaceContent"
-									class="w-full h-32 p-3 border border-gray-600 rounded-xl bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 transition"
-									placeholder="Enter new content here..."
-								></textarea>
-							</div>
-						</div>
-					</details>
-				*/
-			}
 			<Button type='submit'>
 				Save Note
 			</Button>

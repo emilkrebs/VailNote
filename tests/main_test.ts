@@ -85,7 +85,7 @@ Deno.test('Note submission test.', async (t) => {
 			const passwordSHA256 = await generateSHA256Hash(testNoteData.password);
 			const encryptedContent = await encryptNoteContent(
 				testNoteData.content,
-				passwordSHA256,
+				testNoteData.password, // Encrypt using the plain password
 			);
 
 			const resp = await handler(
@@ -127,7 +127,6 @@ Deno.test('Read created notes', async () => {
 
 		for (const note of createdNotes) {
 			console.log(`Testing note ID: ${note.id}`);
-
 			if (note.password) {
 				const formData = new FormData();
 				formData.append('password', note.password);

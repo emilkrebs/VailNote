@@ -13,8 +13,14 @@ import { closeDatabase, initializeDatabase } from './database/db.ts';
 import { initializeArcRateLimiter } from './utils/rate-limiting/rate-limiter.ts';
 import { defaultLogger } from './utils/logging.ts';
 
+const BUILD_MODE = Deno.env.get('BUILD_MODE') === 'true';
+
+if (BUILD_MODE) {
+	defaultLogger.log('Running in build mode, skipping database initialization and rate limiter setup.');
+}
+
 // Only initialize database if not in build mode
-if (!Deno.env.get('BUILD_MODE')) {
+if (!BUILD_MODE) {
 	await initializeDatabase();
 	initializeArcRateLimiter();
 }
@@ -26,7 +32,7 @@ const handleShutdown = async () => {
 	Deno.exit(0);
 };
 
-if (!Deno.env.get('BUILD_MODE')) {
+if (!BUILD_MODE) {
 	Deno.addSignalListener('SIGINT', handleShutdown);
 	try {
 		Deno.addSignalListener('SIGTERM', handleShutdown);
