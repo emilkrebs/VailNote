@@ -48,30 +48,60 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 			},
 		);
 	}
+	try {
+		const { content, iv, password, expiresAt } = await req.json();
 
-	const { content, iv, password, expiresAt } = await req.json();
+		const noteId = await noteDatabase.generateNoteId();
 
-	const noteId = await noteDatabase.generateNoteId();
+		// if password is provided, hash it (password should be hashed with SHA-256 before sending to this endpoint)
+		const passwordHash = password ? await generateHash(password) : undefined;
 
-	// if password is provided, hash it (password should be hashed with SHA-256 before sending to this endpoint)
-	const passwordHash = password ? await generateHash(password) : undefined;
+		// check if content is encrypted
+		const result: Note = {
+			id: noteId,
+			content, // content should be encrypted before sending to this endpoint
+			password: passwordHash, // password should be hashed before sending to this endpoint
+			iv: iv,
+			expiresAt: formatExpiration(expiresAt),
+		};
 
-	// check if content is encrypted
-	const result: Note = {
-		id: noteId,
-		content, // content should be encrypted before sending to this endpoint
-		password: passwordHash, // password should be hashed before sending to this endpoint
-		iv: iv,
-		expiresAt: formatExpiration(expiresAt),
-	};
+		const insertResult = await noteDatabase.insertNote(result);
 
-	const insertResult = await noteDatabase.insertNote(result);
+		if (!insertResult.success) {
+			return new Response(
+				JSON.stringify({
+					message: 'Failed to save note',
+					error: insertResult.error,
+				}),
+				{
+					headers: mergeWithRateLimitHeaders(
+						{ 'Content-Type': 'application/json' },
+						rateLimitResult,
+					),
+					status: 500,
+				},
+			);
+		}
 
-	if (!insertResult.success) {
 		return new Response(
 			JSON.stringify({
-				message: 'Failed to save note',
-				error: insertResult.error,
+				message: 'Note saved successfully!',
+				noteId: noteId,
+				noteLink: `${new URL(req.url).origin}/${noteId}`,
+			}),
+			{
+				headers: mergeWithRateLimitHeaders(
+					{ 'Content-Type': 'application/json' },
+					rateLimitResult,
+				),
+				status: 201,
+			},
+		);
+	} catch (error) {
+		return new Response(
+			JSON.stringify({
+				message: 'Failed to process request',
+				error: error instanceof Error ? error.message : 'Unknown error',
 			}),
 			{
 				headers: mergeWithRateLimitHeaders(
@@ -82,19 +112,4 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 			},
 		);
 	}
-
-	return new Response(
-		JSON.stringify({
-			message: 'Note saved successfully!',
-			noteId: noteId,
-			noteLink: `${new URL(req.url).origin}/${noteId}`,
-		}),
-		{
-			headers: mergeWithRateLimitHeaders(
-				{ 'Content-Type': 'application/json' },
-				rateLimitResult,
-			),
-			status: 201,
-		},
-	);
 };

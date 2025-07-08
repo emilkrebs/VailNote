@@ -56,7 +56,7 @@ export class NoteDatabase {
 		if (this._client) {
 			try {
 				// Force close the client and wait for it to complete
-				await this._client.close(); 
+				await this._client.close();
 				this.logger.log(
 					TerminalColors.format(`Database connection closed. &8(${this.BASE_URI})&r`),
 				);

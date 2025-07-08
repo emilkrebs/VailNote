@@ -7,7 +7,6 @@ import { generateHash, generateSHA256Hash } from '../utils/hashing.ts';
 import { generateRateLimitHeaders } from '../utils/rate-limiting/rate-limit-headers.ts';
 import { State } from './_middleware.ts';
 
-
 interface HomeData {
 	message: string;
 	noteId?: string | null;

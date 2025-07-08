@@ -28,7 +28,7 @@ export class ArcRateLimiter {
 		this.maxRequests = maxRequests;
 		this.windowMs = windowMs;
 		this.blockDurationMs = blockDurationMs;
-		
+
 		if (enablePeriodicCleanup) {
 			this.startPeriodicCleanup();
 		}

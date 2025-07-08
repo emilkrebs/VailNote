@@ -20,7 +20,6 @@ interface NotePageProps {
 	message?: string;
 }
 
-
 async function getPasswordHash(password: string): Promise<string> {
 	if (!password || password.trim() === '') {
 		throw new Error('Password is required to encrypt the note.');
@@ -30,7 +29,12 @@ async function getPasswordHash(password: string): Promise<string> {
 	return sha256Hash;
 }
 
-async function decryptNoteAndDestroy(noteDatabase: NoteDatabase, note: Note, encryptionKey: string, confirm: boolean): Promise<Note> {
+async function decryptNoteAndDestroy(
+	noteDatabase: NoteDatabase,
+	note: Note,
+	encryptionKey: string,
+	confirm: boolean,
+): Promise<Note> {
 	if (!confirm) {
 		throw new Error('Please confirm you want to view and destroy this note.');
 	}
