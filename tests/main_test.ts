@@ -85,7 +85,7 @@ Deno.test('Note submission test.', async (t) => {
 			const passwordSHA256 = await generateSHA256Hash(testNoteData.password);
 			const encryptedContent = await encryptNoteContent(
 				testNoteData.content,
-				passwordSHA256, // Encrypt using the hashed password
+				testNoteData.password, // Encrypt using the plain password
 			);
 
 			const resp = await handler(
@@ -94,7 +94,7 @@ Deno.test('Note submission test.', async (t) => {
 					body: JSON.stringify({
 						content: encryptedContent.encrypted,
 						iv: encryptedContent.iv,
-						password: passwordSHA256, // Password should be hashed with SHA-256 before sending
+						password: passwordSHA256, // Password should be hashed with SHA-256 before sending and is not used for encryption
 						expiresAt: testNoteData.expiresIn,
 					}),
 					headers: { 'Content-Type': 'application/json' },

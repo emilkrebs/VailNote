@@ -49,7 +49,7 @@ export const handler: Handlers = {
 			id: noteId,
 			content: encryptedContent.encrypted,
 			expiresAt: formatExpiration(expiresIn),
-			password: password ? await generateHash(passwordSHA256) : undefined,
+			password: password ? await generateHash(passwordSHA256) : undefined, // Password should be hashed with SHA-256 before sending and is not used for encryption
 			iv: encryptedContent.iv,
 		});
 
