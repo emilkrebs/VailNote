@@ -5,12 +5,13 @@ import PasswordInput from '../islands/PasswordInput.tsx';
 import { decryptNoteContent } from '../utils/encryption.ts';
 import Header from '../components/Header.tsx';
 import PenIcon from '../components/PenIcon.tsx';
-import { Button } from '../components/Button.tsx';
 import HomeButton from '../components/HomeButton.tsx';
 import Message from '../components/Message.tsx';
 import { generateRateLimitHeaders } from '../utils/rate-limiting/rate-limit-headers.ts';
 import { State } from './_middleware.ts';
 import { NoteDatabase } from '../database/note-database.ts';
+import SiteHeader from '../components/SiteHeader.tsx';
+import { Button } from '../components/Button.tsx';
 
 interface NotePageProps {
 	note?: Note;
@@ -180,7 +181,7 @@ export default function NotePage(ctx: PageProps<NotePageProps>) {
 	}
 
 	if (passwordRequired) {
-		return <PasswordProtectedNote message={message} />;
+		return <PasswordProtectedNote />;
 	}
 
 	if (confirmed) {
@@ -193,39 +194,31 @@ export default function NotePage(ctx: PageProps<NotePageProps>) {
 function ConfirmViewNote({ note }: { note: Note }) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
-			<h1 class='text-4xl font-bold'>VailNote</h1>
-			<p class='mt-2 text-lg text-gray-200'>
-				Open-Source, Encrypted Note Sharing
-			</p>
+			<SiteHeader />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-				<div class='mt-6 p-8 rounded-2xl shadow-xl w-full bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600'>
-					<h2 class='text-3xl font-bold text-white mb-2 flex items-center gap-2'>
-						<svg
-							class='w-7 h-7 text-blue-400'
-							fill='none'
-							stroke='currentColor'
-							strokeWidth='2'
-							viewBox='0 0 24 24'
-						>
-							<path strokeLinecap='round' strokeLinejoin='round' d='M12 20h9' />
-							<path
-								strokeLinecap='round'
-								strokeLinejoin='round'
-								d='M16.5 3.5a2.121 2.121 0 113 3L7 19.5H4v-3L16.5 3.5z'
-							/>
-						</svg>
-						View & Destroy Note
-					</h2>
-					<p class='mt-1 text-gray-300 text-base'>
-						This note will be <span class='text-red-400 font-semibold'>destroyed</span>{' '}
-						after you view it. Are you sure you want to continue?
-					</p>
-					<form method='POST' class='mt-8 space-y-4'>
+				<div class='mt-6 p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
+					{/* Header */}
+					<div class='mb-8'>
+						<h2 class='text-3xl font-bold text-white mb-3'>Confirm View & Destroy</h2>
+						<p class='text-gray-300 text-base leading-relaxed'>
+							This action is{' '}
+							<span class='text-red-400 font-semibold'>irreversible</span>. The note will be permanently destroyed after
+							viewing.
+						</p>
+					</div>
+
+					<WarningMessage />
+
+					<form method='POST' class='space-y-6'>
 						<input type='hidden' name='id' value={note.id} />
 						<input type='hidden' name='confirm' value='true' />
-						<Button type='submit'>
-							Destroy & View Note
-						</Button>
+
+						<div class='flex flex-row w-full justify-between gap-4'>
+							<HomeButton class='min-w-max' />
+							<Button color='danger' class='w-full' type='submit'>
+								View and Destroy Note
+							</Button>
+						</div>
 					</form>
 				</div>
 			</div>
@@ -238,93 +231,101 @@ function ViewNoteConfirmed(
 ) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
-			<h1 class='text-4xl font-bold'>VailNote</h1>
-			<p class='mt-2 text-lg text-gray-200'>
-				Open-Source, Encrypted Note Sharing
-			</p>
+			<SiteHeader />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-				<div class='flex flex-col mt-6 p-8 rounded-2xl shadow-xl w-full bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600'>
-					<h2 class='text-3xl font-bold text-white mb-2 flex items-center gap-2'>
-						<PenIcon />
-						Note Details
-					</h2>
+				<div class='mt-6 p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
+					{/* Header with icon and title */}
+					<div class='flex items-center justify-start gap-2 mb-6 pb-4 border-b border-gray-600/50'>
+						<div class='p-3 bg-gray-800 rounded-xl'>
+							<PenIcon />
+						</div>
+						<div>
+							<h2 class='text-3xl font-bold text-white'>Note Retrieved</h2>
+							<p class='text-green-300 text-sm font-medium'>Successfully decrypted and displayed</p>
+						</div>
+					</div>
+
 					<Message message={message} type={note.id ? 'success' : 'error'} />
 
-					<h2 class='text-xl font-semibold text-white mt-2'>
-						Content
-					</h2>
-					<div class='bg-gray-900 rounded p-4 shadow-inner'>
-						<p class='mb-2 whitespace-pre-wrap break-words text-white'>
-							{note.content}
-						</p>
+					{/* Content section with enhanced styling */}
+					<div class='mt-6'>
+						<div class='flex items-center gap-2 mb-4'>
+							<svg class='w-5 h-5 text-gray-300' fill='currentColor' viewBox='0 0 20 20'>
+								<path
+									fill-rule='evenodd'
+									d='M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z'
+									clip-rule='evenodd'
+								>
+								</path>
+							</svg>
+							<h3 class='text-xl font-semibold text-white'>Content</h3>
+						</div>
+
+						<div class='relative bg-gray-900/80 rounded-lg p-6 shadow-inner border border-gray-700/50'>
+							<div class='pr-12'>
+								<p class='whitespace-pre-wrap break-words text-gray-100 leading-relaxed text-base'>
+									{note.content}
+								</p>
+							</div>
+						</div>
 					</div>
-					<HomeButton />
+
+					<div class='mt-8 pt-6 border-t border-gray-600/50'>
+						<HomeButton class='w-full' />
+					</div>
 				</div>
 			</div>
 		</div>
 	);
 }
 
-function PasswordProtectedNote({ message }: { message?: string }) {
+function PasswordProtectedNote() {
 	return (
 		<>
 			<Header title={`Password Protected`} />
 			<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
-				<h1 class='text-4xl font-bold'>VailNote</h1>
-				<p class='mt-2 text-lg text-gray-200'>
-					Open-Source, Encrypted Note Sharing
-				</p>
+				<SiteHeader />
 				<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-					<div class='mt-6 p-8 rounded-2xl shadow-xl w-full bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600'>
-						<h2 class='text-3xl font-bold text-white mb-2 flex items-center gap-2'>
-							<svg
-								class='w-7 h-7 text-blue-400'
-								fill='none'
-								stroke='currentColor'
-								strokeWidth='2'
-								viewBox='0 0 24 24'
-							>
-								<path
-									strokeLinecap='round'
-									strokeLinejoin='round'
-									d='M12 20h9'
-								/>
-								<path
-									strokeLinecap='round'
-									strokeLinejoin='round'
-									d='M16.5 3.5a2.121 2.121 0 113 3L7 19.5H4v-3L16.5 3.5z'
-								/>
-							</svg>
-							Enter Password
-						</h2>
-						<Message message={message} type='info' />
-						<p class='mt-2 text-gray-400'>
-							To view and destroy this note, please enter the correct password. A failed attempt will not destroy the
-							note.
-						</p>
-						<form method='POST' class='mt-8 space-y-5' autoComplete='off'>
+					<div class='mt-6 p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
+						<div class='mb-8'>
+							<h2 class='text-3xl font-bold text-white mb-3 flex items-center gap-2'>
+								<PenIcon />
+								Enter Password
+							</h2>
+
+							<p class='text-gray-300 mb-6'>
+								This note is private and requires a password to view. Please enter the password below to decrypt and
+								view the note.
+							</p>
+						</div>
+
+						<WarningMessage />
+
+						{/* Password input form */}
+						<form method='POST' class='space-y-6' autoComplete='off'>
 							<input type='hidden' name='confirm' value='true' />
 							<div>
 								<label
-									class='block text-white text-lg font-semibold mb-2'
+									class='block text-white text-lg font-semibold mb-3'
 									htmlFor='password'
 								>
-									Password
+									Enter Password
 								</label>
 								<PasswordInput
 									type='password'
 									name='password'
 									id='password'
-									placeholder='Enter password to view note'
+									placeholder='Enter password to decrypt note'
 									required
 								/>
 							</div>
-							<button
+							<Button
+								color='primary'
 								type='submit'
-								class='w-full mt-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl font-semibold text-lg shadow-lg hover:from-blue-600 hover:to-blue-800 transition'
+								class='w-full'
 							>
 								View and Destroy Note
-							</button>
+							</Button>
 						</form>
 					</div>
 				</div>
@@ -336,10 +337,8 @@ function PasswordProtectedNote({ message }: { message?: string }) {
 function NoteErrorPage({ message }: { message?: string }) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
-			<h1 class='text-4xl font-bold'>VailNote</h1>
-			<p class='mt-2 text-lg text-gray-200'>
-				Open-Source, Encrypted Note Sharing
-			</p>
+			<SiteHeader />
+			<Header title='Note Not Found' />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
 				<div class='flex flex-col mt-6 p-8 rounded-2xl shadow-xl w-full bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600'>
 					<h2 class='text-3xl font-bold text-white mb-2'>Error</h2>
@@ -347,6 +346,40 @@ function NoteErrorPage({ message }: { message?: string }) {
 						{message || 'The note you are looking for does not exist.'}
 					</p>
 					<HomeButton />
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function WarningMessage() {
+	return (
+		<div class='bg-red-900/20 border border-red-700/30 rounded-xl p-6 mb-8'>
+			<div class='flex items-start gap-4'>
+				<svg class='w-6 h-6 text-red-400 mt-1 flex-shrink-0' fill='currentColor' viewBox='0 0 20 20'>
+					<path
+						fill-rule='evenodd'
+						d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z'
+						clip-rule='evenodd'
+					>
+					</path>
+				</svg>
+				<div>
+					<h3 class='text-red-300 font-semibold text-lg mb-2'>What happens next:</h3>
+					<ul class='text-red-200 text-sm space-y-2'>
+						<li class='flex items-center gap-2'>
+							<span class='w-1.5 h-1.5 bg-red-400 rounded-full'></span>
+							Note content will be decrypted and displayed
+						</li>
+						<li class='flex items-center gap-2'>
+							<span class='w-1.5 h-1.5 bg-red-400 rounded-full'></span>
+							Note will be immediately deleted from our servers
+						</li>
+						<li class='flex items-center gap-2'>
+							<span class='w-1.5 h-1.5 bg-red-400 rounded-full'></span>
+							This action cannot be undone
+						</li>
+					</ul>
 				</div>
 			</div>
 		</div>

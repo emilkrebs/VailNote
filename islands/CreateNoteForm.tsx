@@ -176,7 +176,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 				</select>
 			</div>
 
-			<Button type='submit'>
+			<Button type='submit' color='primary' class='w-full flex items-center justify-center gap-2'>
 				Save Note
 			</Button>
 
