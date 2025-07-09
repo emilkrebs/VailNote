@@ -232,6 +232,7 @@ function ViewNoteConfirmed(
 ) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
+			<Header title="Note Retrieved" description="Successfully decrypted and displayed" />
 			<SiteHeader />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
 				<div class='mt-6 p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
