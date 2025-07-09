@@ -53,7 +53,7 @@ export const handler: Handlers<HomeData, State> = {
 			id: noteId,
 			content: encryptedContent.encrypted,
 			expiresAt: formatExpiration(expiresIn),
-			password: password ? generateHash(password) : undefined, // Password is hashed with bcrypt for secure storage
+			password: password ? generateHash(password) : undefined, // Password is securely hashed with bcrypt for storage
 			iv: encryptedContent.iv,
 		});
 

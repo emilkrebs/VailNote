@@ -90,7 +90,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 
 			const requestBody = {
 				content: encryptedContent.encrypted,
-				password: notePassword ? passwordSHA256 : null, // Password should be hashed with SHA-256 before sending and is not used for encryption
+				password: notePassword ? passwordSHA256 : null, // Password is SHA-256 hashed before sending, then bcrypt hashed on server
 				expiresAt: expiresIn,
 				iv: encryptedContent.iv,
 			};

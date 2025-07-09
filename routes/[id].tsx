@@ -21,8 +21,6 @@ interface NotePageProps {
 	message?: string;
 }
 
-
-
 async function decryptNoteAndDestroy(
 	noteDatabase: NoteDatabase,
 	note: Note,
@@ -104,6 +102,7 @@ export const handler: Handlers<NotePageProps, State> = {
 		}
 
 		// Always perform hash comparison even if note has no password to prevent timing attacks
+		// compareHash uses bcrypt to securely compare the plain password with the stored bcrypt hash
 		const isPasswordValid = note.password && passwordProtected
 			? compareHash(password, note.password)
 			: !note.password && !passwordProtected;

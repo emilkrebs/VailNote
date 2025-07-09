@@ -88,7 +88,8 @@ VailNote does not share your data with any third parties.
 ## Security
 
 We use industry-standard security measures, including HTTPS and encryption, to protect your data. Notes are encrypted
-using AES-GCM encryption and the password is hashed using SHA-256 before encryption.
+using AES-GCM encryption with SHA-256 key derivation, and passwords are securely hashed using bcrypt with unique salts
+for storage.
 
 ## Disclaimer and Limitation of Liability
 
