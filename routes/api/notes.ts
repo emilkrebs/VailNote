@@ -54,7 +54,7 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 		const noteId = await noteDatabase.generateNoteId();
 
 		// if password is provided, hash it (password should be hashed with SHA-256 before sending to this endpoint)
-		const passwordHash = password ? await generateHash(password) : undefined;
+		const passwordHash = password ? generateHash(password) : undefined;
 
 		// check if content is encrypted
 		const result: Note = {

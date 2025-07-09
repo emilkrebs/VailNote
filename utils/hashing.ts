@@ -5,6 +5,8 @@ export function generateHash(password: string): string {
 	return bcrypt.hashSync(password, salt);
 }
 
+
+
 export async function generateSHA256Hash(input: string): Promise<string> {
 	const encoder = new TextEncoder();
 	const data = encoder.encode(input);

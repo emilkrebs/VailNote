@@ -4,7 +4,7 @@ import SiteHeader from '../components/SiteHeader.tsx';
 import CreateNote from '../islands/CreateNoteForm.tsx';
 import { formatExpiration } from '../types/types.ts';
 import { encryptNoteContent } from '../utils/encryption.ts';
-import { generateHash, generateSHA256Hash } from '../utils/hashing.ts';
+import { generateHash } from '../utils/hashing.ts';
 import { generateRateLimitHeaders } from '../utils/rate-limiting/rate-limit-headers.ts';
 import { State } from './_middleware.ts';
 
@@ -36,7 +36,6 @@ export const handler: Handlers<HomeData, State> = {
 		const noteContent = form.get('noteContent') as string;
 		const password = form.get('notePassword') as string; // the plain password is never submitted to the server
 		const expiresIn = form.get('expiresIn') as string;
-		const passwordSHA256 = await generateSHA256Hash(password);
 
 		if (!noteContent || noteContent.trim() === '') {
 			return ctx.render({ message: 'Please enter a note.' });
@@ -54,7 +53,7 @@ export const handler: Handlers<HomeData, State> = {
 			id: noteId,
 			content: encryptedContent.encrypted,
 			expiresAt: formatExpiration(expiresIn),
-			password: password ? await generateHash(passwordSHA256) : undefined, // Password should be hashed with SHA-256 before sending and is not used for encryption
+			password: password ? generateHash(password) : undefined, // Password is hashed with bcrypt for secure storage
 			iv: encryptedContent.iv,
 		});
 

@@ -1,6 +1,6 @@
 import { Handlers, PageProps } from '$fresh/server.ts';
 import { Note } from '../types/types.ts';
-import { compareHash, generateSHA256Hash } from '../utils/hashing.ts';
+import { compareHash } from '../utils/hashing.ts';
 import PasswordInput from '../islands/PasswordInput.tsx';
 import { decryptNoteContent } from '../utils/encryption.ts';
 import Header from '../components/Header.tsx';
@@ -21,14 +21,7 @@ interface NotePageProps {
 	message?: string;
 }
 
-async function getPasswordHash(password: string): Promise<string> {
-	if (!password || password.trim() === '') {
-		throw new Error('Password is required to encrypt the note.');
-	}
-	const sha256Hash = await generateSHA256Hash(password);
 
-	return sha256Hash;
-}
 
 async function decryptNoteAndDestroy(
 	noteDatabase: NoteDatabase,
@@ -102,8 +95,6 @@ export const handler: Handlers<NotePageProps, State> = {
 		const password = formData.get('password') as string;
 		const confirm = formData.get('confirm') === 'true';
 
-		const passwordHash = password ? await getPasswordHash(password) : undefined;
-
 		const passwordProtected = password && password.trim() !== '';
 
 		const note = await noteDatabase.getNoteById(id);
@@ -113,8 +104,8 @@ export const handler: Handlers<NotePageProps, State> = {
 		}
 
 		// Always perform hash comparison even if note has no password to prevent timing attacks
-		const isPasswordValid = note.password && passwordHash
-			? await compareHash(passwordHash, note.password)
+		const isPasswordValid = note.password && passwordProtected
+			? compareHash(password, note.password)
 			: !note.password && !passwordProtected;
 
 		if (note.password && (!passwordProtected || !isPasswordValid)) {
