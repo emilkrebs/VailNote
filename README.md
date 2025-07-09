@@ -33,7 +33,7 @@ usability.
 - **Framework**: [Fresh](https://fresh.deno.dev) (Deno)
 - **Runtime**: Deno
 - **Database**: MongoDB
-- **Encryption**: AES-GCM with SHA-256 key derivation
+- **Encryption**: AES-GCM with PBKDF2 key derivation for content encryption, bcrypt for password storage
 - **Frontend**: Tailwind CSS & Preact
 
 > [!NOTE]
@@ -51,14 +51,14 @@ been compromised, has been marked with (!)
 ### JavaScript (Recommended)
 
 1. Before sending anything to the server, the content will be encrypted.
-2. First, the password will be hashed with SHA-256
-3. The password hash will then be used to encrypt the content.
+2. First, the password will be hashed with PBKDF2 for security
+3. The original password (not the hash) will then be used to encrypt the content.
 
 - If no password is provided, the client will generate a random phrase (auth key).
 
-4. The client will send the encrypted content, hashed password, and expiration time to the server.
-5. If the document is valid, the server will generate a random note ID, hash the password again using salted hashing
-   (bcrypt), and store the note in the database.
+4. The client will send the encrypted content, PBKDF2 hashed password, and expiration time to the server.
+5. If the document is valid, the server will generate a random note ID, hash the PBKDF2 password again using bcrypt for
+   secure storage, and store the note in the database.
 6. The server will send a successful response containing the new note ID.
 7. The client will generate a valid link using the note ID and local auth key using the following structure:
    `https://vailnote.com/[noteId]?auth=[authKey]`
@@ -66,12 +66,11 @@ been compromised, has been marked with (!)
 ### Non-JavaScript
 
 1. The password and content will be sent to the server as plain text (!)
-2. The server will hash the password with SHA-256 and encrypt the content using the password hash.
+2. The server will encrypt the content using the plain password and hash the password with bcrypt for storage.
 
 - If no password is provided, the server will use the unique noteID for encryption (!)
 
-3. If the document is valid, the server will generate a random note ID, hash the password again using salted hashing
-   (bcrypt), and store the note in the database.
+3. If the document is valid, the server will generate a random note ID and store the note in the database.
 4. The server will generate a random link using the following structure: `https://vailnote.com/[noteId]`
 
 Note: SSL will handle the encryption. If disabled the sensitive data might be compromised.
@@ -83,9 +82,9 @@ Note: SSL will handle the encryption. If disabled the sensitive data might be co
 3. If successful, the server will send the decrypted note to the client (!) and destroy the note.
 
 4. If a password is required, the server will prompt a login form.
-5. The password will be sent as plain text (!) to the server and hashed using SHA-256
-6. The server will compare the password hash to the SHA-256 password.
-7. The server will decrypt the content using the SHA-256 password and destroy the note.
+5. The password will be sent as plain text (!) to the server for verification
+6. The server will use bcrypt to securely compare the password with the stored hash.
+7. The server will decrypt the content using the original password and destroy the note.
 8. If successful, the server will send the decrypted note to the client (!) and destroy the note.
 
 ## Known Issues

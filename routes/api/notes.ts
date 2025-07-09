@@ -9,7 +9,8 @@ import { State } from '../_middleware.ts';
     * - GET: Fetches a note by its ID.
     * - POST: Creates a new note with the provided content, IV, password, and expiration time.
     *
-    * Note: The content should be encrypted before sending to this endpoint and the password should be hashed with SHA-256.
+    * Note: The content should be encrypted before sending to this endpoint and the password should be hashed with PBKDF2
+    * on the client side for security, then securely hashed with bcrypt on the server for storage.
     *
     * Rate Limiting (ARC - Anonymous Rate-Limited Credentials):
     * - Limit: 10 requests per minute per client
@@ -53,14 +54,14 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 
 		const noteId = await noteDatabase.generateNoteId();
 
-		// if password is provided, hash it (password should be hashed with SHA-256 before sending to this endpoint)
-		const passwordHash = password ? await generateHash(password) : undefined;
+		// if password is provided, hash it with bcrypt (password should be PBKDF2 hashed on client before sending)
+		const passwordHash = password ? generateHash(password) : undefined;
 
 		// check if content is encrypted
 		const result: Note = {
 			id: noteId,
 			content, // content should be encrypted before sending to this endpoint
-			password: passwordHash, // password should be hashed before sending to this endpoint
+			password: passwordHash, // password is PBKDF2 hashed on client, then bcrypt hashed on server for secure storage
 			iv: iv,
 			expiresAt: formatExpiration(expiresAt),
 		};

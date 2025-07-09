@@ -5,7 +5,7 @@ import CopyContent from './CopyContent.tsx';
 import PasswordInput from './PasswordInput.tsx';
 import PenIcon from '../components/PenIcon.tsx';
 import { generateRandomId } from '../types/types.ts';
-import { generateSHA256Hash } from '../utils/hashing.ts';
+import { generateDeterministicClientHash } from '../utils/hashing.ts';
 
 interface CreateNoteData {
 	message: string;
@@ -79,7 +79,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 		const notePassword = formData.get('notePassword')?.toString() || ''; // the plain password is never submitted to the server
 		const expiresIn = formData.get('expiresIn')?.toString() || '';
 		const firstAuth = generateRandomId(8);
-		const passwordSHA256 = await generateSHA256Hash(notePassword);
+		const passwordHash = await generateDeterministicClientHash(notePassword);
 
 		try {
 			// encrypt the note content using the provided plain password or a random auth token
@@ -90,7 +90,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 
 			const requestBody = {
 				content: encryptedContent.encrypted,
-				password: notePassword ? passwordSHA256 : null, // Password should be hashed with SHA-256 before sending and is not used for encryption
+				password: notePassword ? passwordHash : null, // Password is PBKDF2 hashed before sending, then bcrypt hashed on server
 				expiresAt: expiresIn,
 				iv: encryptedContent.iv,
 			};

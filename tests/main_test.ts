@@ -2,7 +2,7 @@ import { createHandler, ServeHandlerInfo } from '$fresh/server.ts';
 import manifest from '../fresh.gen.ts';
 import config from '../fresh.config.ts';
 import { assertEquals, assertExists, assertMatch } from '$std/assert/mod.ts';
-import { generateSHA256Hash } from '../utils/hashing.ts';
+import { generateDeterministicClientHash, generateHash } from '../utils/hashing.ts';
 import { encryptNoteContent } from '../utils/encryption.ts';
 import { Context } from '../routes/_middleware.ts';
 
@@ -129,7 +129,8 @@ Deno.test({
 		});
 
 		await t.step('should create note via API', async () => {
-			const passwordSHA256 = await generateSHA256Hash(testData.password);
+			const passwordClientHash = await generateDeterministicClientHash(testData.password);
+			const passwordHash = await generateHash(passwordClientHash);
 			const encryptedContent = await encryptNoteContent(testData.content, testData.password);
 
 			const response = await handler(
@@ -138,7 +139,7 @@ Deno.test({
 					body: JSON.stringify({
 						content: encryptedContent.encrypted,
 						iv: encryptedContent.iv,
-						password: passwordSHA256,
+						password: passwordHash,
 						expiresAt: testData.expiresIn,
 					}),
 					headers: { 'Content-Type': 'application/json' },
