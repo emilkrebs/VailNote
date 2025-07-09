@@ -4,7 +4,7 @@ import SiteHeader from '../components/SiteHeader.tsx';
 import CreateNote from '../islands/CreateNoteForm.tsx';
 import { formatExpiration } from '../types/types.ts';
 import { encryptNoteContent } from '../utils/encryption.ts';
-import { generateHash } from '../utils/hashing.ts';
+import { generateDeterministicClientHash, generateHash } from '../utils/hashing.ts';
 import { generateRateLimitHeaders } from '../utils/rate-limiting/rate-limit-headers.ts';
 import { State } from './_middleware.ts';
 
@@ -49,11 +49,14 @@ export const handler: Handlers<HomeData, State> = {
 			password ? password : noteId,
 		);
 
+		// For consistency with client-side flow, hash password with PBKDF2 first, then bcrypt
+		const passwordPBKDF2 = password ? await generateDeterministicClientHash(password) : undefined;
+
 		const insertResult = await noteDatabase.insertNote({
 			id: noteId,
 			content: encryptedContent.encrypted,
 			expiresAt: formatExpiration(expiresIn),
-			password: password ? generateHash(password) : undefined, // Password is securely hashed with bcrypt for storage
+			password: passwordPBKDF2 ? generateHash(passwordPBKDF2) : undefined, // Password is PBKDF2 hashed then bcrypt hashed for storage
 			iv: encryptedContent.iv,
 		});
 

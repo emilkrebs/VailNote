@@ -1,6 +1,6 @@
 import { Handlers, PageProps } from '$fresh/server.ts';
 import { Note } from '../types/types.ts';
-import { compareHash } from '../utils/hashing.ts';
+import { compareHash, generateDeterministicClientHash } from '../utils/hashing.ts';
 import PasswordInput from '../islands/PasswordInput.tsx';
 import { decryptNoteContent } from '../utils/encryption.ts';
 import Header from '../components/Header.tsx';
@@ -93,6 +93,8 @@ export const handler: Handlers<NotePageProps, State> = {
 		const password = formData.get('password') as string;
 		const confirm = formData.get('confirm') === 'true';
 
+		// Hash the plain password with PBKDF2 first for client-side security (this will be compared with stored hash)
+		const passwordHash = password ? await generateDeterministicClientHash(password) : undefined;
 		const passwordProtected = password && password.trim() !== '';
 
 		const note = await noteDatabase.getNoteById(id);
@@ -102,9 +104,9 @@ export const handler: Handlers<NotePageProps, State> = {
 		}
 
 		// Always perform hash comparison even if note has no password to prevent timing attacks
-		// compareHash uses bcrypt to securely compare the plain password with the stored bcrypt hash
+		// We compare the PBKDF2 hashed password with the stored bcrypt hash (which was created from a PBKDF2 hash)
 		const isPasswordValid = note.password && passwordProtected
-			? compareHash(password, note.password)
+			? compareHash(passwordHash!, note.password)
 			: !note.password && !passwordProtected;
 
 		if (note.password && (!passwordProtected || !isPasswordValid)) {

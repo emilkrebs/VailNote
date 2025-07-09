@@ -33,7 +33,7 @@ usability.
 - **Framework**: [Fresh](https://fresh.deno.dev) (Deno)
 - **Runtime**: Deno
 - **Database**: MongoDB
-- **Encryption**: AES-GCM with SHA-256 key derivation for content encryption, bcrypt for password storage
+- **Encryption**: AES-GCM with PBKDF2 key derivation for content encryption, bcrypt for password storage
 - **Frontend**: Tailwind CSS & Preact
 
 > [!NOTE]
@@ -51,13 +51,13 @@ been compromised, has been marked with (!)
 ### JavaScript (Recommended)
 
 1. Before sending anything to the server, the content will be encrypted.
-2. First, the password will be hashed with SHA-256 for consistency
+2. First, the password will be hashed with PBKDF2 for security
 3. The original password (not the hash) will then be used to encrypt the content.
 
 - If no password is provided, the client will generate a random phrase (auth key).
 
-4. The client will send the encrypted content, SHA-256 hashed password, and expiration time to the server.
-5. If the document is valid, the server will generate a random note ID, hash the SHA-256 password again using bcrypt for
+4. The client will send the encrypted content, PBKDF2 hashed password, and expiration time to the server.
+5. If the document is valid, the server will generate a random note ID, hash the PBKDF2 password again using bcrypt for
    secure storage, and store the note in the database.
 6. The server will send a successful response containing the new note ID.
 7. The client will generate a valid link using the note ID and local auth key using the following structure:
