@@ -22,7 +22,7 @@ export default function CreateNote({ data }: { data: CreateNoteData }) {
 	const [formData, setFormData] = useState<CreateNoteData>({ ...data });
 
 	return (
-		<div class='mt-6 p-4 md:p-8 rounded-2xl shadow-xl w-full bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600'>
+		<div class='mt-6 p-4 md:p-8 rounded-xl shadow-xl w-full bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600 hover:shadow-2xl hover:shadow-blue-500/25 transition-shadow'>
 			<h2 class='text-3xl font-bold text-white mb-2 flex items-center gap-2'>
 				<PenIcon />
 				Create a Note
