@@ -1,40 +1,98 @@
-const defaultDescription = 'VailNote - Transparent, Secure, Open-Source';
+const defaultDescription =
+	'VailNote - Open-source, encrypted note sharing with end-to-end encryption, self-destructing notes, and privacy-preserving rate limiting. Share secure notes that automatically delete after viewing.';
 
 interface HeadProps {
 	title?: string;
 	description?: string;
+	canonicalUrl?: string;
 }
 
-function OpenGraphMeta({ title, description }: HeadProps) {
+function OpenGraphMeta({ title, description, canonicalUrl }: HeadProps) {
+	const ogTitle = title || 'VailNote';
+	const ogDescription = description || defaultDescription;
+	const ogImage = '/logo.png';
+	const ogUrl = canonicalUrl || 'https://vailnote.com';
+
 	return (
 		<>
 			<meta name='viewport' content='width=device-width, initial-scale=1' />
 			<meta name='theme-color' content='#000000' />
-			<meta name='description' content={description || defaultDescription} />
-			<meta property='og:title' content={title || 'VailNote'} />
-			<meta property='og:description' content={description || defaultDescription} />
-			<meta property='og:url' content='https://vailnote.com' />
+			<meta name='description' content={ogDescription} />
+
+			{/* SEO Meta Tags */}
+			<meta
+				name='keywords'
+				content='secure notes, encrypted notes, privacy, open source, self-destructing notes, ephemeral messages, secure sharing, end-to-end encryption, anonymous sharing, temporary notes'
+			/>
+			<meta name='author' content='Emil Krebs' />
+			<meta name='creator' content='VailNote' />
+			<meta name='publisher' content='VailNote' />
+			<meta name='application-name' content='VailNote' />
+			<meta name='generator' content='Fresh Framework' />
+			<meta name='rating' content='general' />
+			<meta name='distribution' content='global' />
+			<meta name='language' content='English' />
+			<meta name='classification' content='Security Software' />
+			<meta name='category' content='Privacy,Security,Open Source' />
+
+			{/* Open Graph / Facebook */}
 			<meta property='og:type' content='website' />
-			<meta property='og:image' content='/logo.png' />
-			<meta property='og:image:alt' content='VailNote Logo' />
-			<meta name='robots' content='index, follow' />
+			<meta property='og:url' content={ogUrl} />
+			<meta property='og:title' content={ogTitle} />
+			<meta property='og:description' content={ogDescription} />
+			<meta property='og:image' content={ogImage} />
+			<meta property='og:image:width' content='512' />
+			<meta property='og:image:height' content='512' />
+			<meta property='og:image:type' content='image/png' />
+			<meta property='og:image:alt' content='VailNote - Secure Note Sharing Logo' />
+			<meta property='og:site_name' content='VailNote' />
+			<meta property='og:locale' content='en_US' />
+
+			{/* Twitter Card tags */}
+			<meta name='twitter:card' content='summary_large_image' />
+			<meta name='twitter:url' content={ogUrl} />
+			<meta name='twitter:title' content={ogTitle} />
+			<meta name='twitter:description' content={ogDescription} />
+			<meta name='twitter:image' content={ogImage} />
+			<meta name='twitter:image:alt' content='VailNote - Secure Note Sharing Logo' />
+			<meta name='twitter:creator' content='@emilkrebs' />
+			<meta name='twitter:site' content='@emilkrebs' />
+
+			{/* Additional SEO */}
+			<meta name='robots' content='index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1' />
+			<meta name='googlebot' content='index, follow' />
+			<meta name='bingbot' content='index, follow' />
+
+			{/* Security and Privacy */}
+			<meta http-equiv='X-Content-Type-Options' content='nosniff' />
+			<meta http-equiv='X-Frame-Options' content='DENY' />
+			<meta http-equiv='Referrer-Policy' content='strict-origin-when-cross-origin' />
+
+			{/* Performance */}
+			<meta http-equiv='x-dns-prefetch-control' content='on' />
+			<link rel='dns-prefetch' href='//fonts.googleapis.com' />
+			<link rel='preconnect' href='https://fonts.googleapis.com' crossOrigin='' />
 		</>
 	);
 }
 
-export default function Header({ title, description }: HeadProps) {
+export default function Header({ title, description, canonicalUrl }: HeadProps) {
+	const pageTitle = title ? `VailNote - ${title}` : 'VailNote - Secure Encrypted Note Sharing';
+	const finalCanonicalUrl = canonicalUrl || 'https://vailnote.com';
+
 	return (
 		<head>
 			<meta charset='utf-8' />
-			<meta name='viewport' content='width=device-width, initial-scale=1.0' />
-			<title>VailNote {title ? `- ${title}` : ''}</title>
+			<title>{pageTitle}</title>
 			<link rel='stylesheet' href='/styles.css' />
 			<link rel='icon' href='/favicon.ico' />
 			<link rel='icon' type='image/png' sizes='32x32' href='/favicon-32x32.png' />
 			<link rel='icon' type='image/png' sizes='16x16' href='/favicon-16x16.png' />
 			<link rel='apple-touch-icon' href='/apple-touch-icon.png' />
-			<link rel='canonical' href='https://vailnote.com' />
-			<OpenGraphMeta title={title} description={description} />
+			<link rel='canonical' href={finalCanonicalUrl} />
+
+			{/* SEO and Social Media Meta Tags */}
+			<OpenGraphMeta title={title} description={description} canonicalUrl={canonicalUrl} />
 		</head>
 	);
 }
