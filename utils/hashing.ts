@@ -19,10 +19,10 @@ export async function generateSHA256Hash(input: string): Promise<string> {
  * This provides similar security to bcrypt but works in web browsers
  * @param password The plain text password to hash
  * @param salt Optional salt (will generate random salt if not provided)
- * @param iterations Number of iterations (default: 100000 for security)
+ * @param iterations Number of iterations (default: 600000 for security)
  * @returns Base64 encoded hash with salt prepended
  */
-export async function generateClientHash(password: string, salt?: string, iterations = 100000): Promise<string> {
+export async function generateClientHash(password: string, salt?: string, iterations = 600000): Promise<string> {
 	const encoder = new TextEncoder();
 
 	// Generate random salt if not provided
@@ -71,7 +71,7 @@ export async function verifyClientHash(password: string, hash: string): Promise<
 		}
 
 		const saltBytes = Uint8Array.from(atob(saltBase64), (c) => c.charCodeAt(0));
-		const computedHash = await generateClientHash(password, saltBytes, parseInt(iterations));
+		const computedHash = await generateClientHash(password, new TextDecoder().decode(saltBytes), parseInt(iterations));
 
 		// Extract just the hash part for comparison
 		const [, , , computedHashBase64] = computedHash.split(':');
@@ -96,10 +96,10 @@ export function compareHash(plainText: string, hash: string): boolean {
  * Client-side deterministic password hashing using PBKDF2 with password-derived salt
  * This ensures the same password always produces the same hash
  * @param password The plain text password to hash
- * @param iterations Number of iterations (default: 100000 for security)
+ * @param iterations Number of iterations (default: 600000 for security)
  * @returns Base64 encoded hash that's deterministic for the same password
  */
-export async function generateDeterministicClientHash(password: string, iterations = 100000): Promise<string> {
+export async function generateDeterministicClientHash(password: string, iterations = 600000): Promise<string> {
 	const encoder = new TextEncoder();
 
 	// Use SHA-256 of password as deterministic salt (this ensures same password = same salt)
