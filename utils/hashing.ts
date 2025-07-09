@@ -71,7 +71,7 @@ export async function verifyClientHash(password: string, hash: string): Promise<
 		}
 
 		const saltBytes = Uint8Array.from(atob(saltBase64), (c) => c.charCodeAt(0));
-		const computedHash = await generateClientHash(password, new TextDecoder().decode(saltBytes), parseInt(iterations));
+		const computedHash = await generateClientHash(password, saltBytes, parseInt(iterations));
 
 		// Extract just the hash part for comparison
 		const [, , , computedHashBase64] = computedHash.split(':');
