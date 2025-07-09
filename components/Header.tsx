@@ -10,7 +10,7 @@ interface HeadProps {
 function OpenGraphMeta({ title, description, canonicalUrl }: HeadProps) {
 	const ogTitle = title || 'VailNote';
 	const ogDescription = description || defaultDescription;
-	const ogImage = 'https://vailnote.com/android-chrome-512x512.png';
+	const ogImage = '/logo.png';
 	const ogUrl = canonicalUrl || 'https://vailnote.com';
 
 	return (
@@ -83,7 +83,6 @@ export default function Header({ title, description, canonicalUrl }: HeadProps) 
 	return (
 		<head>
 			<meta charset='utf-8' />
-			<meta name='viewport' content='width=device-width, initial-scale=1.0' />
 			<title>{pageTitle}</title>
 			<link rel='stylesheet' href='/styles.css' />
 			<link rel='icon' href='/favicon.ico' />
