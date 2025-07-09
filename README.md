@@ -140,4 +140,3 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ![Password Protected](https://github.com/user-attachments/assets/287ca9c9-5213-4d8e-888f-6d8230abbb91)
 
 ![Content Page](https://github.com/user-attachments/assets/7007f54e-1e6b-4b82-b465-55920b9ac001)
-

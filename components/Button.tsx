@@ -25,7 +25,7 @@ export function Button(props: ButtonProps) {
 					: props.color === 'danger'
 					? dangerClasses
 					: primaryClasses
-			} ${props.class}`}
+			} ${props.class ?? ''}`}
 		>
 			{props.children}
 		</button>

@@ -194,10 +194,10 @@ export default function NotePage(ctx: PageProps<NotePageProps>) {
 function ConfirmViewNote({ note }: { note: Note }) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
-			<Header title="Confirm View & Destroy" />
+			<Header title='Confirm View & Destroy' />
 			<SiteHeader />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-				<div class='mt-6 p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
+				<div class='mt-6 p-4 sm:p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
 					{/* Header */}
 					<div class='mb-8'>
 						<h2 class='text-3xl font-bold text-white mb-3'>Confirm View & Destroy</h2>
@@ -214,8 +214,8 @@ function ConfirmViewNote({ note }: { note: Note }) {
 						<input type='hidden' name='id' value={note.id} />
 						<input type='hidden' name='confirm' value='true' />
 
-						<div class='flex flex-row w-full justify-between gap-4'>
-							<HomeButton class='min-w-max' />
+						<div class='flex flex-col sm:flex-row w-full justify-between gap-4'>
+							<HomeButton class='w-full sm:min-w-max' />
 							<Button color='danger' class='w-full' type='submit'>
 								View and Destroy Note
 							</Button>
@@ -232,10 +232,10 @@ function ViewNoteConfirmed(
 ) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
-			<Header title="Note Retrieved" description="Successfully decrypted and displayed" />
+			<Header title='Note Retrieved' description='Successfully decrypted and displayed' />
 			<SiteHeader />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-				<div class='mt-6 p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
+				<div class='flex flex-col mt-6 p-4 sm:p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
 					{/* Header with icon and title */}
 					<div class='flex items-center justify-start gap-2 mb-6 pb-4 border-b border-gray-600/50'>
 						<div class='p-3 bg-gray-800 rounded-xl'>
@@ -272,7 +272,7 @@ function ViewNoteConfirmed(
 						</div>
 					</div>
 
-					<div class='mt-8 pt-6 border-t border-gray-600/50'>
+					<div class='mt-8 pt-6 border-t border-gray-600/50 w-full'>
 						<HomeButton class='w-full' />
 					</div>
 				</div>
@@ -288,7 +288,7 @@ function PasswordProtectedNote() {
 			<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
 				<SiteHeader />
 				<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-					<div class='mt-6 p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
+					<div class='mt-6 p-4 sm:p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
 						<div class='mb-8'>
 							<h2 class='text-3xl font-bold text-white mb-3 flex items-center gap-2'>
 								<PenIcon />
