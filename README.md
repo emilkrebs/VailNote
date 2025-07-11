@@ -13,9 +13,6 @@ VailNote is a simple, **open-source** note-sharing app designed for **maximum pr
 modern encryption technology before being stored, ensuring that no one else can access them. The app is built with a
 focus on user-friendliness and security.
 
-VailNote is **non-JavaScript compatible**; however, JavaScript is highly recommended for maximizing security and
-usability.
-
 🔗 See VailNote in action at [vailnote.com](https://vailnote.com).
 
 ## Features
@@ -46,7 +43,7 @@ Since VailNote uses one JavaScript and one non-JavaScript approach, there are tw
 below. Take a look at the [architecture diagram](#architecture-diagram) for a better visual representation.
 
 Every possible step where I think it might be insecure, given the possibility that the network, server, or database has
-been compromised, has been marked with (!)
+The system has been compromised and is marked with (!).
 
 ### JavaScript (Recommended)
 
@@ -63,7 +60,7 @@ been compromised, has been marked with (!)
 7. The client will generate a valid link using the note ID and local auth key using the following structure:
    `https://vailnote.com/[noteId]#auth=[authKey]`
 
-### Non-JavaScript
+### Non-JavaScript (Obsolete)
 
 1. The password and content will be sent to the server as plain text (!)
 2. The server will encrypt the content using the plain password and hash the password with bcrypt for storage.
@@ -73,16 +70,16 @@ been compromised, has been marked with (!)
 3. If the document is valid, the server will generate a random note ID and store the note in the database.
 4. The server will generate a random link using the following structure: `https://vailnote.com/[noteId]`
 
-Note: SSL will handle the encryption. If disabled the sensitive data might be compromised.
+Note: SSL will handle the encryption. If disabled, the sensitive data might be compromised.
 
-### Viewing the Note
+### Viewing the Note (JavaScript required!)
 
 1. When a note is accessed, the client fetches the encrypted note data from the server.
 2. The client asks the user for confirmation before viewing (and destroying) the note.
 3. If an auth key is present in the URL, the client uses it to decrypt the note. If a password is required, the client
    prompts for it and decrypts locally.
 4. The client never sends the password or auth key to the server—decryption always happens in the browser.
-5. After successful decryption, the client requests the server to delete the note.
+5. After successful decryption, the client requests that the server delete the note.
 6. If decryption fails, the note remains on the server until a valid decryption attempt is made or it expires.
 
 ## Known Issues
