@@ -22,7 +22,7 @@ const MESSAGES = {
 	DECRYPT_SUCCESS: 'Note decrypted successfully',
 	INVALID_PASSWORD: 'Incorrect password. Please try again.',
 	NO_PASSWORD: 'No password provided. Deletion cancelled.',
-	DELETE_SUCCESS: 'Note deleted successfully. It will not be retrievable again.',
+	DELETE_SUCCESS: 'Note deleted successfully. Redirecting...',
 } as const;
 
 interface ViewEncryptedNoteProps {
@@ -62,15 +62,18 @@ export default function ViewEncryptedNote(
 			return authKey;
 		};
 
+		const showPasswordPrompt = () => {
+			setNote(null);
+			setNeedsPassword(true);
+			setLoading(false);
+		};
+
 		const authKey = getAuthKey();
 
 		// If not confirmed and no auth key, show confirmation or password prompt
 		if (!authKey && !confirmed) {
-			setNote(null);
-			setNeedsPassword(true);
-			setLoading(false);
 			console.warn('No auth key provided, note requires password');
-			return;
+			return showPasswordPrompt();
 		}
 
 		// If already confirmed and no password is needed, do nothing
@@ -84,27 +87,10 @@ export default function ViewEncryptedNote(
 				setLoading(true);
 
 				if (authKey) {
-					try {
-						const result = await NoteAPIService.getEncryptedNote(noteId, authKey);
-						if (!result.success || !result.note) throw new Error(result.message);
-
-						notePassword.current = manualDeletion ? authKey : undefined;
-						const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, authKey);
-
-						setNote(
-							{ ...result.note, content: decryptedContent },
-						);
-						setMessage(
-							result.note.manualDeletion ? MESSAGES.MANUAL_DELETION_PROMPT : MESSAGES.AUTO_DELETION_COMPLETE,
-						);
-					} catch (err) {
-						console.error(MESSAGES.DECRYPTION_FAILED, err);
-						setError(MESSAGES.DECRYPTION_FAILED);
-					}
+					await handleAuthKey(authKey);
 				} else {
 					// Password flow: show password form
-					setNote(null);
-					setNeedsPassword(true);
+					showPasswordPrompt();
 				}
 			} catch (err) {
 				setError(err instanceof Error ? err.message : MESSAGES.DECRYPTION_FAILED);
@@ -113,7 +99,27 @@ export default function ViewEncryptedNote(
 			}
 		};
 
-		// Only fetch when confirmed or when we have an auth key (no confirmation needed for auth key notes)
+		const handleAuthKey = async (authKey: string) => {
+			try {
+				const result = await NoteAPIService.getEncryptedNote(noteId, authKey);
+				if (!result.success || !result.note) throw new Error(result.message);
+
+				notePassword.current = manualDeletion ? authKey : undefined;
+				const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, authKey);
+
+				setNote(
+					{ ...result.note, content: decryptedContent },
+				);
+				setMessage(
+					result.note.manualDeletion ? MESSAGES.MANUAL_DELETION_PROMPT : MESSAGES.AUTO_DELETION_COMPLETE,
+				);
+			} catch (err) {
+				console.error(MESSAGES.DECRYPTION_FAILED, err);
+				setError(MESSAGES.DECRYPTION_FAILED);
+			}
+		};
+
+		// Only fetch when confirmed or when we have an auth key
 		if (confirmed || authKey) {
 			fetchAndDecryptNote();
 		}
@@ -160,10 +166,15 @@ export default function ViewEncryptedNote(
 		}
 		await NoteAPIService.deleteNote(noteId, notePassword.current);
 		setMessage(MESSAGES.DELETE_SUCCESS);
+		globalThis.location.href = '/';
 	};
 
 	if (error) {
 		return <NoteErrorPage message={error} />;
+	}
+
+	if (needsPassword) {
+		return <PasswordRequiredView onSubmit={handlePasswordSubmit} error={decryptionError} />;
 	}
 
 	if (!confirmed && !needsPassword && !manualDeletion) {
@@ -172,10 +183,6 @@ export default function ViewEncryptedNote(
 
 	if (loading) {
 		return <LoadingPage title='Decrypting Note' message='Please wait while we securely decrypt your note...' />;
-	}
-
-	if (needsPassword) {
-		return <PasswordRequiredView onSubmit={handlePasswordSubmit} error={decryptionError} />;
 	}
 
 	if (!note) {
@@ -196,6 +203,7 @@ interface DisplayDecryptedNoteProps {
 	content: string;
 	message?: string;
 
+	isDeleted?: boolean;
 	manualDeletion?: boolean;
 	onDeleteNote: () => void;
 }
@@ -250,7 +258,7 @@ function DisplayDecryptedNote({ content, message, manualDeletion, onDeleteNote }
 						<HomeButton />
 
 						{manualDeletion && (
-							<Button variant='danger' onClick={onDeleteNote} class='w-full'>
+							<Button variant='danger' onClick={onDeleteNote}>
 								Delete Note
 							</Button>
 						)}
