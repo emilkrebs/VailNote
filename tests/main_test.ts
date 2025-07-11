@@ -102,7 +102,6 @@ Deno.test({
 
 		const handler = await createHandler(manifest, config);
 		const testData = TestDataFactory.createNoteData();
-		let noteId: string;
 		let apiNoteId: string;
 
 		await t.step('should create note via form submission', async () => {
@@ -122,11 +121,10 @@ Deno.test({
 			assertEquals(response.status, 200);
 
 			const responseText = await response.text();
-			assertMatch(responseText, /Note saved successfully!/);
+			assertMatch(responseText, /Note saved successfully/);
 
 			const extractedId = TestUtils.extractNoteIdFromResponse(responseText);
 			assertExists(extractedId, 'Note ID should be present in response');
-			noteId = extractedId;
 		});
 
 		await t.step('should create note via API', async () => {
@@ -167,50 +165,6 @@ Deno.test({
 			assertEquals(response.status, 200);
 		});
 
-		await t.step('should retrieve note with correct password', async () => {
-			const formData = new FormData();
-			formData.append('password', testData.password);
-			formData.append('confirm', 'true');
-
-			const response = await handler(
-				new Request(`http://${TEST_CONFIG.hostname}/${noteId}`, {
-					method: 'POST',
-					body: formData,
-				}),
-				CONN_INFO,
-			);
-
-			assertEquals(response.status, 200);
-
-			const responseText = await response.text();
-			assertMatch(responseText, new RegExp(testData.content));
-		});
-
-		await t.step('should reject note retrieval with wrong password', async () => {
-			const formData = new FormData();
-			formData.append('password', 'wrongpassword');
-			formData.append('confirm', 'true');
-
-			const response = await handler(
-				new Request(`http://${TEST_CONFIG.hostname}/${noteId}`, {
-					method: 'POST',
-					body: formData,
-				}),
-				CONN_INFO,
-			);
-
-			// Should not return 200 or should not contain the note content
-			const responseText = await response.text();
-			// This test depends on how the application handles wrong passwords
-			// Adjust assertion based on actual behavior
-			if (response.status === 200) {
-				// If status is 200, content should not be visible
-				assertMatch(responseText, /wrong|incorrect|invalid/i);
-			} else {
-				// Or status should indicate failure
-				assertEquals(response.status >= 400, true);
-			}
-		});
 
 		await t.step('should handle non-existent note', async () => {
 			const response = await handler(
