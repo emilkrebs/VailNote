@@ -38,6 +38,11 @@ body {
 	}
 }
 
+/* Loading Spinner Animations */
+.animate-reverse {
+	animation-direction: reverse;
+}
+
 /* Markdown Styles */
 .markdown-body {
 	font-size: 1rem;

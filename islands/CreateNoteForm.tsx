@@ -103,7 +103,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 
 			const result = await response.json();
 			if (response.ok) {
-				const link = notePassword ? result.noteLink : `${result.noteLink}?auth=${firstAuth}`;
+				const link = notePassword ? result.noteLink : `${result.noteLink}#auth=${firstAuth}`;
 				onCreate(result.noteId, result.message, link);
 				form.reset();
 			} else {
@@ -183,7 +183,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 			<noscript class='mt-1 text-red-500 text-base'>
 				<p>
 					⚠ You have JavaScript disabled. Notes will now be encrypted on the server side. Enable JavaScript for
-					client-side encryption.
+					client-side encryption. Zero-knowledge encryption is not possible without JavaScript.{' '}
 					<a href='/privacy#javascript-usage' class='underline mx-1'>Learn more</a>
 				</p>
 			</noscript>

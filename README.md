@@ -61,7 +61,7 @@ been compromised, has been marked with (!)
    secure storage, and store the note in the database.
 6. The server will send a successful response containing the new note ID.
 7. The client will generate a valid link using the note ID and local auth key using the following structure:
-   `https://vailnote.com/[noteId]?auth=[authKey]`
+   `https://vailnote.com/[noteId]#auth=[authKey]`
 
 ### Non-JavaScript
 
@@ -77,15 +77,13 @@ Note: SSL will handle the encryption. If disabled the sensitive data might be co
 
 ### Viewing the Note
 
-1. If no password is required, the server will ask for confirmation first.
-2. When confirmed, the server will decrypt the note using the auth key (if provided) or note ID
-3. If successful, the server will send the decrypted note to the client (!) and destroy the note.
-
-4. If a password is required, the server will prompt a login form.
-5. The password will be sent as plain text (!) to the server for verification
-6. The server will use bcrypt to securely compare the password with the stored hash.
-7. The server will decrypt the content using the original password and destroy the note.
-8. If successful, the server will send the decrypted note to the client (!) and destroy the note.
+1. When a note is accessed, the client fetches the encrypted note data from the server.
+2. The client asks the user for confirmation before viewing (and destroying) the note.
+3. If an auth key is present in the URL, the client uses it to decrypt the note. If a password is required, the client
+   prompts for it and decrypts locally.
+4. The client never sends the password or auth key to the server—decryption always happens in the browser.
+5. After successful decryption, the client requests the server to delete the note.
+6. If decryption fails, the note remains on the server until a valid decryption attempt is made or it expires.
 
 ## Known Issues
 
