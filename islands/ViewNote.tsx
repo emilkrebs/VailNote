@@ -47,6 +47,7 @@ export default function ViewEncryptedNote(
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [needsPassword, setNeedsPassword] = useState(false);
+    const [confirmed, setConfirmed] = useState(false);
     const [decryptionError, setDecryptionError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -58,12 +59,18 @@ export default function ViewEncryptedNote(
                     throw new Error('Note not found');
                 }
                 
-                // Check hash fragment (#auth=...)
-                const hash = globalThis.location.hash.slice(1); // Remove the # symbol
-                const authKey = new URLSearchParams(hash).get('auth');
+                // Check hash fragment (#auth=...) and query parameters (?auth=...)
+                const url = new URL(globalThis.location.href);
+                let authKey = url.searchParams.get('auth'); // Check query parameters first (?auth=...)
+                
+                if (!authKey) {
+                    // Check hash fragment (#auth=...)
+                    const hash = globalThis.location.hash.slice(1); // Remove the # symbol
+                    authKey = new URLSearchParams(hash).get('auth');
+                }
                 
                 if (authKey) {
-                    // We have an auth key, try to decrypt
+                    // We have an auth key, try to decrypt immediately (no password needed)
                     try {
                         const decryptedContent = await decryptNoteContent(data.content, data.iv, authKey);
                         data.content = decryptedContent;
@@ -76,7 +83,7 @@ export default function ViewEncryptedNote(
                         setLoading(false);
                     }
                 } else {
-                    // No auth key, this note needs a password
+                    // No auth key, this note needs a password - store encrypted data and show password form
                     setNote(data); // Store encrypted note data
                     setNeedsPassword(true);
                     setLoading(false);
@@ -91,8 +98,11 @@ export default function ViewEncryptedNote(
             }
         };
 
-        fetchAndDecryptNote();
-    }, [noteId]);
+        // Only fetch when confirmed or when we have an auth key (no confirmation needed for auth key notes)
+        if (confirmed) {
+            fetchAndDecryptNote();
+        }
+    }, [confirmed, noteId]);
 
     const handlePasswordSubmit = async (event: Event) => {
         event.preventDefault();
@@ -122,9 +132,15 @@ export default function ViewEncryptedNote(
         }
     };
 
+
     if (error) {
         return <NoteErrorPage message={error} />;
     }
+    
+    if (!confirmed) {
+        return <ConfirmViewNote onSubmit={() => setConfirmed(true)} />;
+    }
+
 
     if (loading) {
         return <LoadingSpinner />;
@@ -260,6 +276,40 @@ function PasswordRequiredView({ onSubmit, error }: { onSubmit: (event: Event) =>
         </div>
     );
 }
+
+function ConfirmViewNote({ onSubmit }: { onSubmit: () => void }) {
+	return (
+		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
+			<Header title='Confirm View & Destroy' />
+			<SiteHeader />
+			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
+				<div class='mt-6 p-4 sm:p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
+					{/* Header */}
+					<div class='mb-8'>
+						<h2 class='text-3xl font-bold text-white mb-3'>Confirm View & Destroy</h2>
+						<p class='text-gray-300 text-base leading-relaxed'>
+							This action is{' '}
+							<span class='text-red-400 font-semibold'>irreversible</span>. The note will be permanently destroyed after
+							viewing.
+						</p>
+					</div>
+
+					<WarningMessage />
+
+					<div class='space-y-6'>
+						<div class='flex flex-col sm:flex-row w-full justify-between gap-4'>
+							<HomeButton class='w-full sm:min-w-max' />
+							<Button color='danger' class='w-full' onClick={onSubmit}>
+								View and Destroy Note
+							</Button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 
 function WarningMessage() {
     return (
