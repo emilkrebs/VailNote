@@ -6,6 +6,7 @@ import PasswordInput from './PasswordInput.tsx';
 import PenIcon from '../components/PenIcon.tsx';
 import { generateRandomId } from '../types/types.ts';
 import { generateDeterministicClientHash } from '../utils/hashing.ts';
+import Select from '../components/Select.tsx';
 
 interface CreateNoteData {
 	message: string;
@@ -42,7 +43,7 @@ export default function CreateNote({ data }: { data: CreateNoteData }) {
 							: 'bg-red-600/20 border-red-400 text-red-200'
 					}`}
 				>
-					<span class='font-medium' title={formData.noteId ? 'Note ID: ' + formData.noteId : undefined}>
+					<span class='font-medium text-wrap' title={formData.noteId ? 'Note ID: ' + formData.noteId : undefined}>
 						{formData.message}
 					</span>
 
@@ -78,6 +79,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 		const noteContent = formData.get('noteContent')?.toString() || '';
 		const notePassword = formData.get('notePassword')?.toString() || ''; // the plain password is never submitted to the server
 		const expiresIn = formData.get('expiresIn')?.toString() || '';
+		const manualDeletion = formData.get('manualDeletion') === 'enabled';
 		const firstAuth = generateRandomId(8);
 		const passwordHash = await generateDeterministicClientHash(notePassword);
 
@@ -92,6 +94,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 				content: encryptedContent.encrypted,
 				password: notePassword ? passwordHash : null, // Password is PBKDF2 hashed before sending, then bcrypt hashed on server
 				expiresAt: expiresIn,
+				manualDeletion,
 				iv: encryptedContent.iv,
 			};
 
@@ -159,10 +162,9 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 						- Note will self-destruct after this time
 					</span>
 				</label>
-				<select
+				<Select
 					name='expiresIn'
 					id='expiresIn'
-					class='w-full p-3 border border-gray-600 rounded-xl bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 transition'
 					defaultValue='24h'
 				>
 					<option value='10m'>10 minutes</option>
@@ -173,8 +175,34 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 					<option value='3d'>3 days</option>
 					<option value='7d'>7 days</option>
 					<option value='30d'>30 days</option>
-				</select>
+				</Select>
 			</div>
+
+			{/* Advanced Options Container */}
+			<details class='mt-4 bg-gray-800/50 rounded-xl p-4'>
+				<summary class='text-white text-lg font-semibold cursor-pointer'>
+					Advanced Options
+				</summary>
+				<div class='mt-2 space-y-2'>
+					<div>
+						<label class='block text-white text-lg font-semibold' htmlFor='replaceContent'>
+							Manual Deletion
+						</label>
+						<p class='text-gray-400 text-sm mb-2'>
+							Let anybody with access to the note delete it manually at any time. This will turn off self-destruction
+							after viewing - use with caution.
+						</p>
+						<Select
+							name='manualDeletion'
+							id='manualDeletion'
+							defaultValue='disabled'
+						>
+							<option value='enabled'>Enable Manual Deletion</option>
+							<option value='disabled' selected>Disable Manual Deletion</option>
+						</Select>
+					</div>
+				</div>
+			</details>
 
 			<Button type='submit' color='primary' class='w-full flex items-center justify-center gap-2'>
 				Save Note

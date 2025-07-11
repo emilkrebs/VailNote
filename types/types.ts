@@ -4,7 +4,10 @@ export interface Note {
 
 	iv: string; // Initialization vector for encryption
 	expiresAt: Date;
-	password?: string; // Optional password hash for private notes
+
+	// Optional fields for additional functionality
+	password?: string; // password hash for private notes
+	manualDeletion?: boolean; // Flag for manual deletion
 }
 
 const expirationMap: Record<string, number> = {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import Header from '../components/Header.tsx';
 import HomeButton from '../components/HomeButton.tsx';
 import Message from '../components/Message.tsx';
@@ -8,12 +8,20 @@ import PasswordInput from './PasswordInput.tsx';
 import { Button } from '../components/Button.tsx';
 import { Note } from '../types/types.ts';
 import { decryptNoteContent } from '../utils/encryption.ts';
+import { generateDeterministicClientHash } from '../utils/hashing.ts';
 
-async function deleteNote(noteId: string) {
+interface ViewEncryptedNoteProps {
+	noteId: string;
+	manualDeletion?: boolean;
+}
+
+async function deleteNote(noteId: string, password: string) {
 	try {
+		const passwordHash = await generateDeterministicClientHash(password);
 		const response = await fetch(`/api/notes/${noteId}`, {
 			method: 'DELETE',
 			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ passwordHash }),
 		});
 
 		if (!response.ok) {
@@ -24,14 +32,16 @@ async function deleteNote(noteId: string) {
 	}
 }
 
-async function getEncryptedNote(noteId: string) {
+async function getEncryptedNote(noteId: string, password: string) {
+	const passwordHash = await generateDeterministicClientHash(password);
 	const response = await fetch(`/api/notes/${noteId}`, {
-		method: 'GET',
+		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ passwordHash }),
 	});
 
 	if (!response.ok) {
-		throw new Error('Failed to fetch note');
+		throw new Error('Failed to fetch note: ' + await response.text());
 	}
 
 	return response.json();
@@ -39,7 +49,7 @@ async function getEncryptedNote(noteId: string) {
 
 // https://vailnote.com/[id]#[authKey] or https://vailnote.com/[id] (password required)
 export default function ViewEncryptedNote(
-	{ noteId }: { noteId: string },
+	{ noteId, manualDeletion }: ViewEncryptedNoteProps,
 ) {
 	const [note, setNote] = useState<Note | null>(null);
 	const [error, setError] = useState<string | null>(null);
@@ -47,63 +57,82 @@ export default function ViewEncryptedNote(
 	const [needsPassword, setNeedsPassword] = useState(false);
 	const [confirmed, setConfirmed] = useState(false);
 	const [decryptionError, setDecryptionError] = useState<string | null>(null);
+	const [message, setMessage] = useState<string | null>(null);
+
+	const notePassword = useRef<string | undefined>(undefined);
 
 	useEffect(() => {
+		// Helper to extract auth key from URL
+		const getAuthKey = () => {
+			const url = new URL(globalThis.location.href);
+			let authKey = url.searchParams.get('auth');
+			if (!authKey) {
+				const hash = globalThis.location.hash.slice(1);
+				authKey = new URLSearchParams(hash).get('auth');
+			}
+			return authKey;
+		};
+
+		const authKey = getAuthKey();
+
+		// If not confirmed and no auth key, show confirmation or password prompt
+		if (!authKey && !confirmed) {
+			setNote(null);
+			setNeedsPassword(true);
+			setLoading(false);
+			console.warn('No auth key provided, note requires password');
+			return;
+		}
+
+		// If already confirmed and no password is needed, do nothing
+		if (!needsPassword && confirmed) {
+			return;
+		}
+
+		// Fetch and decrypt note (for both auth key and password flows)
 		const fetchAndDecryptNote = async () => {
 			try {
 				setLoading(true);
-				const data = await getEncryptedNote(noteId);
-				if (!data) {
-					throw new Error('Note not found');
-				}
-
-				// Check hash fragment (#auth=...) and query parameters (?auth=...)
-				const url = new URL(globalThis.location.href);
-				let authKey = url.searchParams.get('auth'); // Check query parameters first (?auth=...)
-
-				if (!authKey) {
-					// Check hash fragment (#auth=...)
-					const hash = globalThis.location.hash.slice(1); // Remove the # symbol
-					authKey = new URLSearchParams(hash).get('auth');
-				}
 
 				if (authKey) {
-					// We have an auth key, try to decrypt immediately (no password needed)
 					try {
+						const data = await getEncryptedNote(noteId, authKey) as Note;
+						if (!data) throw new Error('Note not found');
+						notePassword.current = manualDeletion ? authKey : undefined;
+						console.log('Set note password:', notePassword);
 						const decryptedContent = await decryptNoteContent(data.content, data.iv, authKey);
 						data.content = decryptedContent;
 						setNote(data);
-						setLoading(false);
-						// Delete the note after successful decryption
-						await deleteNote(noteId);
-					} catch (_decryptErr) {
+						setMessage(
+							data.manualDeletion
+								? 'The note has been retrieved. Click the button below to delete it.'
+								: 'This note has been destroyed. It will not be retrievable again.',
+						);
+					} catch (err) {
+						console.error('Failed to decrypt note with provided authentication key', err);
 						setError('Failed to decrypt note with provided authentication key');
-						setLoading(false);
 					}
 				} else {
-					// No auth key, this note needs a password - store encrypted data and show password form
-					setNote(data); // Store encrypted note data
+					// Password flow: show password form
+					setNote(null);
 					setNeedsPassword(true);
-					setLoading(false);
 				}
 			} catch (err) {
-				if (err instanceof Error) {
-					setError(err.message);
-				} else {
-					setError('An unknown error occurred');
-				}
+				setError(err instanceof Error ? err.message : 'An unknown error occurred');
+			} finally {
 				setLoading(false);
 			}
 		};
 
 		// Only fetch when confirmed or when we have an auth key (no confirmation needed for auth key notes)
-		if (confirmed) {
+		if (confirmed || authKey) {
 			fetchAndDecryptNote();
 		}
 	}, [confirmed, noteId]);
 
 	const handlePasswordSubmit = async (event: Event) => {
 		event.preventDefault();
+		setLoading(true);
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
 		const password = formData.get('password')?.toString() || '';
@@ -113,28 +142,43 @@ export default function ViewEncryptedNote(
 			return;
 		}
 
-		if (!note) {
-			setDecryptionError('Note data not available');
-			return;
-		}
-
 		try {
 			setDecryptionError(null);
-			const decryptedContent = await decryptNoteContent(note.content, note.iv, password);
-			setNote({ ...note, content: decryptedContent });
+			const data = await getEncryptedNote(noteId, password);
+
+			if (!data) {
+				setDecryptionError('Note data not available');
+				return;
+			}
+			notePassword.current = manualDeletion ? password : undefined;
+			const decryptedContent = await decryptNoteContent(data.content, data.iv, password);
+			data.content = decryptedContent;
+
+			setNote(data);
 			setNeedsPassword(false);
-			// Delete the note after successful decryption
-			await deleteNote(noteId);
+			setConfirmed(true);
+			setLoading(false);
+			setMessage('Note decrypted successfully');
 		} catch (_decryptErr) {
 			setDecryptionError('Incorrect password. Please try again.');
+			console.error('Decryption failed:', _decryptErr);
 		}
+	};
+
+	const handleDeleteNote = async (noteId: string) => {
+		if (!notePassword.current) {
+			setMessage('No password provided. Deletion cancelled.');
+			return;
+		}
+		await deleteNote(noteId, notePassword.current);
+		setMessage('Note deleted successfully.');
 	};
 
 	if (error) {
 		return <NoteErrorPage message={error} />;
 	}
 
-	if (!confirmed) {
+	if (!confirmed && !needsPassword && !manualDeletion) {
 		return <ConfirmViewNote onSubmit={() => setConfirmed(true)} />;
 	}
 
@@ -147,7 +191,7 @@ export default function ViewEncryptedNote(
 	}
 
 	if (!note) {
-		return <NoteErrorPage message='Note not found' />;
+		return <NoteErrorPage message={message || 'Note not found'} />;
 	}
 
 	return (
@@ -167,7 +211,10 @@ export default function ViewEncryptedNote(
 						</div>
 					</div>
 
-					<Message message='This note has been destroyed. It will not be retrievable again.' type='success' />
+					<Message
+						message={message || 'This note has been destroyed. It will not be retrievable again.'}
+						type='success'
+					/>
 
 					{/* Content section with enhanced styling */}
 					<div class='mt-6'>
@@ -192,8 +239,15 @@ export default function ViewEncryptedNote(
 						</div>
 					</div>
 
-					<div class='mt-8 pt-6 border-t border-gray-600/50 w-full'>
-						<HomeButton class='w-full' />
+					{/* Action buttons */}
+					<div class='flex flex-col sm:flex-row gap-4 mt-8 pt-6 border-t border-gray-600/50 w-full'>
+						<HomeButton />
+
+						{note.manualDeletion && (
+							<Button color='danger' onClick={() => handleDeleteNote(note.id)}>
+								Delete Note
+							</Button>
+						)}
 					</div>
 				</div>
 			</div>

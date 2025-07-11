@@ -46,7 +46,7 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 	}
 
 	try {
-		const { content, iv, password, expiresAt } = await req.json();
+		const { content, iv, password, expiresAt, manualDeletion } = await req.json();
 
 		const noteId = await noteDatabase.generateNoteId();
 
@@ -57,9 +57,10 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 		const result: Note = {
 			id: noteId,
 			content, // content should be encrypted before sending to this endpoint
-			password: passwordHash, // password is PBKDF2 hashed on client, then bcrypt hashed on server for secure storage
+			password: passwordHash, // password is PBKDF2 non-deterministic hashed on client, then bcrypt hashed on server for secure storage
 			iv: iv,
 			expiresAt: formatExpiration(expiresAt),
+			manualDeletion: manualDeletion,
 		};
 
 		const insertResult = await noteDatabase.insertNote(result);
