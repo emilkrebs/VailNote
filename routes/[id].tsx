@@ -28,7 +28,7 @@ export const handler: Handlers<NotePageProps, State> = {
 		// The client will handle password input and decryption entirely
 		return ctx.render({
 			note,
-			message: 'Note found - decryption will happen in your browser',
+			message: 'Note found - the client will handle decryption',
 		});
 	},
 
@@ -62,7 +62,12 @@ export default function NotePage(ctx: PageProps<NotePageProps>) {
 	}
 
 	// Always render the client-side component for zero-knowledge architecture
-	return <ViewEncryptedNote noteId={note.id} manualDeletion={note.manualDeletion} />;
+	return (
+		<>
+			<Header title='Opening Note' description={message} />
+			<ViewEncryptedNote noteId={note.id} manualDeletion={note.manualDeletion} />
+		</>
+	);
 }
 
 function NoteErrorPage({ message }: { message?: string }) {

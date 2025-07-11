@@ -15,6 +15,7 @@ import * as $CopyContent from './islands/CopyContent.tsx';
 import * as $CreateNoteForm from './islands/CreateNoteForm.tsx';
 import * as $PasswordInput from './islands/PasswordInput.tsx';
 import * as $ViewNote from './islands/ViewNote.tsx';
+import * as $ViewNote_clean from './islands/ViewNote_clean.tsx';
 import type { Manifest } from '$fresh/server.ts';
 
 const manifest = {
@@ -34,6 +35,7 @@ const manifest = {
 		'./islands/CreateNoteForm.tsx': $CreateNoteForm,
 		'./islands/PasswordInput.tsx': $PasswordInput,
 		'./islands/ViewNote.tsx': $ViewNote,
+		'./islands/ViewNote_clean.tsx': $ViewNote_clean,
 	},
 	baseUrl: import.meta.url,
 } satisfies Manifest;

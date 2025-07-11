@@ -1,7 +1,7 @@
 import { JSX } from 'preact';
 
 interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
-	color?: 'primary' | 'secondary' | 'danger';
+	variant?: 'primary' | 'secondary' | 'danger';
 }
 
 export function Button(props: ButtonProps) {
@@ -18,11 +18,11 @@ export function Button(props: ButtonProps) {
 		<button
 			{...props}
 			class={`${baseClasses} ${
-				props.color === 'primary'
+				props.variant === 'primary'
 					? primaryClasses
-					: props.color === 'secondary'
+					: props.variant === 'secondary'
 					? secondaryClasses
-					: props.color === 'danger'
+					: props.variant === 'danger'
 					? dangerClasses
 					: primaryClasses
 			} ${props.class ?? ''}`}
