@@ -2,7 +2,7 @@ import { Handlers, PageProps } from '$fresh/server.ts';
 import Header from '../components/Header.tsx';
 import SiteHeader from '../components/SiteHeader.tsx';
 import CreateNote from '../islands/CreateNoteForm.tsx';
-import { formatExpiration } from '../types/types.ts';
+import { formatExpiration, generateRandomId } from '../types/types.ts';
 import { encryptNoteContent } from '../utils/encryption.ts';
 import { generateDeterministicClientHash, generateHash } from '../utils/hashing.ts';
 import { generateRateLimitHeaders } from '../utils/rate-limiting/rate-limit-headers.ts';
@@ -36,6 +36,7 @@ export const handler: Handlers<HomeData, State> = {
 		const noteContent = form.get('noteContent') as string;
 		const password = form.get('notePassword') as string; // the plain password is never submitted to the server
 		const expiresIn = form.get('expiresIn') as string;
+		const firstAuth = generateRandomId(8);
 
 		if (!noteContent || noteContent.trim() === '') {
 			return ctx.render({ message: 'Please enter a note.' });
@@ -46,7 +47,7 @@ export const handler: Handlers<HomeData, State> = {
 		// encrypt note content using the provided plain password or a random auth token
 		const encryptedContent = await encryptNoteContent(
 			noteContent,
-			password ? password : noteId,
+			password ? password : firstAuth,
 		);
 
 		// For consistency with client-side flow, hash password with PBKDF2 first, then bcrypt
@@ -69,9 +70,9 @@ export const handler: Handlers<HomeData, State> = {
 		}
 
 		return ctx.render({
-			message: 'Note saved successfully!',
+			message: 'Note saved successfully using server-side form submission!',
 			noteId: noteId,
-			noteLink: `${ctx.url}${noteId}`,
+			noteLink: `${ctx.url}${noteId}#auth=${firstAuth}`,
 		});
 	},
 };

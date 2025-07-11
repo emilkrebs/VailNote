@@ -14,7 +14,6 @@ interface NotePageProps {
 	message?: string;
 }
 
-
 export const handler: Handlers<NotePageProps, State> = {
 	async GET(_req, ctx) {
 		const { id } = ctx.params;

@@ -25,7 +25,7 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 
 	const rateLimitResult = await ctx.state.context.getRateLimiter().checkRateLimit(req);
 	const noteDatabase = ctx.state.context.getNoteDatabase();
-	
+
 	// check if rate limit is exceeded
 	if (!rateLimitResult.allowed) {
 		const resetTime = new Date(rateLimitResult.resetTime);

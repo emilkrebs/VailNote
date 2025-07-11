@@ -105,7 +105,6 @@ Deno.test({
 		let noteId: string;
 		let apiNoteId: string;
 
-
 		await t.step('should create note via form submission', async () => {
 			const formData = new FormData();
 			formData.append('noteContent', testData.content);

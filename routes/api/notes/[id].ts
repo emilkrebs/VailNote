@@ -55,7 +55,7 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 		if (!note) {
 			return new Response('Note not found', { status: 404 });
 		}
-		
+
 		await noteDatabase.deleteNote(id);
 		return new Response(
 			JSON.stringify({

@@ -1,22 +1,30 @@
 # Privacy Policy
 
-_Last updated: July 7, 2025_
+_Last updated: July 11, 2025_
 
 Your privacy and security are our top priorities. This Privacy Policy explains how VailNote (“we”, “us”, or “our”)
 collects, uses, and protects your information when you use our secure note-sharing application.
 
 ## Data Protection at VailNote
 
-- **End-to-End Encryption:**\
-  Notes are encrypted in your browser before leaving your device (when JavaScript is enabled). Only you and your
-  intended recipient can decrypt and read your notes.
-
-- **Server-Side Encryption (No JavaScript):**\
-  If JavaScript is disabled, encryption occurs on our servers. In this case, you must trust us to handle your data
-  securely.
+- **End-to-End Encryption (JavaScript):**\
+  All notes are encrypted in your browser before leaving your device. Only you and your intended recipient can decrypt
+  and read your notes. **Your password or auth key is never sent to our servers.**
 
 - **No Password or Key Storage:**\
-  We never store your password or encryption key. Only you can decrypt your notes.
+  We never store your password or encryption key. Only you can decrypt your notes. The server only stores encrypted note
+  data and never sees your secrets.
+
+- **Automatic Deletion:**\
+  Notes are deleted automatically from the server after being viewed (decrypted in your browser) or after their
+  expiration time.
+
+- **No Trackers or Analytics:**\
+  We do not use cookies, trackers, or analytics tools.
+
+- **Legacy Server-Side Encryption (No JavaScript):**\
+  If JavaScript is disabled, encryption occurs on our servers. In this case, you must trust us to handle your data
+  securely. We recommend enabling JavaScript for maximum privacy.
 
 - **Automatic Deletion:**\
   Notes are deleted automatically after being viewed or after their expiration time.
@@ -39,9 +47,6 @@ collects, uses, and protects your information when you use our secure note-shari
   addresses are unavailable.
 
 ## Use of Your Information
-
-- **Service Delivery:**\
-  Encrypted note data is used solely to deliver your notes to recipients.
 
 - **Security:**\
   We use Anonymous Rate-Limited Credentials (ARC) to prevent abuse and attacks. This system creates anonymous tokens
