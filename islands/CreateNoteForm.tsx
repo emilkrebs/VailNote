@@ -103,7 +103,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 
 			const result = await response.json();
 			if (response.ok) {
-				const link = notePassword ? result.noteLink : `${result.noteLink}?auth=${firstAuth}`;
+				const link = notePassword ? result.noteLink : `${result.noteLink}#auth=${firstAuth}`;
 				onCreate(result.noteId, result.message, link);
 				form.reset();
 			} else {

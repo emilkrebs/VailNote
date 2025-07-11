@@ -5,8 +5,7 @@ import { mergeWithRateLimitHeaders } from '../../utils/rate-limiting/rate-limit-
 import { State } from '../_middleware.ts';
 
 /* used for client side note creation and encryption
-    * This endpoint handles both GET and POST requests.
-    * - GET: Fetches a note by its ID.
+    * This endpoint handles only POST requests.
     * - POST: Creates a new note with the provided content, IV, password, and expiration time.
     *
     * Note: The content should be encrypted before sending to this endpoint and the password should be hashed with PBKDF2
@@ -20,20 +19,16 @@ import { State } from '../_middleware.ts';
     */
 
 export const handler = async (req: Request, ctx: FreshContext<State>): Promise<Response> => {
-	if (req.method !== 'POST' && req.method !== 'GET') {
+	if (req.method !== 'POST') {
 		return new Response('Method not allowed', { status: 405 });
-	}
-
-	if (req.method === 'GET') {
-		return new Response('GET method not implemented', { status: 501 });
 	}
 
 	const rateLimitResult = await ctx.state.context.getRateLimiter().checkRateLimit(req);
 	const noteDatabase = ctx.state.context.getNoteDatabase();
-
+	
+	// check if rate limit is exceeded
 	if (!rateLimitResult.allowed) {
 		const resetTime = new Date(rateLimitResult.resetTime);
-
 		return new Response(
 			JSON.stringify({
 				message: 'Rate limit exceeded. Please try again later.',
@@ -49,6 +44,7 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 			},
 		);
 	}
+
 	try {
 		const { content, iv, password, expiresAt } = await req.json();
 

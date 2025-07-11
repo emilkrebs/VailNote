@@ -103,6 +103,8 @@ Deno.test({
 		const handler = await createHandler(manifest, config);
 		const testData = TestDataFactory.createNoteData();
 		let noteId: string;
+		let apiNoteId: string;
+
 
 		await t.step('should create note via form submission', async () => {
 			const formData = new FormData();
@@ -152,6 +154,18 @@ Deno.test({
 			const data = await response.json();
 			assertEquals(data.message, 'Note saved successfully!');
 			assertExists(data.noteId, 'Note ID should be present in API response');
+			apiNoteId = data.noteId;
+		});
+
+		await t.step('should retrieve note by ID', async () => {
+			const response = await handler(
+				new Request(`http://${TEST_CONFIG.hostname}/api/notes/${apiNoteId}`, {
+					method: 'GET',
+					headers: { 'Content-Type': 'application/json' },
+				}),
+				CONN_INFO,
+			);
+			assertEquals(response.status, 200);
 		});
 
 		await t.step('should retrieve note with correct password', async () => {

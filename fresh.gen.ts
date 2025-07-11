@@ -7,12 +7,14 @@ import * as $_404 from './routes/_404.tsx';
 import * as $_app from './routes/_app.tsx';
 import * as $_middleware from './routes/_middleware.ts';
 import * as $api_notes from './routes/api/notes.ts';
+import * as $api_notes_id_ from './routes/api/notes/[id].ts';
 import * as $index from './routes/index.tsx';
 import * as $privacy from './routes/privacy.tsx';
 import * as $terms from './routes/terms.tsx';
 import * as $CopyContent from './islands/CopyContent.tsx';
 import * as $CreateNoteForm from './islands/CreateNoteForm.tsx';
 import * as $PasswordInput from './islands/PasswordInput.tsx';
+import * as $ViewNote from './islands/ViewNote.tsx';
 import type { Manifest } from '$fresh/server.ts';
 
 const manifest = {
@@ -22,6 +24,7 @@ const manifest = {
 		'./routes/_app.tsx': $_app,
 		'./routes/_middleware.ts': $_middleware,
 		'./routes/api/notes.ts': $api_notes,
+		'./routes/api/notes/[id].ts': $api_notes_id_,
 		'./routes/index.tsx': $index,
 		'./routes/privacy.tsx': $privacy,
 		'./routes/terms.tsx': $terms,
@@ -30,6 +33,7 @@ const manifest = {
 		'./islands/CopyContent.tsx': $CopyContent,
 		'./islands/CreateNoteForm.tsx': $CreateNoteForm,
 		'./islands/PasswordInput.tsx': $PasswordInput,
+		'./islands/ViewNote.tsx': $ViewNote,
 	},
 	baseUrl: import.meta.url,
 } satisfies Manifest;
