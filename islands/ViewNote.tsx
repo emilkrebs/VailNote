@@ -39,7 +39,7 @@ async function getEncryptedNote(noteId: string) {
 
 // https://vailnote.com/[id]#[authKey] or https://vailnote.com/[id] (password required)
 export default function ViewEncryptedNote(
-	{ noteId, message }: { noteId: string; message?: string },
+	{ noteId }: { noteId: string },
 ) {
 	const [note, setNote] = useState<Note | null>(null);
 	const [error, setError] = useState<string | null>(null);

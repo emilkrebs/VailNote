@@ -165,7 +165,6 @@ Deno.test({
 			assertEquals(response.status, 200);
 		});
 
-
 		await t.step('should handle non-existent note', async () => {
 			const response = await handler(
 				new Request(`http://${TEST_CONFIG.hostname}/nonexistent123`),

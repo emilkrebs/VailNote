@@ -69,7 +69,7 @@ export default function NotePage(ctx: PageProps<NotePageProps>) {
 	}
 
 	// Always render the client-side component for zero-knowledge architecture
-	return <ViewEncryptedNote noteId={note.id} message={message} />;
+	return <ViewEncryptedNote noteId={note.id} />;
 }
 
 function NoteErrorPage({ message }: { message?: string }) {
