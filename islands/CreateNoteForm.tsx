@@ -1,12 +1,28 @@
 import { Button } from '../components/Button.tsx';
-import { encryptNoteContent } from '../utils/encryption.ts';
 import { useState } from 'preact/hooks';
 import CopyContent from './CopyContent.tsx';
 import PasswordInput from './PasswordInput.tsx';
 import PenIcon from '../components/PenIcon.tsx';
-import { generateRandomId } from '../types/types.ts';
-import { generateDeterministicClientHash } from '../utils/hashing.ts';
 import Select from '../components/Select.tsx';
+import NoteAPIService from '../utils/note-api-service.ts';
+
+// Constants
+const MESSAGES = {
+	CREATE_SUCCESS: 'Note created successfully!',
+	CREATE_ERROR: 'Failed to create note.',
+	UNEXPECTED_ERROR: 'An error occurred while creating the note.',
+} as const;
+
+const EXPIRY_OPTIONS = [
+	{ value: '10m', label: '10 minutes' },
+	{ value: '1h', label: '1 hour' },
+	{ value: '6h', label: '6 hours' },
+	{ value: '12h', label: '12 hours' },
+	{ value: '24h', label: '24 hours', default: true },
+	{ value: '3d', label: '3 days' },
+	{ value: '7d', label: '7 days' },
+	{ value: '30d', label: '30 days' },
+];
 
 interface CreateNoteData {
 	message: string;
@@ -71,51 +87,34 @@ export default function CreateNote({ data }: { data: CreateNoteData }) {
 }
 
 function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
-	async function handleSubmit(event: Event) {
+	const handleSubmit = async (event: Event) => {
 		event.preventDefault();
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
-
 		const noteContent = formData.get('noteContent')?.toString() || '';
-		const notePassword = formData.get('notePassword')?.toString() || ''; // the plain password is never submitted to the server
+		const notePassword = formData.get('notePassword')?.toString() || undefined; // the plain password is never submitted to the server
 		const expiresIn = formData.get('expiresIn')?.toString() || '';
 		const manualDeletion = formData.get('manualDeletion') === 'enabled';
-		const firstAuth = generateRandomId(8);
-		const passwordHash = await generateDeterministicClientHash(notePassword);
 
 		try {
-			// encrypt the note content using the provided plain password or a random auth token
-			const encryptedContent = await encryptNoteContent(
+			const result = await NoteAPIService.createNote({
 				noteContent,
-				notePassword ? notePassword : firstAuth,
-			);
-
-			const requestBody = {
-				content: encryptedContent.encrypted,
-				password: notePassword ? passwordHash : null, // Password is PBKDF2 hashed before sending, then bcrypt hashed on server
-				expiresAt: expiresIn,
+				notePassword,
+				expiresIn,
 				manualDeletion,
-				iv: encryptedContent.iv,
-			};
-
-			const response = await fetch('/api/notes', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(requestBody),
 			});
 
-			const result = await response.json();
-			if (response.ok) {
-				const link = notePassword ? result.noteLink : `${result.noteLink}#auth=${firstAuth}`;
-				onCreate(result.noteId, result.message, link);
-				form.reset();
-			} else {
-				onError(result.error || 'Failed to create note.');
+			if (!result.success) {
+				throw new Error(result.message || MESSAGES.CREATE_ERROR);
 			}
-		} catch (_err) {
-			onError('An error occurred while creating the note.');
+			const link = notePassword ? result.noteId : `${result.noteId}#auth=${result.authKey}`;
+			onCreate(result.noteId!, MESSAGES.CREATE_SUCCESS, `${globalThis.location.origin}/${link}`);
+			form.reset();
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : MESSAGES.UNEXPECTED_ERROR;
+			onError(errorMessage);
 		}
-	}
+	};
 
 	return (
 		<form class='mt-4 space-y-5' method='post' onSubmit={handleSubmit} autoComplete='off'>
@@ -167,14 +166,15 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 					id='expiresIn'
 					defaultValue='24h'
 				>
-					<option value='10m'>10 minutes</option>
-					<option value='1h'>1 hour</option>
-					<option value='6h'>6 hours</option>
-					<option value='12h'>12 hours</option>
-					<option value='24h' selected>24 hours</option>
-					<option value='3d'>3 days</option>
-					<option value='7d'>7 days</option>
-					<option value='30d'>30 days</option>
+					{EXPIRY_OPTIONS.map((option) => (
+						<option
+							key={option.value}
+							value={option.value}
+							selected={option.default}
+						>
+							{option.label}
+						</option>
+					))}
 				</Select>
 			</div>
 
