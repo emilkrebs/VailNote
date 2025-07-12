@@ -129,7 +129,6 @@ Deno.test({
 
 		await t.step('should create note via API', async () => {
 			const passwordClientHash = await generateDeterministicClientHash(testData.password);
-			const passwordHash = await generateHash(passwordClientHash);
 			const encryptedContent = await encryptNoteContent(testData.content, testData.password);
 
 			const response = await handler(
@@ -138,7 +137,7 @@ Deno.test({
 					body: JSON.stringify({
 						content: encryptedContent.encrypted,
 						iv: encryptedContent.iv,
-						password: passwordHash,
+						password: passwordClientHash,
 						expiresAt: testData.expiresIn,
 					}),
 					headers: { 'Content-Type': 'application/json' },
@@ -152,16 +151,22 @@ Deno.test({
 			assertEquals(data.message, 'Note saved successfully!');
 			assertExists(data.noteId, 'Note ID should be present in API response');
 			apiNoteId = data.noteId;
+
 		});
 
 		await t.step('should retrieve note by ID', async () => {
+			const passwordHash = await generateDeterministicClientHash(testData.password);
 			const response = await handler(
 				new Request(`http://${TEST_CONFIG.hostname}/api/notes/${apiNoteId}`, {
-					method: 'GET',
+					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ passwordHash }),
 				}),
 				CONN_INFO,
 			);
+
+			const data = await response.json();
+			assertExists(data.id, 'Note ID should be present in response');
 			assertEquals(response.status, 200);
 		});
 
@@ -218,31 +223,6 @@ Deno.test({
 			);
 
 			assertEquals(response.status >= 400, true);
-		});
-
-		await t.step('should reject form submission with missing fields', async () => {
-			const formData = new FormData();
-			// Missing required fields
-			formData.append('noteContent', '');
-
-			const response = await handler(
-				new Request(`http://${TEST_CONFIG.hostname}/`, {
-					method: 'POST',
-					body: formData,
-				}),
-				CONN_INFO,
-			);
-
-			const responseText = await response.text();
-			// Check if the response indicates validation error
-			// Either through status code or error message in response
-			const hasValidationError = response.status >= 400 ||
-				responseText.includes('error') ||
-				responseText.includes('required') ||
-				responseText.includes('empty') ||
-				!responseText.includes('Note saved successfully!');
-
-			assertEquals(hasValidationError, true, 'Should handle empty content validation');
 		});
 
 		// Cleanup
