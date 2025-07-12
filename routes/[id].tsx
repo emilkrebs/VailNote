@@ -7,10 +7,7 @@ import SiteHeader from '../components/SiteHeader.tsx';
 import ViewEncryptedNote from '../islands/ViewNote.tsx';
 
 interface NotePageProps {
-	note?: Note;
-	passwordRequired?: boolean;
-	confirmed: boolean;
-
+	note: Note;
 	message?: string;
 }
 
@@ -31,9 +28,7 @@ export const handler: Handlers<NotePageProps, State> = {
 		// The client will handle password input and decryption entirely
 		return ctx.render({
 			note,
-			passwordRequired: false,
-			confirmed: true, // Always confirmed since client handles everything
-			message: 'Note found - decryption will happen in your browser',
+			message: 'Note found - the client will handle decryption',
 		});
 	},
 
@@ -54,8 +49,6 @@ export const handler: Handlers<NotePageProps, State> = {
 		// Always render the client-side component - password validation is now client-side
 		return ctx.render({
 			note,
-			passwordRequired: false,
-			confirmed: true,
 			message: 'Note found - decryption will happen in your browser',
 		});
 	},
@@ -69,7 +62,12 @@ export default function NotePage(ctx: PageProps<NotePageProps>) {
 	}
 
 	// Always render the client-side component for zero-knowledge architecture
-	return <ViewEncryptedNote noteId={note.id} />;
+	return (
+		<>
+			<Header title='Opening Note' description={message} />
+			<ViewEncryptedNote noteId={note.id} manualDeletion={note.manualDeletion} />
+		</>
+	);
 }
 
 function NoteErrorPage({ message }: { message?: string }) {

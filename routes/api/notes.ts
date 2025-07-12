@@ -46,20 +46,20 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 	}
 
 	try {
-		const { content, iv, password, expiresAt } = await req.json();
-
+		const { content, iv, password, expiresAt, manualDeletion } = await req.json();
 		const noteId = await noteDatabase.generateNoteId();
-
+		const hasPassword = password && password.trim() !== '';
 		// if password is provided, hash it with bcrypt (password should be PBKDF2 hashed on client before sending)
-		const passwordHash = password ? generateHash(password) : undefined;
+		const passwordHash = hasPassword ? generateHash(password) : undefined;
 
 		// check if content is encrypted
 		const result: Note = {
 			id: noteId,
 			content, // content should be encrypted before sending to this endpoint
-			password: passwordHash, // password is PBKDF2 hashed on client, then bcrypt hashed on server for secure storage
+			password: passwordHash, // password is PBKDF2 non-deterministic hashed on client, then bcrypt hashed on server for secure storage
 			iv: iv,
 			expiresAt: formatExpiration(expiresAt),
+			manualDeletion: manualDeletion,
 		};
 
 		const insertResult = await noteDatabase.insertNote(result);
@@ -84,7 +84,6 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 			JSON.stringify({
 				message: 'Note saved successfully!',
 				noteId: noteId,
-				noteLink: `${new URL(req.url).origin}/${noteId}`,
 			}),
 			{
 				headers: mergeWithRateLimitHeaders(

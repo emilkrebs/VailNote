@@ -1,14 +1,37 @@
 import { Button } from '../components/Button.tsx';
-import { encryptNoteContent } from '../utils/encryption.ts';
 import { useState } from 'preact/hooks';
 import CopyContent from './CopyContent.tsx';
 import PasswordInput from './PasswordInput.tsx';
 import PenIcon from '../components/PenIcon.tsx';
-import { generateRandomId } from '../types/types.ts';
-import { generateDeterministicClientHash } from '../utils/hashing.ts';
+import Select from '../components/Select.tsx';
+import NoteAPIService from '../utils/note-api-service.ts';
 
+// Constants
+const MESSAGES = {
+	CREATE_SUCCESS: 'Note created successfully!',
+	CREATE_ERROR: 'Failed to create note.',
+	UNEXPECTED_ERROR: 'An error occurred while creating the note.',
+} as const;
+
+const EXPIRY_OPTIONS = [
+	{ value: '10m', label: '10 minutes' },
+	{ value: '1h', label: '1 hour' },
+	{ value: '6h', label: '6 hours' },
+	{ value: '12h', label: '12 hours' },
+	{ value: '24h', label: '24 hours', default: true },
+	{ value: '3d', label: '3 days' },
+	{ value: '7d', label: '7 days' },
+	{ value: '30d', label: '30 days' },
+];
+
+const MANUAL_DELETION_OPTIONS = [
+	{ value: 'disabled', label: 'Disable Manual Deletion', default: true },
+	{ value: 'enabled', label: 'Enable Manual Deletion' },
+];
+
+// Types
 interface CreateNoteData {
-	message: string;
+	message?: string;
 	noteId?: string;
 	noteLink?: string;
 }
@@ -18,182 +41,281 @@ interface CreateNoteFormProps {
 	onError: (error: string) => void;
 }
 
-export default function CreateNote({ data }: { data: CreateNoteData }) {
-	const [formData, setFormData] = useState<CreateNoteData>({ ...data });
+function MessageDisplay({ data }: { data: CreateNoteData }) {
+	if (!data.message) return null;
+
+	const isSuccess = !!data.noteId;
 
 	return (
-		<div class='mt-6 p-4 sm:p-8 rounded-xl shadow-xl w-full bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600 hover:shadow-2xl hover:shadow-blue-500/25 transition-shadow'>
-			<h2 class='text-3xl font-bold text-white mb-2 flex items-center gap-2'>
-				<PenIcon />
-				Create a Note
-			</h2>
-
-			<p class='mt-1 text-gray-300 text-base'>
-				Share your notes securely with a password. Notes are <span class='font-semibold text-blue-300'>encrypted</span>
-				{' '}
-				and <span class='font-semibold text-blue-300'>self-destruct</span> after a set time or after being viewed.
-			</p>
-
-			{formData.message && (
+		<div
+			class={`mt-6 p-6 rounded-xl border-2 transition-all duration-300 ${
+				isSuccess
+					? 'bg-gradient-to-br from-green-600/20 to-green-700/10 border-green-400/50 shadow-lg shadow-green-500/20'
+					: 'bg-gradient-to-br from-red-600/20 to-red-700/10 border-red-400/50 shadow-lg shadow-red-500/20'
+			}`}
+		>
+			<div class='flex items-start gap-3'>
 				<div
-					class={`mt-6 p-4 rounded-lg border transition-all ${
-						formData.noteId
-							? 'bg-green-600/20 border-green-400 text-green-200'
-							: 'bg-red-600/20 border-red-400 text-red-200'
+					class={`w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold ${
+						isSuccess ? 'bg-green-500' : 'bg-red-500'
 					}`}
 				>
-					<span class='font-medium' title={formData.noteId ? 'Note ID: ' + formData.noteId : undefined}>
-						{formData.message}
-					</span>
-
-					{formData.noteId && (
-						<CopyContent
-							content={formData.noteLink!}
-							label={formData.noteLink!}
-						/>
+					{isSuccess ? '✓' : '✕'}
+				</div>
+				<div class='flex-1'>
+					<p class={`font-semibold text-lg ${isSuccess ? 'text-green-200' : 'text-red-200'}`}>
+						{data.message}
+					</p>
+					{data.noteId && (
+						<p class='text-green-300/80 text-sm mt-1' title={`Note ID: ${data.noteId}`}>
+							Share the link below to give someone access to your note
+						</p>
 					)}
 				</div>
-			)}
+			</div>
 
-			<div class='mt-8'>
-				<CreateNoteForm
-					onCreate={(id, message, noteLink) => {
-						setFormData({ message, noteId: id, noteLink });
-					}}
-					onError={(error) => {
-						setFormData({ message: error, noteId: undefined, noteLink: '' });
-					}}
-				/>
+			{data.noteId && data.noteLink && (
+				<div class='mt-4 pt-4 border-t border-green-400/20'>
+					<CopyContent
+						content={data.noteLink}
+						label={data.noteLink}
+					/>
+				</div>
+			)}
+		</div>
+	);
+}
+
+function CreateNoteHeader() {
+	return (
+		<div class='text-start mb-8'>
+			<div class='flex items-center justify-start gap-3 mb-4'>
+				<div class='p-3 bg-blue-600/20 rounded-xl'>
+					<PenIcon />
+				</div>
+				<h2 class='text-4xl font-bold text-white'>
+					Create a Note
+				</h2>
+			</div>
+			<p class='text-gray-300 text-lg max-w-2xl mx-auto leading-relaxed'>
+				Share your notes securely with a password. Notes are{' '}
+				<span class='font-semibold text-blue-300 bg-blue-500/10 px-2 py-1 rounded'>encrypted</span> and{' '}
+				<span class='font-semibold text-blue-300 bg-blue-500/10 px-2 py-1 rounded'>self-destruct</span>{' '}
+				after a set time or after being viewed.
+			</p>
+		</div>
+	);
+}
+
+export default function CreateNote({ message }: { message?: string }) {
+	const [formData, setFormData] = useState<CreateNoteData>({ message });
+
+	return (
+		<div class='max-w-4xl mx-auto'>
+			<div class='bg-gradient-to-br from-gray-800/95 to-gray-700/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-600/50 overflow-hidden'>
+				<div class='p-4 sm:p-12'>
+					<CreateNoteHeader />
+
+					<MessageDisplay data={formData} />
+
+					<div class='mt-8'>
+						<CreateNoteForm
+							onCreate={(id, message, noteLink) => {
+								setFormData({ message, noteId: id, noteLink });
+							}}
+							onError={(error) => {
+								setFormData({ message: error, noteId: undefined, noteLink: '' });
+							}}
+						/>
+					</div>
+				</div>
 			</div>
 		</div>
 	);
 }
 
 function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
-	async function handleSubmit(event: Event) {
+	const handleSubmit = async (event: Event) => {
 		event.preventDefault();
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
-
 		const noteContent = formData.get('noteContent')?.toString() || '';
-		const notePassword = formData.get('notePassword')?.toString() || ''; // the plain password is never submitted to the server
+		const notePassword = formData.get('notePassword')?.toString() || undefined;
 		const expiresIn = formData.get('expiresIn')?.toString() || '';
-		const firstAuth = generateRandomId(8);
-		const passwordHash = await generateDeterministicClientHash(notePassword);
+		const manualDeletion = formData.get('manualDeletion') === 'enabled';
 
 		try {
-			// encrypt the note content using the provided plain password or a random auth token
-			const encryptedContent = await encryptNoteContent(
+			const result = await NoteAPIService.createNote({
 				noteContent,
-				notePassword ? notePassword : firstAuth,
-			);
-
-			const requestBody = {
-				content: encryptedContent.encrypted,
-				password: notePassword ? passwordHash : null, // Password is PBKDF2 hashed before sending, then bcrypt hashed on server
-				expiresAt: expiresIn,
-				iv: encryptedContent.iv,
-			};
-
-			const response = await fetch('/api/notes', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(requestBody),
+				notePassword,
+				expiresIn,
+				manualDeletion,
 			});
 
-			const result = await response.json();
-			if (response.ok) {
-				const link = notePassword ? result.noteLink : `${result.noteLink}#auth=${firstAuth}`;
-				onCreate(result.noteId, result.message, link);
-				form.reset();
-			} else {
-				onError(result.error || 'Failed to create note.');
+			if (!result.success) {
+				throw new Error(result.message || MESSAGES.CREATE_ERROR);
 			}
-		} catch (_err) {
-			onError('An error occurred while creating the note.');
+
+			const link = notePassword ? result.noteId : `${result.noteId}#auth=${result.authKey}`;
+			onCreate(result.noteId!, MESSAGES.CREATE_SUCCESS, `${globalThis.location.origin}/${link}`);
+			form.reset();
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : MESSAGES.UNEXPECTED_ERROR;
+			onError(errorMessage);
 		}
-	}
+	};
 
 	return (
-		<form class='mt-4 space-y-5' method='post' onSubmit={handleSubmit} autoComplete='off'>
-			<div>
-				<label
-					class='block text-white text-lg font-semibold mb-2'
-					htmlFor='noteContent'
-				>
-					Note
-				</label>
-				<textarea
-					class='w-full h-52 p-3 border border-gray-600 rounded-xl bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 transition'
-					placeholder='Type your note here...'
-					name='noteContent'
-					id='noteContent'
-					required
-				>
-				</textarea>
+		<form class='space-y-8' method='post' onSubmit={handleSubmit} autoComplete='off'>
+			<div class='grid gap-8'>
+				{/* Note Content Field */}
+				<div>
+					<label
+						class='block text-white text-lg font-semibold mb-2'
+						htmlFor='noteContent'
+					>
+						Note Content <span class='text-red-400 ml-1'>*</span>
+					</label>
+					<textarea
+						class='w-full h-52 p-2 border border-gray-600 rounded-xl bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 transition'
+						placeholder='Type your note here...'
+						name='noteContent'
+						id='noteContent'
+						required
+					>
+					</textarea>
+				</div>
+
+				{/* Password Field */}
+				<div>
+					<label
+						class='block text-white text-lg font-semibold mb-2'
+						htmlFor='notePassword'
+						title='Set a password to protect and encrypt your note'
+					>
+						Password <span class='text-gray-400 font-normal text-base'>(optional)</span>
+					</label>
+					<p class='text-gray-400 text-sm -mt-1'>
+						Optional: Add password protection for enhanced security
+					</p>
+					<PasswordInput
+						type='password'
+						name='notePassword'
+						id='notePassword'
+						placeholder='Enter to set a password'
+					/>
+				</div>
+
+				{/* Expiration Field */}
+				<div>
+					<label
+						class='block text-white text-lg font-semibold mb-2'
+						htmlFor='expiresIn'
+					>
+						Expire After
+					</label>
+					<p class='text-gray-400 text-sm -mt-1'>
+						Note will automatically self-destruct after this time period
+					</p>
+					<Select
+						name='expiresIn'
+						id='expiresIn'
+						defaultValue='24h'
+					>
+						{EXPIRY_OPTIONS.map((option) => (
+							<option
+								key={option.value}
+								value={option.value}
+								selected={option.default}
+							>
+								{option.label}
+							</option>
+						))}
+					</Select>
+				</div>
+
+				{/* Advanced Options */}
+				<details class='group bg-gradient-to-br from-gray-800/60 to-gray-900/40 rounded-xl p-6 border border-gray-600/30 hover:border-gray-500/50 transition-all duration-200'>
+					<summary class='text-white text-lg font-semibold cursor-pointer flex items-center gap-2 hover:text-blue-300 transition-colors'>
+						<span class='transform group-open:rotate-90 transition-transform duration-200'>▶</span>
+						Advanced Options
+					</summary>
+					<div class='mt-6 pt-4 border-t border-gray-600/30'>
+						<label class='block text-white text-lg font-semibold' htmlFor='replaceContent'>
+							Manual Deletion
+						</label>
+						<p class='text-gray-400 text-sm mb-2'>
+							Let anybody with access to the note delete it manually at any time. This will turn off self-destruction
+							after viewing - use with caution.
+						</p>
+						<Select
+							name='manualDeletion'
+							id='manualDeletion'
+							defaultValue='disabled'
+						>
+							{MANUAL_DELETION_OPTIONS.map((option) => (
+								<option
+									key={option.value}
+									value={option.value}
+									selected={option.default}
+								>
+									{option.label}
+								</option>
+							))}
+						</Select>
+					</div>
+				</details>
 			</div>
 
-			<div>
-				<label
-					class='block text-white text-lg font-semibold mb-2'
-					htmlFor='notePassword'
-					title='Set a password to protect and encrypt your note'
-				>
-					Password <span class='text-gray-400 font-normal text-base'>(optional)</span>
-				</label>
-				<PasswordInput
-					type='password'
-					name='notePassword'
-					id='notePassword'
-					placeholder='Enter to set a password'
-				/>
-			</div>
+			{/* Submit Button */}
 
-			<div>
-				<label
-					class='block text-white text-lg font-semibold'
-					htmlFor='expiresIn'
-				>
-					Expire After
-					<span class='text-gray-400 font-normal text-sm'>
-						- Note will self-destruct after this time
-					</span>
-				</label>
-				<select
-					name='expiresIn'
-					id='expiresIn'
-					class='w-full p-3 border border-gray-600 rounded-xl bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 transition'
-					defaultValue='24h'
-				>
-					<option value='10m'>10 minutes</option>
-					<option value='1h'>1 hour</option>
-					<option value='6h'>6 hours</option>
-					<option value='12h'>12 hours</option>
-					<option value='24h' selected>24 hours</option>
-					<option value='3d'>3 days</option>
-					<option value='7d'>7 days</option>
-					<option value='30d'>30 days</option>
-				</select>
-			</div>
-
-			<Button type='submit' color='primary' class='w-full flex items-center justify-center gap-2'>
+			<Button type='submit' variant='primary' class='w-full flex items-center justify-center gap-2'>
 				Save Note
 			</Button>
 
-			<noscript class='mt-1 text-red-500 text-base'>
-				<p>
-					⚠ You have JavaScript disabled. Notes will now be encrypted on the server side. Enable JavaScript for
-					client-side encryption. Zero-knowledge encryption is not possible without JavaScript.{' '}
-					<a href='/privacy#javascript-usage' class='underline mx-1'>Learn more</a>
-				</p>
+			{/* Warnings and Info */}
+			<noscript>
+				<div class='mt-4 p-4 bg-red-600/20 border border-red-500/50 rounded-xl'>
+					<div class='flex items-start gap-3'>
+						<span class='text-red-400 text-xl'>⚠</span>
+						<div class='text-red-200'>
+							<p class='font-semibold mb-1'>JavaScript Required</p>
+							<p class='text-sm'>
+								You have JavaScript disabled. Enable JavaScript for client-side encryption. Zero-knowledge encryption is
+								not possible without JavaScript.
+							</p>
+							<a
+								href='/privacy#javascript-usage'
+								class='inline-block mt-2 text-red-300 hover:text-red-200 underline'
+							>
+								Learn more about JavaScript usage
+							</a>
+						</div>
+					</div>
+				</div>
 			</noscript>
 
-			<div class='mt-4 text-sm text-gray-400'>
-				<p>
-					Notes are encrypted with AES-GCM and can be protected with a password. They will self-destruct after the
-					specified time or after being viewed.
-					<a href='/privacy#javascript-usage' class='underline mx-2'>Learn more</a>
-				</p>
+			<div class='mt-6 p-4 bg-blue-600/10 border border-blue-500/30 rounded-xl'>
+				<div class='flex items-start gap-3'>
+					<div class='w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold'>
+						i
+					</div>
+					<div class='text-sm text-blue-200 leading-relaxed'>
+						<p class='font-semibold mb-2'>Security Information:</p>
+						<ul class='space-y-1 text-blue-300/90'>
+							<li>• Notes are encrypted with AES-GCM encryption</li>
+							<li>• Password protection adds an additional security layer</li>
+							<li>• Notes automatically self-destruct after viewing or expiration</li>
+							<li>• All encryption happens in your browser - we never see your data</li>
+						</ul>
+						<a
+							href='/privacy#javascript-usage'
+							class='inline-block mt-3 text-blue-400 hover:text-blue-300 underline transition-colors'
+						>
+							Learn more about our security →
+						</a>
+					</div>
+				</div>
 			</div>
 		</form>
 	);

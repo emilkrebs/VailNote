@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import Header from '../components/Header.tsx';
 import HomeButton from '../components/HomeButton.tsx';
 import Message from '../components/Message.tsx';
@@ -8,151 +8,208 @@ import PasswordInput from './PasswordInput.tsx';
 import { Button } from '../components/Button.tsx';
 import { Note } from '../types/types.ts';
 import { decryptNoteContent } from '../utils/encryption.ts';
+import NoteAPIService from '../utils/note-api-service.ts';
+import LoadingPage from '../components/LoadingPage.tsx';
 
-async function deleteNote(noteId: string) {
-	try {
-		const response = await fetch(`/api/notes/${noteId}`, {
-			method: 'DELETE',
-			headers: { 'Content-Type': 'application/json' },
-		});
+// Constants for messages
+const MESSAGES = {
+	NO_AUTH_KEY: 'No auth key provided, note requires password',
+	MANUAL_DELETION_PROMPT: 'The note has been retrieved. Click the button below to delete it.',
+	AUTO_DELETION_COMPLETE: 'This note has been destroyed. It will not be retrievable again.',
+	DECRYPTION_FAILED: 'Failed to decrypt note with provided authentication key',
+	ENTER_PASSWORD: 'Please enter a password',
+	NOTE_NOT_AVAILABLE: 'Note data not available',
+	DECRYPT_SUCCESS: 'Note decrypted successfully',
+	INVALID_PASSWORD: 'Incorrect password. Please try again.',
+	NO_PASSWORD: 'No password provided. Deletion cancelled.',
+	DELETE_SUCCESS: 'Note deleted successfully. Redirecting...',
+} as const;
 
-		if (!response.ok) {
-			console.warn('Failed to delete note from server (note may have already been deleted)');
-		}
-	} catch (err) {
-		console.warn('Failed to delete note from server:', err);
-	}
+interface ViewEncryptedNoteProps {
+	noteId: string;
+	manualDeletion?: boolean;
 }
 
-async function getEncryptedNote(noteId: string) {
-	const response = await fetch(`/api/notes/${noteId}`, {
-		method: 'GET',
-		headers: { 'Content-Type': 'application/json' },
-	});
-
-	if (!response.ok) {
-		throw new Error('Failed to fetch note');
-	}
-
-	return response.json();
+interface PasswordRequiredViewProps {
+	onSubmit: (event: Event) => Promise<void>;
+	error?: string;
+	manualDeletion?: boolean;
 }
 
 // https://vailnote.com/[id]#[authKey] or https://vailnote.com/[id] (password required)
 export default function ViewEncryptedNote(
-	{ noteId }: { noteId: string },
+	{ noteId, manualDeletion }: ViewEncryptedNoteProps,
 ) {
 	const [note, setNote] = useState<Note | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [needsPassword, setNeedsPassword] = useState(false);
 	const [confirmed, setConfirmed] = useState(false);
-	const [decryptionError, setDecryptionError] = useState<string | null>(null);
+	const [decryptionError, setDecryptionError] = useState<string | undefined>(undefined);
+	const [message, setMessage] = useState<string | undefined>(undefined);
+
+	const notePassword = useRef<string | undefined>(undefined);
 
 	useEffect(() => {
+		// Helper to extract auth key from URL
+		const getAuthKey = () => {
+			const url = new URL(globalThis.location.href);
+			let authKey = url.searchParams.get('auth');
+			if (!authKey) {
+				const hash = globalThis.location.hash.slice(1);
+				authKey = new URLSearchParams(hash).get('auth');
+			}
+			return authKey;
+		};
+
+		const showPasswordPrompt = () => {
+			setNote(null);
+			setNeedsPassword(true);
+			setLoading(false);
+		};
+
+		const authKey = getAuthKey();
+
+		// If not confirmed and no auth key, show confirmation or password prompt
+		if (!authKey && !confirmed) {
+			console.warn('No auth key provided, note requires password');
+			return showPasswordPrompt();
+		}
+
+		// If already confirmed and no password is needed, do nothing
+		if (!needsPassword && confirmed) {
+			return;
+		}
+
+		// Fetch and decrypt note (for both auth key and password flows)
 		const fetchAndDecryptNote = async () => {
 			try {
 				setLoading(true);
-				const data = await getEncryptedNote(noteId);
-				if (!data) {
-					throw new Error('Note not found');
-				}
-
-				// Check hash fragment (#auth=...) and query parameters (?auth=...)
-				const url = new URL(globalThis.location.href);
-				let authKey = url.searchParams.get('auth'); // Check query parameters first (?auth=...)
-
-				if (!authKey) {
-					// Check hash fragment (#auth=...)
-					const hash = globalThis.location.hash.slice(1); // Remove the # symbol
-					authKey = new URLSearchParams(hash).get('auth');
-				}
 
 				if (authKey) {
-					// We have an auth key, try to decrypt immediately (no password needed)
-					try {
-						const decryptedContent = await decryptNoteContent(data.content, data.iv, authKey);
-						data.content = decryptedContent;
-						setNote(data);
-						setLoading(false);
-						// Delete the note after successful decryption
-						await deleteNote(noteId);
-					} catch (_decryptErr) {
-						setError('Failed to decrypt note with provided authentication key');
-						setLoading(false);
-					}
+					await handleAuthKey(authKey);
 				} else {
-					// No auth key, this note needs a password - store encrypted data and show password form
-					setNote(data); // Store encrypted note data
-					setNeedsPassword(true);
-					setLoading(false);
+					// Password flow: show password form
+					showPasswordPrompt();
 				}
 			} catch (err) {
-				if (err instanceof Error) {
-					setError(err.message);
-				} else {
-					setError('An unknown error occurred');
-				}
+				setError(err instanceof Error ? err.message : MESSAGES.DECRYPTION_FAILED);
+			} finally {
 				setLoading(false);
 			}
 		};
 
-		// Only fetch when confirmed or when we have an auth key (no confirmation needed for auth key notes)
-		if (confirmed) {
+		const handleAuthKey = async (authKey: string) => {
+			try {
+				const result = await NoteAPIService.getEncryptedNote(noteId, authKey);
+				if (!result.success || !result.note) throw new Error(result.message);
+
+				notePassword.current = manualDeletion ? authKey : undefined;
+				const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, authKey);
+
+				setNote(
+					{ ...result.note, content: decryptedContent },
+				);
+				setMessage(
+					result.note.manualDeletion ? MESSAGES.MANUAL_DELETION_PROMPT : MESSAGES.AUTO_DELETION_COMPLETE,
+				);
+			} catch (err) {
+				console.error(MESSAGES.DECRYPTION_FAILED, err);
+				setError(MESSAGES.DECRYPTION_FAILED);
+			}
+		};
+
+		// Only fetch when confirmed or when we have an auth key
+		if (confirmed || authKey) {
 			fetchAndDecryptNote();
 		}
 	}, [confirmed, noteId]);
 
 	const handlePasswordSubmit = async (event: Event) => {
 		event.preventDefault();
+		setLoading(true);
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
 		const password = formData.get('password')?.toString() || '';
 
 		if (!password.trim()) {
-			setDecryptionError('Please enter a password');
-			return;
-		}
-
-		if (!note) {
-			setDecryptionError('Note data not available');
+			setDecryptionError(MESSAGES.ENTER_PASSWORD);
 			return;
 		}
 
 		try {
-			setDecryptionError(null);
-			const decryptedContent = await decryptNoteContent(note.content, note.iv, password);
-			setNote({ ...note, content: decryptedContent });
+			setDecryptionError(undefined);
+			const result = await NoteAPIService.getEncryptedNote(noteId, password);
+			console.log('Note fetch result:', result);
+			if (!result.success || !result.note) {
+				return setDecryptionError(MESSAGES.INVALID_PASSWORD);
+			}
+			notePassword.current = manualDeletion ? password : undefined;
+			const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, password);
+			result.note.content = decryptedContent;
+
+			setNote(result.note);
 			setNeedsPassword(false);
-			// Delete the note after successful decryption
-			await deleteNote(noteId);
+			setConfirmed(true);
+			setLoading(false);
+			setMessage(MESSAGES.DECRYPT_SUCCESS);
 		} catch (_decryptErr) {
-			setDecryptionError('Incorrect password. Please try again.');
+			setDecryptionError(MESSAGES.INVALID_PASSWORD);
+			console.error('Decryption failed:', _decryptErr);
+			setLoading(false);
 		}
+	};
+
+	const handleDeleteNote = async () => {
+		if (!notePassword.current) {
+			setMessage(MESSAGES.NO_PASSWORD);
+			return;
+		}
+		await NoteAPIService.deleteNote(noteId, notePassword.current);
+		setMessage(MESSAGES.DELETE_SUCCESS);
+		globalThis.location.href = '/';
 	};
 
 	if (error) {
 		return <NoteErrorPage message={error} />;
 	}
 
-	if (!confirmed) {
+	if (needsPassword) {
+		return <PasswordRequiredView onSubmit={handlePasswordSubmit} error={decryptionError} manualDeletion={manualDeletion} />;
+	}
+
+	if (!confirmed && !needsPassword && !manualDeletion) {
 		return <ConfirmViewNote onSubmit={() => setConfirmed(true)} />;
 	}
 
 	if (loading) {
-		return <LoadingSpinner />;
-	}
-
-	if (needsPassword) {
-		return <PasswordRequiredView onSubmit={handlePasswordSubmit} error={decryptionError} />;
+		return <LoadingPage title='Decrypting Note' message='Please wait while we securely decrypt your note...' />;
 	}
 
 	if (!note) {
-		return <NoteErrorPage message='Note not found' />;
+		return <NoteErrorPage message={message || 'Note not found'} />;
 	}
 
 	return (
+		<DisplayDecryptedNote
+			content={note.content}
+			message={message}
+			manualDeletion={manualDeletion}
+			onDeleteNote={handleDeleteNote}
+		/>
+	);
+}
+
+interface DisplayDecryptedNoteProps {
+	content: string;
+	message?: string;
+	manualDeletion?: boolean;
+	onDeleteNote: () => void;
+}
+
+function DisplayDecryptedNote({ content, message, manualDeletion, onDeleteNote }: DisplayDecryptedNoteProps) {
+	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
-			<Header title='Note Retrieved' description='Successfully decrypted and displayed' />
 			<SiteHeader />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
 				<div class='flex flex-col mt-6 p-4 sm:p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
@@ -167,7 +224,10 @@ export default function ViewEncryptedNote(
 						</div>
 					</div>
 
-					<Message message='This note has been destroyed. It will not be retrievable again.' type='success' />
+					<Message
+						message={message || MESSAGES.AUTO_DELETION_COMPLETE}
+						type='success'
+					/>
 
 					{/* Content section with enhanced styling */}
 					<div class='mt-6'>
@@ -186,14 +246,21 @@ export default function ViewEncryptedNote(
 						<div class='relative bg-gray-900/80 rounded-lg p-6 shadow-inner border border-gray-700/50'>
 							<div class='pr-12'>
 								<p class='whitespace-pre-wrap break-words text-gray-100 leading-relaxed text-base'>
-									{note.content}
+									{content}
 								</p>
 							</div>
 						</div>
 					</div>
 
-					<div class='mt-8 pt-6 border-t border-gray-600/50 w-full'>
-						<HomeButton class='w-full' />
+					{/* Action buttons */}
+					<div class='flex flex-col sm:flex-row gap-4 mt-8 pt-6 border-t border-gray-600/50 w-full'>
+						<HomeButton />
+
+						{manualDeletion && (
+							<Button variant='danger' onClick={onDeleteNote}>
+								Delete Note
+							</Button>
+						)}
 					</div>
 				</div>
 			</div>
@@ -201,47 +268,9 @@ export default function ViewEncryptedNote(
 	);
 }
 
-function LoadingSpinner() {
-	return (
-		<div class='flex flex-col items-center justify-center min-h-screen h-full w-full background-animate text-white py-16'>
-			<Header title='Loading...' description='Decrypting your secure note' />
-			<SiteHeader />
-			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-				<div class='flex flex-col items-center mt-6 p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
-					{/* Animated spinner */}
-					<div class='relative mb-8'>
-						<div class='w-16 h-16 border-4 border-gray-600 border-t-blue-400 border-r-blue-400 rounded-full animate-spin'>
-						</div>
-						<div class='absolute inset-2 w-12 h-12 border-2 border-gray-700 border-b-purple-400 border-l-purple-400 rounded-full animate-spin animate-reverse'>
-						</div>
-						<div class='absolute inset-4 w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse'>
-						</div>
-					</div>
-
-					{/* Loading text */}
-					<div class='text-center'>
-						<h2 class='text-2xl font-bold text-white mb-2'>Decrypting Note</h2>
-						<p class='text-gray-300 text-sm'>
-							Please wait while we securely decrypt your note...
-						</p>
-					</div>
-
-					{/* Progress dots */}
-					<div class='flex space-x-2 mt-6'>
-						<div class='w-2 h-2 bg-blue-400 rounded-full animate-bounce'></div>
-						<div class='w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:0.1s]'></div>
-						<div class='w-2 h-2 bg-blue-400 rounded-full animate-bounce [animation-delay:0.2s]'></div>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
-}
-
-function PasswordRequiredView({ onSubmit, error }: { onSubmit: (event: Event) => void; error: string | null }) {
+function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequiredViewProps) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
-			<Header title='Password Protected' description='This note requires a password to decrypt' />
 			<SiteHeader />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
 				<div class='flex flex-col mt-6 p-4 sm:p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
@@ -262,12 +291,18 @@ function PasswordRequiredView({ onSubmit, error }: { onSubmit: (event: Event) =>
 						</div>
 					)}
 
-					<WarningMessage />
+					{!manualDeletion && <WarningMessage />}
+
+					{manualDeletion && (
+						<div class='mb-6 p-4 rounded-lg border bg-yellow-600/20 border-yellow-400 text-yellow-200'>
+							<span class='font-medium'>This note will not be deleted automatically. You must delete it manually.</span>
+						</div>
+					)}
 
 					<NoScriptWarning />
 
 					{/* Password input form */}
-					<form onSubmit={onSubmit} class='space-y-6' autoComplete='off'>
+					<form class='space-y-6' onSubmit={onSubmit} autoComplete='off'>
 						<div>
 							<label
 								class='block text-white text-lg font-semibold mb-3'
@@ -284,16 +319,16 @@ function PasswordRequiredView({ onSubmit, error }: { onSubmit: (event: Event) =>
 							/>
 						</div>
 						<Button
-							color='primary'
 							type='submit'
+							variant='primary'
 							class='w-full'
 						>
-							Decrypt and View Note
+							{manualDeletion ? 'View Note' : 'View & Destroy'}
 						</Button>
 					</form>
 
-					<div class='mt-8 pt-6 border-t border-gray-600/50 w-full'>
-						<HomeButton class='w-full' />
+					<div class='block mt-8 pt-6 border-t border-gray-600/50'>
+						<HomeButton />
 					</div>
 				</div>
 			</div>
@@ -304,7 +339,6 @@ function PasswordRequiredView({ onSubmit, error }: { onSubmit: (event: Event) =>
 function ConfirmViewNote({ onSubmit }: { onSubmit: () => void }) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
-			<Header title='Confirm View & Destroy' />
 			<SiteHeader />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
 				<div class='mt-6 p-4 sm:p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
@@ -325,7 +359,7 @@ function ConfirmViewNote({ onSubmit }: { onSubmit: () => void }) {
 					<div class='space-y-6'>
 						<div class='flex flex-col sm:flex-row w-full justify-between gap-4'>
 							<HomeButton class='w-full sm:min-w-max' />
-							<Button color='danger' class='w-full' onClick={onSubmit}>
+							<Button variant='danger' class='w-full' onClick={onSubmit}>
 								View and Destroy Note
 							</Button>
 						</div>

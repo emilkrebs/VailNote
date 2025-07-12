@@ -22,10 +22,6 @@ collects, uses, and protects your information when you use our secure note-shari
 - **No Trackers or Analytics:**\
   We do not use cookies, trackers, or analytics tools.
 
-- **Legacy Server-Side Encryption (No JavaScript):**\
-  If JavaScript is disabled, encryption occurs on our servers. In this case, you must trust us to handle your data
-  securely. We recommend enabling JavaScript for maximum privacy.
-
 - **Automatic Deletion:**\
   Notes are deleted automatically after being viewed or after their expiration time.
 
@@ -65,12 +61,7 @@ collects, uses, and protects your information when you use our secure note-shari
 ## Zero-Knowledge Guarantee
 
 VailNote is designed so that not even our team can access your note contents. All encryption and decryption happens on
-your device (when JavaScript is enabled). We never have access to your passwords or encryption keys.
-
-## JavaScript Usage
-
-When JavaScript is enabled, your notes are encrypted in your browser before being sent to our servers.\
-If you disable JavaScript, encryption happens on the server side, and you must trust us to handle your data securely.
+your device. We never have access to your passwords or encryption keys.
 
 ## Anonymous Rate Limiting (ARC)
 

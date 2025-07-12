@@ -1,8 +1,14 @@
 import { FreshContext } from '$fresh/server.ts';
+import { Note } from '../../../types/types.ts';
+import { compareHash } from '../../../utils/hashing.ts';
 import { mergeWithRateLimitHeaders } from '../../../utils/rate-limiting/rate-limit-headers.ts';
 import { State } from '../../_middleware.ts';
 
 export const handler = async (req: Request, ctx: FreshContext<State>): Promise<Response> => {
+	if (req.method !== 'POST' && req.method !== 'DELETE') {
+		return new Response('Method not allowed', { status: 405 });
+	}
+
 	const rateLimitResult = await ctx.state.context.getRateLimiter().checkRateLimit(req);
 	const noteDatabase = ctx.state.context.getNoteDatabase();
 
@@ -30,18 +36,31 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 		return new Response('Note ID is required', { status: 400 });
 	}
 
-	if (req.method === 'GET') {
+	if (req.method === 'POST') {
 		const note = await noteDatabase.getNoteById(id);
-		if (!note) {
-			return new Response('Note not found', { status: 404 });
+		const { passwordHash } = await req.json();
+
+		if (!note || !passwordHash) {
+			return new Response('Note not found or password hash missing', { status: 404 });
 		}
+
+		if (note.password && !compareHash(passwordHash, note.password)) {
+			return new Response('Invalid password or auth key', { status: 403 });
+		}
+
+		// If the note doesn't require manual deletion, delete it to ensure it has been destroyed
+		if (!note.manualDeletion) {
+			await noteDatabase.deleteNote(id);
+		}
+
 		return new Response(
 			JSON.stringify({
 				id: note.id,
 				content: note.content,
 				iv: note.iv,
 				expiresAt: note.expiresAt,
-			}),
+				manualDeletion: note.manualDeletion,
+			} as Note),
 			{
 				headers: mergeWithRateLimitHeaders(
 					{ 'Content-Type': 'application/json' },
@@ -52,10 +71,14 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 		);
 	} else if (req.method === 'DELETE') {
 		const note = await noteDatabase.getNoteById(id);
+		const { passwordHash } = await req.json();
 		if (!note) {
 			return new Response('Note not found', { status: 404 });
 		}
 
+		if (note.password && !compareHash(passwordHash, note.password)) {
+			return new Response('Invalid password or auth key', { status: 403 });
+		}
 		await noteDatabase.deleteNote(id);
 		return new Response(
 			JSON.stringify({
