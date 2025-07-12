@@ -175,7 +175,7 @@ export default function ViewEncryptedNote(
 	}
 
 	if (needsPassword) {
-		return <PasswordRequiredView onSubmit={handlePasswordSubmit} error={decryptionError} />;
+		return <PasswordRequiredView onSubmit={handlePasswordSubmit} error={decryptionError} manualDeletion={manualDeletion} />;
 	}
 
 	if (!confirmed && !needsPassword && !manualDeletion) {
