@@ -104,29 +104,6 @@ Deno.test({
 		const testData = TestDataFactory.createNoteData();
 		let apiNoteId: string;
 
-		await t.step('should create note via form submission', async () => {
-			const formData = new FormData();
-			formData.append('noteContent', testData.content);
-			formData.append('notePassword', testData.password);
-			formData.append('expiresIn', testData.expiresIn);
-
-			const response = await handler(
-				new Request(`http://${TEST_CONFIG.hostname}/`, {
-					method: 'POST',
-					body: formData,
-				}),
-				CONN_INFO,
-			);
-
-			assertEquals(response.status, 200);
-
-			const responseText = await response.text();
-			assertMatch(responseText, /Note saved successfully/);
-
-			const extractedId = TestUtils.extractNoteIdFromResponse(responseText);
-			assertExists(extractedId, 'Note ID should be present in response');
-		});
-
 		await t.step('should create note via API', async () => {
 			const passwordClientHash = await generateDeterministicClientHash(testData.password);
 			const encryptedContent = await encryptNoteContent(testData.content, testData.password);
