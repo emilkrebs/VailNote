@@ -210,9 +210,8 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 
 			<noscript class='mt-1 text-red-500 text-base'>
 				<p>
-					⚠ You have JavaScript disabled. Notes will now be encrypted on the server side. Enable JavaScript for
-					client-side encryption. Zero-knowledge encryption is not possible without JavaScript.{' '}
-					<a href='/privacy#javascript-usage' class='underline mx-1'>Learn more</a>
+					⚠ You have JavaScript disabled. Enable JavaScript for client-side encryption. Zero-knowledge encryption is not
+					possible without JavaScript. <a href='/privacy#javascript-usage' class='underline mx-1'>Learn more</a>
 				</p>
 			</noscript>
 

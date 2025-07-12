@@ -2,7 +2,7 @@ import { createHandler, ServeHandlerInfo } from '$fresh/server.ts';
 import manifest from '../fresh.gen.ts';
 import config from '../fresh.config.ts';
 import { assertEquals, assertExists, assertMatch } from '$std/assert/mod.ts';
-import { generateDeterministicClientHash, generateHash } from '../utils/hashing.ts';
+import { generateDeterministicClientHash } from '../utils/hashing.ts';
 import { encryptNoteContent } from '../utils/encryption.ts';
 import { Context } from '../routes/_middleware.ts';
 
@@ -151,7 +151,6 @@ Deno.test({
 			assertEquals(data.message, 'Note saved successfully!');
 			assertExists(data.noteId, 'Note ID should be present in API response');
 			apiNoteId = data.noteId;
-
 		});
 
 		await t.step('should retrieve note by ID', async () => {

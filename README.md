@@ -17,12 +17,11 @@ focus on user-friendliness and security.
 
 ## Features
 
-- 🔒 **End-to-end encryption** (JavaScript mode)
+- 🔒 **End-to-end encryption**
 - 🗂️ **Self-destructing notes** - automatically deleted after viewing
 - 🔑 **Optional password protection**
 - ⏰ **Configurable expiration times** (10 minutes to 30 days)
 - 🚫 **No tracking or analytics**
-- 📱 **No-JavaScript fallback** for maximum compatibility
 - 🛡️ **Privacy-preserving rate limiting** using Anonymous Rate-Limited Credentials (ARC)
 
 ## Tech Stack
@@ -39,13 +38,10 @@ focus on user-friendliness and security.
 
 # How does VailNote work?
 
-Since VailNote uses one JavaScript and one non-JavaScript approach, there are two different implementations listed
-below. Take a look at the [architecture diagram](#architecture-diagram) for a better visual representation.
+Take a look at the [architecture diagram](#architecture-diagram) for a better visual representation.
 
 Every possible step where I think it might be insecure, given the possibility that the network, server, or database has
 The system has been compromised and is marked with (!).
-
-### JavaScript (Recommended)
 
 1. Before sending anything to the server, the content will be encrypted.
 2. First, the password will be hashed with PBKDF2 for security
@@ -60,19 +56,7 @@ The system has been compromised and is marked with (!).
 7. The client will generate a valid link using the note ID and local auth key using the following structure:
    `https://vailnote.com/[noteId]#auth=[authKey]`
 
-### Non-JavaScript (Obsolete)
-
-1. The password and content will be sent to the server as plain text (!)
-2. The server will encrypt the content using the plain password and hash the password with bcrypt for storage.
-
-- If no password is provided, the server will use the unique noteID for encryption (!)
-
-3. If the document is valid, the server will generate a random note ID and store the note in the database.
-4. The server will generate a random link using the following structure: `https://vailnote.com/[noteId]`
-
-Note: SSL will handle the encryption. If disabled, the sensitive data might be compromised.
-
-### Viewing the Note (JavaScript required!)
+### Viewing the Note
 
 1. When a note is accessed, the client fetches the encrypted note data from the server.
 2. The client asks the user for confirmation before viewing (and destroying) the note.

@@ -2,77 +2,19 @@ import { Handlers, PageProps } from '$fresh/server.ts';
 import Header from '../components/Header.tsx';
 import SiteHeader from '../components/SiteHeader.tsx';
 import CreateNote from '../islands/CreateNoteForm.tsx';
-import { formatExpiration, generateRandomId } from '../types/types.ts';
-import { encryptNoteContent } from '../utils/encryption.ts';
-import { generateDeterministicClientHash, generateHash } from '../utils/hashing.ts';
-import { generateRateLimitHeaders } from '../utils/rate-limiting/rate-limit-headers.ts';
 import { State } from './_middleware.ts';
 
 interface HomeData {
 	message: string;
-	noteId?: string | null;
-	noteLink?: string;
 }
 
 export const handler: Handlers<HomeData, State> = {
 	GET(_req, ctx) {
 		return ctx.render({ message: '' });
 	},
-	async POST(req, ctx) {
-		// this endpoint is only used to create a note when the client does not have JavaScript enabled
-		const rateLimitResult = await ctx.state.context.getRateLimiter().checkRateLimit(req);
-		const noteDatabase = ctx.state.context.getNoteDatabase();
-		if (!rateLimitResult.allowed) {
-			return ctx.render({
-				message: 'Rate limit exceeded. Please try again later in a few minutes.',
-				noteId: null,
-				noteLink: '',
-			}, {
-				headers: generateRateLimitHeaders(rateLimitResult),
-			});
-		}
-
-		const form = await req.formData();
-		const noteContent = form.get('noteContent') as string;
-		const password = form.get('notePassword') as string; // the plain password is never submitted to the server
-		const expiresIn = form.get('expiresIn') as string;
-		const firstAuth = generateRandomId(8);
-
-		if (!noteContent || noteContent.trim() === '') {
-			return ctx.render({ message: 'Please enter a note.' });
-		}
-
-		const noteId = await noteDatabase.generateNoteId();
-
-		// encrypt note content using the provided plain password or a random auth token
-		const encryptedContent = await encryptNoteContent(
-			noteContent,
-			password ? password : firstAuth,
-		);
-
-		// For consistency with client-side flow, hash password with PBKDF2 first, then bcrypt
-		const passwordPBKDF2 = password ? await generateDeterministicClientHash(password) : undefined;
-
-		const insertResult = await noteDatabase.insertNote({
-			id: noteId,
-			content: encryptedContent.encrypted,
-			expiresAt: formatExpiration(expiresIn),
-			password: passwordPBKDF2 ? generateHash(passwordPBKDF2) : undefined, // Password is PBKDF2 hashed then bcrypt hashed for storage
-			iv: encryptedContent.iv,
-		});
-
-		if (!insertResult.success) {
-			return ctx.render({
-				message: `Failed to save note: ${insertResult.error}`,
-				noteId: null,
-				noteLink: '',
-			});
-		}
-
+	POST(_req, ctx) {
 		return ctx.render({
-			message: 'Note saved successfully using server-side form submission!',
-			noteId: noteId,
-			noteLink: `${ctx.url}${noteId}#auth=${firstAuth}`,
+			message: 'Server-side note creation is deprecated. Enable JavaScript to use the client-side form.',
 		});
 	},
 };
