@@ -202,8 +202,6 @@ export default function ViewEncryptedNote(
 interface DisplayDecryptedNoteProps {
 	content: string;
 	message?: string;
-
-	isDeleted?: boolean;
 	manualDeletion?: boolean;
 	onDeleteNote: () => void;
 }
