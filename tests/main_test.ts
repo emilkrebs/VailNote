@@ -1,7 +1,7 @@
 import { createHandler, ServeHandlerInfo } from '$fresh/server.ts';
 import manifest from '../fresh.gen.ts';
 import config from '../fresh.config.ts';
-import { assertEquals, assertExists, assertMatch } from '$std/assert/mod.ts';
+import { assertEquals, assertExists } from '$std/assert/mod.ts';
 import { generateDeterministicClientHash } from '../utils/hashing.ts';
 import { encryptNoteContent } from '../utils/encryption.ts';
 import { Context } from '../routes/_middleware.ts';

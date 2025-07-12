@@ -34,7 +34,7 @@ export default function Home({ data }: PageProps) {
 					class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-2 md:px-4 py-4 md:py-8'
 					aria-label='Create Note Form'
 				>
-					<CreateNote data={data} />
+					<CreateNote message={data.message} />
 				</section>
 
 				<FeaturesSection />

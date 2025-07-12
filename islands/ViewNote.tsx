@@ -156,6 +156,7 @@ export default function ViewEncryptedNote(
 		} catch (_decryptErr) {
 			setDecryptionError(MESSAGES.INVALID_PASSWORD);
 			console.error('Decryption failed:', _decryptErr);
+			setLoading(false);
 		}
 	};
 
@@ -326,8 +327,8 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
 						</Button>
 					</form>
 
-					<div class='mt-8 pt-6 border-t border-gray-600/50 w-full'>
-						<HomeButton class='w-full' />
+					<div class='block mt-8 pt-6 border-t border-gray-600/50'>
+						<HomeButton />
 					</div>
 				</div>
 			</div>
