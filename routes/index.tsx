@@ -56,7 +56,7 @@ function FeaturesSection() {
 			</h2>
 
 			<div class='flex flex-col md:flex-row gap-4 text-left'>
-				<article class='feature-card group relative bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/25 transform hover:-translate-y-3 transition-all duration-500 ease-out overflow-hidden'>
+				<article class='feature-card group relative bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/25 transform hover:-translate-y-3 transition-all duration-500 ease-out '>
 					{/* Background accent */}
 					<div class='absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full blur-xl group-hover:bg-blue-500/20 transition-all duration-500'>
 					</div>
@@ -104,7 +104,7 @@ function FeaturesSection() {
 					</div>
 				</article>
 
-				<article class='feature-card group relative bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700 hover:border-green-400 hover:shadow-2xl hover:shadow-green-500/25 transform hover:-translate-y-3 transition-all duration-500 ease-out overflow-hidden'>
+				<article class='feature-card group relative bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700 hover:border-green-400 hover:shadow-2xl hover:shadow-green-500/25 transform hover:-translate-y-3 transition-all duration-500 ease-out '>
 					{/* Background accent */}
 					<div class='absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full blur-xl group-hover:bg-green-500/20 transition-all duration-500'>
 					</div>
@@ -152,7 +152,7 @@ function FeaturesSection() {
 					</div>
 				</article>
 
-				<article class='feature-card group relative bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700 hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-500/25 transform hover:-translate-y-3 transition-all duration-500 ease-out overflow-hidden'>
+				<article class='feature-card group relative bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700 hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-500/25 transform hover:-translate-y-3 transition-all duration-500 ease-out '>
 					{/* Background accent */}
 					<div class='absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full blur-xl group-hover:bg-purple-500/20 transition-all duration-500'>
 					</div>

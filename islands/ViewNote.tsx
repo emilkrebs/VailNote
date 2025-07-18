@@ -224,10 +224,9 @@ function DisplayDecryptedNote({ content, message, manualDeletion, onDeleteNote }
 						</div>
 					</div>
 
-					<Message
-						message={message || MESSAGES.AUTO_DELETION_COMPLETE}
-						type='success'
-					/>
+					<Message variant='success'>
+						{message || MESSAGES.AUTO_DELETION_COMPLETE}
+					</Message>
 
 					{/* Content section with enhanced styling */}
 					<div class='mt-6'>

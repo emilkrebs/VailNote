@@ -5,6 +5,7 @@ import PasswordInput from './PasswordInput.tsx';
 import PenIcon from '../components/PenIcon.tsx';
 import Select from '../components/Select.tsx';
 import NoteAPIService from '../utils/note-api-service.ts';
+import Message from '../components/Message.tsx';
 
 // Constants
 const MESSAGES = {
@@ -42,17 +43,12 @@ interface CreateNoteFormProps {
 }
 
 function MessageDisplay({ data }: { data: CreateNoteData }) {
-	if (!data.message) return null;
-
 	const isSuccess = !!data.noteId;
-
 	return (
-		<div
-			class={`mt-6 p-6 rounded-xl border-2 transition-all duration-300 ${
-				isSuccess
-					? 'bg-gradient-to-br from-green-600/20 to-green-700/10 border-green-400/50 shadow-lg shadow-green-500/20'
-					: 'bg-gradient-to-br from-red-600/20 to-red-700/10 border-red-400/50 shadow-lg shadow-red-500/20'
-			}`}
+		<Message
+			variant={isSuccess ? 'success' : 'error'}
+			visible={!!data.message}
+			class='mt-6 p-6 w-full'
 		>
 			<div class='flex items-start gap-3'>
 				<div
@@ -82,7 +78,7 @@ function MessageDisplay({ data }: { data: CreateNoteData }) {
 					/>
 				</div>
 			)}
-		</div>
+		</Message>
 	);
 }
 
@@ -112,7 +108,7 @@ export default function CreateNote({ message }: { message?: string }) {
 
 	return (
 		<div class='max-w-4xl mx-auto'>
-			<div class='bg-gradient-to-br from-gray-800/95 to-gray-700/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-600/50 overflow-hidden'>
+			<div class='bg-gradient-to-br from-gray-800/95 to-gray-700/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-600/50'>
 				<div class='p-4 sm:p-12'>
 					<CreateNoteHeader />
 
@@ -159,6 +155,8 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 			const link = notePassword ? result.noteId : `${result.noteId}#auth=${result.authKey}`;
 			onCreate(result.noteId!, MESSAGES.CREATE_SUCCESS, `${globalThis.location.origin}/${link}`);
 			form.reset();
+
+			globalThis.scrollTo({ top: 64, behavior: 'smooth' });
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : MESSAGES.UNEXPECTED_ERROR;
 			onError(errorMessage);
@@ -275,7 +273,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 
 			{/* Warnings and Info */}
 			<noscript>
-				<div class='mt-4 p-4 bg-red-600/20 border border-red-500/50 rounded-xl'>
+				<Message variant='error' class='mt-2'>
 					<div class='flex items-start gap-3'>
 						<span class='text-red-400 text-xl'>⚠</span>
 						<div class='text-red-200'>
@@ -292,10 +290,10 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 							</a>
 						</div>
 					</div>
-				</div>
+				</Message>
 			</noscript>
 
-			<div class='mt-6 p-4 bg-blue-600/10 border border-blue-500/30 rounded-xl'>
+			<Message variant='info' class='mt-6'>
 				<div class='flex items-start gap-3'>
 					<div class='w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold'>
 						i
@@ -316,7 +314,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 						</a>
 					</div>
 				</div>
-			</div>
+			</Message>
 		</form>
 	);
 }
