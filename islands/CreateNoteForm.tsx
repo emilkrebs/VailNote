@@ -71,7 +71,7 @@ function MessageDisplay({ data }: { data: CreateNoteData }) {
 			</div>
 
 			{data.noteId && data.noteLink && (
-				<div class='mt-4 pt-4 border-t border-green-400/20'>
+				<div class='mt-4 pt-4 border-t border-green-400/20 w-72 sm:w-max'>
 					<CopyContent
 						content={data.noteLink}
 						label={data.noteLink}
