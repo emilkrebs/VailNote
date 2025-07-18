@@ -27,7 +27,12 @@ export default function CopyContent(
 			disabled={copied}
 			class='cursor-pointer mt-2 flex items-center gap-3 border-2 border-blue-500 rounded-lg p-3 bg-blue-600/20 text-blue-300'
 		>
-			{copied ? 'Copied!' : label}
+			<span
+				class='min-w-0 whitespace-nowrap overflow-scroll w-full scrollbar-hidden'
+				title={label}
+			>
+				{copied ? 'Copied!' : label}
+			</span>
 			{copied
 				? (
 					<svg

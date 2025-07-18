@@ -43,6 +43,15 @@ body {
 	animation-direction: reverse;
 }
 
+.scrollbar-hidden::-webkit-scrollbar {
+	display: none;
+}
+
+.scrollbar-hidden {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
 /* Markdown Styles */
 .markdown-body {
 	font-size: 1rem;
