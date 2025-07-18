@@ -28,7 +28,7 @@ export default function CopyContent(
 			class='cursor-pointer mt-2 flex items-center gap-3 border-2 border-blue-500 rounded-lg p-3 bg-blue-600/20 text-blue-300 w-72'
 		>
 			<span
-				class='min-w-0 whitespace-nowrap overflow-scroll text-ellipsis w-full scrollbar-hidden'
+				class='min-w-0 whitespace-nowrap overflow-scroll w-full scrollbar-hidden'
 				title={label}
 			>
 				{copied ? 'Copied!' : label}
