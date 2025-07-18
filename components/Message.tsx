@@ -16,7 +16,7 @@ export default function Message({ visible = true, variant = 'info', children, cl
 		<>
 			{visible && (
 				<div
-					class={`${baseClasses} ${variantClasses[variant]} ${className}`}
+					class={`${baseClasses} ${variantClasses[variant]} ${className || ''}`}
 				>
 					{children}
 				</div>
