@@ -5,7 +5,7 @@ interface MessageProps extends JSX.HTMLAttributes<HTMLDivElement> {
 	variant?: 'success' | 'error' | 'info';
 }
 
-export default function Message({ visible = true, variant = 'info', children, class: className }: MessageProps) {
+export default function Message({ visible = true, variant = 'info', children, class: className, ...props }: MessageProps) {
 	const baseClasses = 'p-4 rounded-xl shadow-md border transition-all duration-300';
 	const variantClasses = {
 		success: 'bg-green-600/20 border-green-400 text-green-200 shadow-green-500/20',
@@ -17,8 +17,9 @@ export default function Message({ visible = true, variant = 'info', children, cl
 			{visible && (
 				<div
 					class={`${baseClasses} ${variantClasses[variant]} ${className || ''}`}
+					{...props}
 				>
-					{children}
+					{children} 
 				</div>
 			)}
 		</>

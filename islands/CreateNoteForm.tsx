@@ -114,7 +114,7 @@ export default function CreateNote({ message }: { message?: string }) {
 
 					<MessageDisplay data={formData} />
 
-					<div class='mt-8'>
+					<div class='mt-8 w-full'>
 						<CreateNoteForm
 							onCreate={(id, message, noteLink) => {
 								setFormData({ message, noteId: id, noteLink });
