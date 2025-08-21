@@ -33,7 +33,6 @@ export function formatExpiration(expiresIn: string): Date {
 	return new Date(now.getTime() + ms);
 }
 
-// for example 2025-08-22T21:34:34.542Z
 export function formatExpirationMessage(expiresAt: Date): string {
 	const now = new Date();
 	expiresAt = new Date(expiresAt);
@@ -44,8 +43,8 @@ export function formatExpirationMessage(expiresAt: Date): string {
 	}
 
 	const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-	const minutes = Math.floor(diff / (1000 * 60));
-	const hours = Math.floor(minutes / 60);
+	const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+	const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 	const days = Math.floor(hours / 24);
 
 	if (days > 0) {
@@ -60,6 +59,7 @@ export function formatExpirationMessage(expiresAt: Date): string {
 	if (seconds > 0) {
 		return `${seconds} second${seconds !== 1 ? 's' : ''}`;
 	}
+
 	return 'Just now';
 }
 
