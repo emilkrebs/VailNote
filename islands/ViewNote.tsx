@@ -97,7 +97,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 		try {
 			setLoading(true);
 			const authKey = getAuthKey();
-			console.log('Fetching note with auth key:', authKey);
+			// console.log('Fetching note with auth key:', authKey); // Avoid logging sensitive information
 
 			if (authKey) {
 				await handleAuthKey(authKey);
