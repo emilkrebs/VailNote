@@ -52,8 +52,9 @@ function MessageDisplay({ data }: { data: CreateNoteData }) {
 		>
 			<div class='flex items-start gap-3'>
 				<div
-					class={`w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold ${isSuccess ? 'bg-green-500' : 'bg-red-500'
-						}`}
+					class={`w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold ${
+						isSuccess ? 'bg-green-500' : 'bg-red-500'
+					}`}
 				>
 					{isSuccess ? '✓' : '✕'}
 				</div>

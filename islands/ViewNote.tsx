@@ -97,7 +97,6 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 		try {
 			setLoading(true);
 			const authKey = getAuthKey();
-			// console.log('Fetching note with auth key:', authKey); // Avoid logging sensitive information
 
 			if (authKey) {
 				await handleAuthKey(authKey);
@@ -212,8 +211,6 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 	if (!confirmed) {
 		return <ConfirmViewNote onSubmit={() => setConfirmed(true)} />;
 	}
-
-
 
 	if (!note) {
 		return <NoteErrorPage message={message || 'Note not found'} />;
