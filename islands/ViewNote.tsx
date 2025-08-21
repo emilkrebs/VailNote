@@ -6,10 +6,11 @@ import PenIcon from '../components/PenIcon.tsx';
 import SiteHeader from '../components/SiteHeader.tsx';
 import PasswordInput from './PasswordInput.tsx';
 import { Button } from '../components/Button.tsx';
-import { Note } from '../types/types.ts';
+import { formatExpiration, formatExpirationMessage, Note } from '../types/types.ts';
 import { decryptNoteContent } from '../utils/encryption.ts';
 import NoteAPIService from '../utils/note-api-service.ts';
 import LoadingPage from '../components/LoadingPage.tsx';
+import { needsEncoding } from '$std/media_types/_util.ts';
 
 // Constants for messages
 const MESSAGES = {
@@ -76,17 +77,14 @@ export default function ViewEncryptedNote(
 			return showPasswordPrompt();
 		}
 
-		// If already confirmed and no password is needed, do nothing
-		if (!needsPassword && confirmed) {
-			return;
-		}
-
 		// Fetch and decrypt note (for both auth key and password flows)
 		const fetchAndDecryptNote = async () => {
+			console.log('Fetching and decrypting note...');
 			try {
 				setLoading(true);
-
+				console.log('Fetching note...');
 				if (authKey) {
+					console.log('Fetching note with auth key');
 					await handleAuthKey(authKey);
 				} else {
 					// Password flow: show password form
@@ -119,8 +117,9 @@ export default function ViewEncryptedNote(
 			}
 		};
 
-		// Only fetch when confirmed or when we have an auth key
-		if (confirmed || authKey) {
+		// Only fetch automatically when confirmed and when we have an auth key
+		if (confirmed && authKey) {
+			console.log('Confirmed and auth key present, fetching note...');
 			fetchAndDecryptNote();
 		}
 	}, [confirmed, noteId]);
@@ -195,6 +194,7 @@ export default function ViewEncryptedNote(
 			content={note.content}
 			message={message}
 			manualDeletion={manualDeletion}
+			expiresAt={note.expiresAt}
 			onDeleteNote={handleDeleteNote}
 		/>
 	);
@@ -204,10 +204,11 @@ interface DisplayDecryptedNoteProps {
 	content: string;
 	message?: string;
 	manualDeletion?: boolean;
+	expiresAt: Date;
 	onDeleteNote: () => void;
 }
 
-function DisplayDecryptedNote({ content, message, manualDeletion, onDeleteNote }: DisplayDecryptedNoteProps) {
+function DisplayDecryptedNote({ content, message, manualDeletion, expiresAt, onDeleteNote }: DisplayDecryptedNoteProps) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
 			<SiteHeader />
@@ -220,7 +221,9 @@ function DisplayDecryptedNote({ content, message, manualDeletion, onDeleteNote }
 						</div>
 						<div>
 							<h2 class='text-3xl font-bold text-white'>Note Retrieved</h2>
-							<p class='text-green-300 text-sm font-medium'>Successfully decrypted and destroyed</p>
+							{manualDeletion &&
+								<ExpirationMessage expiresAt={expiresAt} />
+							}
 						</div>
 					</div>
 
@@ -228,7 +231,7 @@ function DisplayDecryptedNote({ content, message, manualDeletion, onDeleteNote }
 						{message || MESSAGES.AUTO_DELETION_COMPLETE}
 					</Message>
 
-					{/* Content section with enhanced styling */}
+					{/* Content section */}
 					<div class='mt-6'>
 						<div class='flex items-center gap-2 mb-4'>
 							<svg class='w-5 h-5 text-gray-300' fill='currentColor' viewBox='0 0 20 20'>
@@ -280,7 +283,7 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
 						</div>
 						<div>
 							<h2 class='text-3xl font-bold text-white'>Enter Password</h2>
-							<p class='text-blue-300 text-sm font-medium'>This note is encrypted and requires a password</p>
+							<p class='text-yellow-300 text-sm font-medium'>This note is encrypted and requires a password</p>
 						</div>
 					</div>
 
@@ -403,6 +406,31 @@ function WarningMessage() {
 	);
 }
 
+function ExpirationMessage({ expiresAt }: { expiresAt: Date }) {
+	const [message, setMessage] = useState(`Expires in: ${formatExpirationMessage(expiresAt)}`);
+	const [title, setTitle] = useState(`The note will expire in ${formatExpirationMessage(expiresAt)}. Click the button below to delete it.`);
+
+	const updateMessage = () => {
+		const timeString = formatExpirationMessage(expiresAt);
+		if (timeString === 'Expired') {
+			setTitle('This note has expired and has been deleted.');
+		}
+		setMessage(`Expires in: ${timeString}`);
+		setTitle(`The note will expire in ${timeString}. Click the button below to delete it.`);
+	};
+
+	useEffect(() => {
+		const interval = setInterval(updateMessage, 1000);
+		return () => clearInterval(interval);
+	}, []);
+
+	return (
+		<p class='text-yellow-300 text-xs font-medium mt-1' title={title}>
+			{message}
+		</p>
+	);
+}
+
 function NoteErrorPage({ message }: { message?: string }) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
@@ -423,27 +451,29 @@ function NoteErrorPage({ message }: { message?: string }) {
 
 function NoScriptWarning() {
 	return (
-		<noscript class='bg-yellow-900/20 border border-yellow-700/30 rounded-xl p-6 mb-8'>
-			<div class='flex items-start gap-4'>
-				<svg class='w-6 h-6 text-yellow-400 mt-1 flex-shrink-0' fill='currentColor' viewBox='0 0 20 20'>
-					<path
-						fill-rule='evenodd'
-						d='M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v4a1 1 0 102 0V7zm-1 6a1.5 1.5 0 110-3 1.5 1.5 0 010 3z'
-						clip-rule='evenodd'
-					>
-					</path>
-				</svg>
-				<div>
-					<h3 class='text-yellow-300 font-semibold text-lg mb-2'>JavaScript is required</h3>
-					<p class='text-yellow-200 text-sm'>
-						To ensure the security and functionality of VailNote, please enable JavaScript in your browser settings.
-						{' '}
-						<a href='https://www.enable-javascript.com/' target='_blank' rel='noopener noreferrer' class='underline'>
-							Learn more
-						</a>
-					</p>
+		<noscript>
+			<Message variant='warning'>
+				<div class='flex items-start gap-4'>
+					<svg class='w-6 h-6 text-yellow-400 mt-1 flex-shrink-0' fill='currentColor' viewBox='0 0 20 20'>
+						<path
+							fill-rule='evenodd'
+							d='M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v4a1 1 0 102 0V7zm-1 6a1.5 1.5 0 110-3 1.5 1.5 0 010 3z'
+							clip-rule='evenodd'
+						>
+						</path>
+					</svg>
+					<div>
+						<h3 class='text-yellow-300 font-semibold text-lg mb-2'>JavaScript is required</h3>
+						<p class='text-yellow-200 text-sm'>
+							To ensure the security and functionality of VailNote, please enable JavaScript in your browser settings.
+							{' '}
+							<a href='https://www.enable-javascript.com/' target='_blank' rel='noopener noreferrer' class='underline'>
+								Learn more
+							</a>
+						</p>
+					</div>
 				</div>
-			</div>
+			</Message>
 		</noscript>
 	);
 }
