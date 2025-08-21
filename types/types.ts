@@ -49,7 +49,7 @@ export function formatExpirationMessage(expiresAt: Date): string {
 	const days = Math.floor(hours / 24);
 
 	if (days > 0) {
-		return `${days} day${days > 1 ? 's' : ''} and ${hours % 24} hour${hours % 24 > 1 ? 's' : ''}`;
+		return `${days} day${days > 1 ? 's' : ''} and ${hours % 24} hour${hours % 24 !== 1 ? 's' : ''}`;
 	} else if (hours > 0) {
 		return `${hours} hour${hours > 1 ? 's' : ''} and ${minutes % 60} minute${minutes % 60 > 1 ? 's' : ''}`;
 	} else if (minutes > 0) {
