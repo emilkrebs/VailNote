@@ -50,12 +50,15 @@ export function formatExpirationMessage(expiresAt: Date): string {
 
 	if (days > 0) {
 		return `${days} day${days > 1 ? 's' : ''} and ${hours % 24} hour${hours % 24 !== 1 ? 's' : ''}`;
-	} else if (hours > 0) {
+	}
+	if (hours > 0) {
 		return `${hours} hour${hours > 1 ? 's' : ''} and ${minutes % 60} minute${minutes % 60 !== 1 ? 's' : ''}`;
-	} else if (minutes > 0) {
+	}
+	if (minutes > 0) {
 		return `${minutes} minute${minutes > 1 ? 's' : ''} and ${seconds} second${seconds > 1 ? 's' : ''}`;
-	} else if (seconds > 0) {
-	} else if (seconds < 0) {
+	}
+	if (seconds > 0) {
+		return `${seconds} second${seconds !== 1 ? 's' : ''}`;
 	}
 	return 'Just now';
 }
