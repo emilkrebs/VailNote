@@ -48,9 +48,9 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 	// State management
 	const [note, setNote] = useState<Note | null>(null);
 	const [error, setError] = useState<string | null>(null);
-	const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(false);
 	const [needsPassword, setNeedsPassword] = useState(false);
-	const [confirmed, setConfirmed] = useState(false);
+	const [confirmed, setConfirmed] = useState(manualDeletion ? true : false);
 	const [decryptionError, setDecryptionError] = useState<string | undefined>(undefined);
 	const [message, setMessage] = useState<string | undefined>(undefined);
 
@@ -97,6 +97,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 		try {
 			setLoading(true);
 			const authKey = getAuthKey();
+			console.log('Fetching note with auth key:', authKey);
 
 			if (authKey) {
 				await handleAuthKey(authKey);
@@ -115,16 +116,18 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 		const authKey = getAuthKey();
 
 		// Show password prompt if no auth key and not confirmed
-		if (!authKey && !confirmed) {
-			showPasswordPrompt();
+		if (!authKey) {
+			if (!confirmed || manualDeletion) {
+				showPasswordPrompt();
+			}
 			return;
 		}
 
-		// Only fetch when confirmed and we have an auth key
-		if (confirmed && authKey) {
+		// Fetch note only when confirmed and auth key is available
+		if (confirmed) {
 			fetchAndDecryptNote();
 		}
-	}, [confirmed, noteId]);
+	}, [confirmed, noteId, manualDeletion]);
 
 	// Event handlers
 	const handlePasswordSubmit = async (event: Event) => {
@@ -197,10 +200,6 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 		);
 	}
 
-	if (!confirmed) {
-		return <ConfirmViewNote onSubmit={() => setConfirmed(true)} />;
-	}
-
 	if (loading) {
 		return (
 			<LoadingPage
@@ -209,6 +208,12 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 			/>
 		);
 	}
+
+	if (!confirmed) {
+		return <ConfirmViewNote onSubmit={() => setConfirmed(true)} />;
+	}
+
+
 
 	if (!note) {
 		return <NoteErrorPage message={message || 'Note not found'} />;
@@ -334,7 +339,7 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
 								required
 							/>
 						</div>
-						<Button type='submit' variant='primary' class='w-full'>
+						<Button type='submit' variant={manualDeletion ? 'primary' : 'danger'} class='w-full'>
 							{manualDeletion ? 'View Note' : 'View & Destroy'}
 						</Button>
 					</form>
