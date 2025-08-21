@@ -57,7 +57,6 @@ export function formatExpirationMessage(expiresAt: Date): string {
 	} else if (seconds > 0) {
 		return `${seconds} second${seconds !== 1 ? 's' : ''}`;
 	} else if (seconds < 0) {
-		return `${seconds} second${seconds !== 1 ? 's' : ''}`;
 	}
 	return 'Just now';
 }
