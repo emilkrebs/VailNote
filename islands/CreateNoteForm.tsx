@@ -235,7 +235,17 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 				{/* Advanced Options */}
 				<details class='group bg-gradient-to-br from-gray-800/60 to-gray-900/40 rounded-xl p-6 border border-gray-600/30 hover:border-gray-500/50 transition-all duration-200'>
 					<summary class='text-white text-lg font-semibold cursor-pointer flex items-center gap-2 hover:text-blue-300 transition-colors'>
-						<span class='transform group-open:rotate-90 transition-transform duration-200'>▶</span>
+						<span class='transform group-open:rotate-90 transition-transform duration-200'>
+							<svg
+								xmlns='http://www.w3.org/2000/svg'
+								class='h-5 w-5'
+								fill='none'
+								viewBox='0 0 24 24'
+								stroke='currentColor'
+							>
+								<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5l7 7-7 7' />
+							</svg>
+						</span>
 						Advanced Options
 					</summary>
 					<div class='mt-6 pt-4 border-t border-gray-600/30'>

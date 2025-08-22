@@ -6,7 +6,7 @@ import PenIcon from '../components/PenIcon.tsx';
 import SiteHeader from '../components/SiteHeader.tsx';
 import PasswordInput from './PasswordInput.tsx';
 import { Button } from '../components/Button.tsx';
-import { Note } from '../types/types.ts';
+import { formatExpirationMessage, Note } from '../types/types.ts';
 import { decryptNoteContent } from '../utils/encryption.ts';
 import NoteAPIService from '../utils/note-api-service.ts';
 import LoadingPage from '../components/LoadingPage.tsx';
@@ -19,7 +19,6 @@ const MESSAGES = {
 	DECRYPTION_FAILED: 'Failed to decrypt note with provided authentication key',
 	ENTER_PASSWORD: 'Please enter a password',
 	NOTE_NOT_AVAILABLE: 'Note data not available',
-	DECRYPT_SUCCESS: 'Note decrypted successfully',
 	INVALID_PASSWORD: 'Incorrect password. Please try again.',
 	NO_PASSWORD: 'No password provided. Deletion cancelled.',
 	DELETE_SUCCESS: 'Note deleted successfully. Redirecting...',
@@ -36,126 +35,135 @@ interface PasswordRequiredViewProps {
 	manualDeletion?: boolean;
 }
 
+interface DisplayDecryptedNoteProps {
+	content: string;
+	message?: string;
+	manualDeletion?: boolean;
+	expiresAt: Date;
+	onDeleteNote: () => void;
+}
+
 // https://vailnote.com/[id]#[authKey] or https://vailnote.com/[id] (password required)
-export default function ViewEncryptedNote(
-	{ noteId, manualDeletion }: ViewEncryptedNoteProps,
-) {
+export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryptedNoteProps) {
+	// State management
 	const [note, setNote] = useState<Note | null>(null);
 	const [error, setError] = useState<string | null>(null);
-	const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(false);
 	const [needsPassword, setNeedsPassword] = useState(false);
-	const [confirmed, setConfirmed] = useState(false);
+	const [confirmed, setConfirmed] = useState(manualDeletion ? true : false);
 	const [decryptionError, setDecryptionError] = useState<string | undefined>(undefined);
 	const [message, setMessage] = useState<string | undefined>(undefined);
 
 	const notePassword = useRef<string | undefined>(undefined);
 
-	useEffect(() => {
-		// Helper to extract auth key from URL
-		const getAuthKey = () => {
-			const url = new URL(globalThis.location.href);
-			let authKey = url.searchParams.get('auth');
-			if (!authKey) {
-				const hash = globalThis.location.hash.slice(1);
-				authKey = new URLSearchParams(hash).get('auth');
+	// Helper functions
+	const getAuthKey = (): string | null => {
+		const url = new URL(globalThis.location.href);
+		let authKey = url.searchParams.get('auth');
+		if (!authKey) {
+			const hash = globalThis.location.hash.slice(1);
+			authKey = new URLSearchParams(hash).get('auth');
+		}
+		return authKey;
+	};
+
+	const showPasswordPrompt = () => {
+		setNote(null);
+		setNeedsPassword(true);
+		setLoading(false);
+	};
+
+	const handleAuthKey = async (authKey: string) => {
+		try {
+			const result = await NoteAPIService.getEncryptedNote(noteId, authKey);
+			if (!result.success || !result.note) {
+				throw new Error(result.message);
 			}
-			return authKey;
-		};
 
-		const showPasswordPrompt = () => {
-			setNote(null);
-			setNeedsPassword(true);
+			notePassword.current = manualDeletion ? authKey : undefined;
+			const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, authKey);
+
+			setNote({ ...result.note, content: decryptedContent });
+			setMessage(
+				result.note.manualDeletion ? MESSAGES.MANUAL_DELETION_PROMPT : MESSAGES.AUTO_DELETION_COMPLETE,
+			);
+		} catch (err) {
+			console.error(MESSAGES.DECRYPTION_FAILED, err);
+			setError(MESSAGES.DECRYPTION_FAILED);
+		}
+	};
+
+	const fetchAndDecryptNote = async () => {
+		try {
+			setLoading(true);
+			const authKey = getAuthKey();
+
+			if (authKey) {
+				await handleAuthKey(authKey);
+			} else {
+				showPasswordPrompt();
+			}
+		} catch (err) {
+			setError(err instanceof Error ? err.message : MESSAGES.DECRYPTION_FAILED);
+		} finally {
 			setLoading(false);
-		};
+		}
+	};
 
+	// Main effect for handling note loading logic
+	useEffect(() => {
 		const authKey = getAuthKey();
 
-		// If not confirmed and no auth key, show confirmation or password prompt
-		if (!authKey && !confirmed) {
-			console.warn('No auth key provided, note requires password');
-			return showPasswordPrompt();
-		}
-
-		// If already confirmed and no password is needed, do nothing
-		if (!needsPassword && confirmed) {
+		// Show password prompt if no auth key and not confirmed
+		if (!authKey) {
+			if (!confirmed || manualDeletion) {
+				showPasswordPrompt();
+			}
 			return;
 		}
 
-		// Fetch and decrypt note (for both auth key and password flows)
-		const fetchAndDecryptNote = async () => {
-			try {
-				setLoading(true);
-
-				if (authKey) {
-					await handleAuthKey(authKey);
-				} else {
-					// Password flow: show password form
-					showPasswordPrompt();
-				}
-			} catch (err) {
-				setError(err instanceof Error ? err.message : MESSAGES.DECRYPTION_FAILED);
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		const handleAuthKey = async (authKey: string) => {
-			try {
-				const result = await NoteAPIService.getEncryptedNote(noteId, authKey);
-				if (!result.success || !result.note) throw new Error(result.message);
-
-				notePassword.current = manualDeletion ? authKey : undefined;
-				const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, authKey);
-
-				setNote(
-					{ ...result.note, content: decryptedContent },
-				);
-				setMessage(
-					result.note.manualDeletion ? MESSAGES.MANUAL_DELETION_PROMPT : MESSAGES.AUTO_DELETION_COMPLETE,
-				);
-			} catch (err) {
-				console.error(MESSAGES.DECRYPTION_FAILED, err);
-				setError(MESSAGES.DECRYPTION_FAILED);
-			}
-		};
-
-		// Only fetch when confirmed or when we have an auth key
-		if (confirmed || authKey) {
+		// Fetch note only when confirmed and auth key is available
+		if (confirmed) {
 			fetchAndDecryptNote();
 		}
-	}, [confirmed, noteId]);
+	}, [confirmed, noteId, manualDeletion]);
 
+	// Event handlers
 	const handlePasswordSubmit = async (event: Event) => {
 		event.preventDefault();
 		setLoading(true);
+
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
 		const password = formData.get('password')?.toString() || '';
 
 		if (!password.trim()) {
 			setDecryptionError(MESSAGES.ENTER_PASSWORD);
+			setLoading(false);
 			return;
 		}
 
 		try {
 			setDecryptionError(undefined);
 			const result = await NoteAPIService.getEncryptedNote(noteId, password);
-			console.log('Note fetch result:', result);
+
 			if (!result.success || !result.note) {
-				return setDecryptionError(MESSAGES.INVALID_PASSWORD);
+				setDecryptionError(MESSAGES.INVALID_PASSWORD);
+				setLoading(false);
+				return;
 			}
+
 			notePassword.current = manualDeletion ? password : undefined;
 			const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, password);
-			result.note.content = decryptedContent;
 
-			setNote(result.note);
+			setNote({ ...result.note, content: decryptedContent });
 			setNeedsPassword(false);
 			setConfirmed(true);
-			setLoading(false);
-			setMessage(MESSAGES.DECRYPT_SUCCESS);
-		} catch (_decryptErr) {
+			setMessage(manualDeletion ? MESSAGES.MANUAL_DELETION_PROMPT : MESSAGES.AUTO_DELETION_COMPLETE);
+		} catch (error) {
 			setDecryptionError(MESSAGES.INVALID_PASSWORD);
-			console.error('Decryption failed:', _decryptErr);
+			console.error('Decryption failed:', error);
+		} finally {
 			setLoading(false);
 		}
 	};
@@ -165,25 +173,43 @@ export default function ViewEncryptedNote(
 			setMessage(MESSAGES.NO_PASSWORD);
 			return;
 		}
-		await NoteAPIService.deleteNote(noteId, notePassword.current);
-		setMessage(MESSAGES.DELETE_SUCCESS);
-		globalThis.location.href = '/';
+
+		try {
+			await NoteAPIService.deleteNote(noteId, notePassword.current);
+			setMessage(MESSAGES.DELETE_SUCCESS);
+			globalThis.location.href = '/';
+		} catch (error) {
+			console.error('Failed to delete note:', error);
+			setMessage('Failed to delete note. Please try again.');
+		}
 	};
 
+	// Render logic
 	if (error) {
 		return <NoteErrorPage message={error} />;
 	}
 
 	if (needsPassword) {
-		return <PasswordRequiredView onSubmit={handlePasswordSubmit} error={decryptionError} manualDeletion={manualDeletion} />;
-	}
-
-	if (!confirmed && !needsPassword && !manualDeletion) {
-		return <ConfirmViewNote onSubmit={() => setConfirmed(true)} />;
+		return (
+			<PasswordRequiredView
+				onSubmit={handlePasswordSubmit}
+				error={decryptionError}
+				manualDeletion={manualDeletion}
+			/>
+		);
 	}
 
 	if (loading) {
-		return <LoadingPage title='Decrypting Note' message='Please wait while we securely decrypt your note...' />;
+		return (
+			<LoadingPage
+				title='Decrypting Note'
+				message='Please wait while we securely decrypt your note...'
+			/>
+		);
+	}
+
+	if (!confirmed) {
+		return <ConfirmViewNote onSubmit={() => setConfirmed(true)} />;
 	}
 
 	if (!note) {
@@ -195,6 +221,7 @@ export default function ViewEncryptedNote(
 			content={note.content}
 			message={message}
 			manualDeletion={manualDeletion}
+			expiresAt={note.expiresAt}
 			onDeleteNote={handleDeleteNote}
 		/>
 	);
@@ -204,10 +231,13 @@ interface DisplayDecryptedNoteProps {
 	content: string;
 	message?: string;
 	manualDeletion?: boolean;
+	expiresAt: Date;
 	onDeleteNote: () => void;
 }
 
-function DisplayDecryptedNote({ content, message, manualDeletion, onDeleteNote }: DisplayDecryptedNoteProps) {
+function DisplayDecryptedNote(
+	{ content, message, manualDeletion, expiresAt, onDeleteNote }: DisplayDecryptedNoteProps,
+) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
 			<SiteHeader />
@@ -220,7 +250,7 @@ function DisplayDecryptedNote({ content, message, manualDeletion, onDeleteNote }
 						</div>
 						<div>
 							<h2 class='text-3xl font-bold text-white'>Note Retrieved</h2>
-							<p class='text-green-300 text-sm font-medium'>Successfully decrypted and destroyed</p>
+							{manualDeletion && <ExpirationMessage expiresAt={expiresAt} />}
 						</div>
 					</div>
 
@@ -228,7 +258,7 @@ function DisplayDecryptedNote({ content, message, manualDeletion, onDeleteNote }
 						{message || MESSAGES.AUTO_DELETION_COMPLETE}
 					</Message>
 
-					{/* Content section with enhanced styling */}
+					{/* Content section */}
 					<div class='mt-6'>
 						<div class='flex items-center gap-2 mb-4'>
 							<svg class='w-5 h-5 text-gray-300' fill='currentColor' viewBox='0 0 20 20'>
@@ -236,8 +266,7 @@ function DisplayDecryptedNote({ content, message, manualDeletion, onDeleteNote }
 									fill-rule='evenodd'
 									d='M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z'
 									clip-rule='evenodd'
-								>
-								</path>
+								/>
 							</svg>
 							<h3 class='text-xl font-semibold text-white'>Content</h3>
 						</div>
@@ -254,7 +283,6 @@ function DisplayDecryptedNote({ content, message, manualDeletion, onDeleteNote }
 					{/* Action buttons */}
 					<div class='flex flex-col sm:flex-row gap-4 mt-8 pt-6 border-t border-gray-600/50 w-full'>
 						<HomeButton />
-
 						{manualDeletion && (
 							<Button variant='danger' onClick={onDeleteNote}>
 								Delete Note
@@ -273,14 +301,14 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
 			<SiteHeader />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
 				<div class='flex flex-col mt-6 p-4 sm:p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
-					{/* Header with icon and title */}
+					{/* Header */}
 					<div class='flex items-center justify-start gap-2 mb-6 pb-4 border-b border-gray-600/50'>
 						<div class='p-3 bg-gray-800 rounded-xl'>
 							<PenIcon />
 						</div>
 						<div>
 							<h2 class='text-3xl font-bold text-white'>Enter Password</h2>
-							<p class='text-blue-300 text-sm font-medium'>This note is encrypted and requires a password</p>
+							<p class='text-yellow-300 text-sm font-medium'>This note is encrypted and requires a password</p>
 						</div>
 					</div>
 
@@ -292,21 +320,12 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
 
 					{!manualDeletion && <WarningMessage />}
 
-					{manualDeletion && (
-						<div class='mb-6 p-4 rounded-lg border bg-yellow-600/20 border-yellow-400 text-yellow-200'>
-							<span class='font-medium'>This note will not be deleted automatically. You must delete it manually.</span>
-						</div>
-					)}
-
 					<NoScriptWarning />
 
-					{/* Password input form */}
+					{/* Password form */}
 					<form class='space-y-6' onSubmit={onSubmit} autoComplete='off'>
 						<div>
-							<label
-								class='block text-white text-lg font-semibold mb-3'
-								htmlFor='password'
-							>
+							<label class='block text-white text-lg font-semibold mb-3' htmlFor='password'>
 								Enter Password
 							</label>
 							<PasswordInput
@@ -317,11 +336,7 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
 								required
 							/>
 						</div>
-						<Button
-							type='submit'
-							variant='primary'
-							class='w-full'
-						>
+						<Button type='submit' variant={manualDeletion ? 'primary' : 'danger'} class='w-full'>
 							{manualDeletion ? 'View Note' : 'View & Destroy'}
 						</Button>
 					</form>
@@ -403,6 +418,27 @@ function WarningMessage() {
 	);
 }
 
+function ExpirationMessage({ expiresAt }: { expiresAt: Date }) {
+	const [message, setMessage] = useState('');
+
+	const updateMessage = () => {
+		const timeString = formatExpirationMessage(expiresAt);
+		setMessage(`Expires in: ${timeString}`);
+	};
+
+	useEffect(() => {
+		updateMessage();
+		const interval = setInterval(updateMessage, 1000);
+		return () => clearInterval(interval);
+	}, [expiresAt]);
+
+	return (
+		<p class='text-yellow-300 text-xs font-medium mt-1'>
+			{message}
+		</p>
+	);
+}
+
 function NoteErrorPage({ message }: { message?: string }) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
@@ -423,25 +459,26 @@ function NoteErrorPage({ message }: { message?: string }) {
 
 function NoScriptWarning() {
 	return (
-		<noscript class='bg-yellow-900/20 border border-yellow-700/30 rounded-xl p-6 mb-8'>
-			<div class='flex items-start gap-4'>
-				<svg class='w-6 h-6 text-yellow-400 mt-1 flex-shrink-0' fill='currentColor' viewBox='0 0 20 20'>
-					<path
-						fill-rule='evenodd'
-						d='M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v4a1 1 0 102 0V7zm-1 6a1.5 1.5 0 110-3 1.5 1.5 0 010 3z'
-						clip-rule='evenodd'
-					>
-					</path>
-				</svg>
-				<div>
-					<h3 class='text-yellow-300 font-semibold text-lg mb-2'>JavaScript is required</h3>
-					<p class='text-yellow-200 text-sm'>
-						To ensure the security and functionality of VailNote, please enable JavaScript in your browser settings.
-						{' '}
-						<a href='https://www.enable-javascript.com/' target='_blank' rel='noopener noreferrer' class='underline'>
-							Learn more
-						</a>
-					</p>
+		<noscript>
+			<div class='bg-yellow-900/20 border border-yellow-700/30 rounded-xl p-6 mb-8'>
+				<div class='flex items-start gap-4'>
+					<svg class='w-6 h-6 text-yellow-400 mt-1 flex-shrink-0' fill='currentColor' viewBox='0 0 20 20'>
+						<path
+							fill-rule='evenodd'
+							d='M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v4a1 1 0 102 0V7zm-1 6a1.5 1.5 0 110-3 1.5 1.5 0 010 3z'
+							clip-rule='evenodd'
+						/>
+					</svg>
+					<div>
+						<h3 class='text-yellow-300 font-semibold text-lg mb-2'>JavaScript is required</h3>
+						<p class='text-yellow-200 text-sm'>
+							To ensure the security and functionality of VailNote, please enable JavaScript in your browser settings.
+							{' '}
+							<a href='https://www.enable-javascript.com/' target='_blank' rel='noopener noreferrer' class='underline'>
+								Learn more
+							</a>
+						</p>
+					</div>
 				</div>
 			</div>
 		</noscript>

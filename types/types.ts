@@ -33,6 +33,36 @@ export function formatExpiration(expiresIn: string): Date {
 	return new Date(now.getTime() + ms);
 }
 
+export function formatExpirationMessage(expiresAt: Date): string {
+	const now = new Date();
+	expiresAt = new Date(expiresAt);
+	const diff = expiresAt.getTime() - now.getTime();
+
+	if (diff <= 0) {
+		return 'Expired';
+	}
+
+	const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+	const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+	const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+	const days = Math.floor(hours / 24);
+
+	if (days > 0) {
+		return `${days} day${days > 1 ? 's' : ''} and ${hours % 24} hour${hours % 24 !== 1 ? 's' : ''}`;
+	}
+	if (hours > 0) {
+		return `${hours} hour${hours > 1 ? 's' : ''} and ${minutes % 60} minute${minutes % 60 !== 1 ? 's' : ''}`;
+	}
+	if (minutes > 0) {
+		return `${minutes} minute${minutes > 1 ? 's' : ''} and ${seconds} second${seconds > 1 ? 's' : ''}`;
+	}
+	if (seconds > 0) {
+		return `${seconds} second${seconds !== 1 ? 's' : ''}`;
+	}
+
+	return 'Just now';
+}
+
 export function generateRandomId(length: number = 16): string {
 	// Use crypto.getRandomValues for cryptographically secure random IDs
 	const array = new Uint8Array(Math.ceil(length * 3 / 4));
