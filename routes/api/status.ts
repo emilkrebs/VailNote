@@ -206,9 +206,7 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 
     try {
         // Perform all health checks in parallel
-        const [databaseStatus] = await Promise.all([
-            checkDatabaseHealth(ctx),
-        ]);
+        const databaseStatus = await checkDatabaseHealth(ctx);
 
         const apiStatus = checkApiHealth();
         const websiteStatus = checkWebsiteHealth();
