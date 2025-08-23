@@ -106,31 +106,52 @@ export async function handler(
 	req: Request,
 	ctx: FreshContext<State>,
 ) {
-
 	// Set context state first
 	ctx.state.context = Context.instance();
 
-	const origin = req.headers.get("Origin") || 'https://vailnote.com';
+	const origin = req.headers.get('Origin') || 'https://vailnote.com';
 	const resp = await ctx.next();
 	const headers = resp.headers;
 
 	headers.set('Access-Control-Allow-Origin', origin);
-	headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+	headers.set(
+		"Access-Control-Allow-Methods",
+		"POST, OPTIONS, GET, PUT, DELETE",
+	);
 	headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 	headers.set('Access-Control-Max-Age', '86400');
-	
+
 	// Cross-Origin Policies
 	headers.set('Cross-Origin-Resource-Policy', 'same-site');
 	headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
 	headers.set('Cross-Origin-Opener-Policy', 'same-origin');
 
 	// Privacy and Permissions
-	headers.set('Permissions-Policy', 'geolocation=(), camera=(), microphone=(), payment=(), usb=(), bluetooth=(), magnetometer=(), gyroscope=(), accelerometer=()');
+	headers.set(
+		'Permissions-Policy',
+		'geolocation=(), camera=(), microphone=(), payment=(), usb=(), bluetooth=(), magnetometer=(), gyroscope=(), accelerometer=()',
+	);
 	headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
 	// Content Security
 	headers.set('X-Content-Type-Options', 'nosniff');
 	headers.set('X-Frame-Options', 'DENY');
+
+	// Enhanced CSP to allow Google Fonts move to build-in CSP in the future
+	const csp = [
+		"default-src 'self'",
+		"script-src 'self' 'unsafe-inline'", // unsafe-inline needed for fresh
+		"style-src 'self' https://fonts.googleapis.com",
+		"font-src 'self' https://fonts.gstatic.com",
+		"img-src 'self' data:",
+		"connect-src 'self'",
+		"object-src 'none'",
+		"base-uri 'self'",
+		"form-action 'self'",
+		"frame-ancestors 'none'",
+		'upgrade-insecure-requests',
+	].join('; ');
+	headers.set('Content-Security-Policy', csp);
 
 	// Transport Security
 	headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
