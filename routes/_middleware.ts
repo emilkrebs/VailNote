@@ -150,10 +150,6 @@ export async function handler(
 
 	// Transport Security
 	headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
-	
-	// Additional Security Headers
-	headers.set('X-XSS-Protection', '1; mode=block');
-	headers.set('X-Robots-Tag', 'noindex, nofollow, nosnippet, noarchive');
 
 	return resp;
 }
