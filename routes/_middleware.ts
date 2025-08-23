@@ -135,8 +135,8 @@ export async function handler(
 	// Enhanced CSP to allow Google Fonts
 	const csp = [
 		"default-src 'self'",
-		"script-src 'self' 'unsafe-inline'", // unsafe-inline needed for Fresh hydration
-		"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+		"script-src 'self'",
+		"style-src 'self' https://fonts.googleapis.com",
 		"font-src 'self' https://fonts.gstatic.com",
 		"img-src 'self' data:",
 		"connect-src 'self'",
