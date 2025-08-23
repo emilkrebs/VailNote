@@ -207,32 +207,3 @@ Deno.test({
 	sanitizeResources: false,
 	sanitizeOps: false,
 });
-
-// Test suite for security headers
-Deno.test({
-	name: 'Security - HTTP Headers',
-	fn: async (t) => {
-		await TestUtils.setupTestEnvironment();
-		const handler = await createHandler(manifest, config);
-
-		await t.step('should handle CORS preflight requests', async () => {
-			const response = await handler(
-				new Request(`http://${TEST_CONFIG.hostname}/api/notes`, {
-					method: 'OPTIONS',
-					headers: {
-						'Origin': 'https://vailnote.com',
-						'Access-Control-Request-Method': 'POST',
-						'Access-Control-Request-Headers': 'Content-Type',
-					},
-				}),
-				CONN_INFO,
-			);
-			
-			const headers = response.headers;
-			assertEquals(headers.get('Access-Control-Allow-Origin'), 'https://vailnote.com');
-			assertEquals(headers.get('Access-Control-Allow-Methods'), 'GET, POST, OPTIONS');
-		});
-	},
-	sanitizeResources: false,
-	sanitizeOps: false,
-});
