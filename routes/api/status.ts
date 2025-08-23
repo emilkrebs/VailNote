@@ -206,11 +206,11 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 
     try {
         // Perform all health checks in parallel
-        const databaseStatus = await checkDatabaseHealth(ctx);
-
-        const apiStatus = checkApiHealth();
-        const websiteStatus = checkWebsiteHealth();
-
+        const [databaseStatus, apiStatus, websiteStatus] = await Promise.all([
+            checkDatabaseHealth(ctx),
+            Promise.resolve(checkApiHealth()),
+            Promise.resolve(checkWebsiteHealth()),
+        ]);
         const services = {
             api: apiStatus,
             database: databaseStatus,
