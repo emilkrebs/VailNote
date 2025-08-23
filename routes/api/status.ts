@@ -32,23 +32,34 @@ const STATUS_CONFIG = {
 } as const;
 
 // Service health checkers with timeout and error handling
-function checkApiHealth(): ServiceStatus {
+async function checkApiHealth(): Promise<ServiceStatus> {
     const startTime = performance.now();
     const lastChecked = new Date().toISOString();
 
     try {
+        // Make a real request to the API endpoint (e.g., /api/status)
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), STATUS_CONFIG.TIMEOUT_MS);
+        const response = await fetch('/api/status', { signal: controller.signal });
+        clearTimeout(timeout);
         const responseTime = Math.round(performance.now() - startTime);
 
-        // Determine status based on response time
-        const status = responseTime > STATUS_CONFIG.DEGRADED_THRESHOLD_MS ? 'degraded' : 'online';
+        // Determine status based on response time and HTTP status
+        let status: 'online' | 'degraded' | 'offline' = 'online';
+        if (!response.ok) {
+            status = 'offline';
+        } else if (responseTime > STATUS_CONFIG.DEGRADED_THRESHOLD_MS) {
+            status = 'degraded';
+        }
 
         return {
             status,
             responseTime,
             lastChecked,
             details: {
-                endpoint: 'status',
-                healthy: true,
+                endpoint: '/api/status',
+                healthy: response.ok,
+                httpStatus: response.status,
             },
         };
     } catch (error) {
