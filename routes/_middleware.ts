@@ -106,21 +106,15 @@ export async function handler(
 	req: Request,
 	ctx: FreshContext<State>,
 ) {
+
 	// Set context state first
 	ctx.state.context = Context.instance();
-	
+
+	const origin = req.headers.get("Origin") || 'https://vailnote.com';
 	const resp = await ctx.next();
 	const headers = resp.headers;
 
-	// CORS Headers - More restrictive origin handling
-	const allowedOrigins = ['https://vailnote.com', 'https://www.vailnote.com', 'http://localhost:8000'];
-	const requestOrigin = req.headers.get("Origin");
-	if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
-		headers.set('Access-Control-Allow-Origin', requestOrigin);
-	} else {
-		headers.set('Access-Control-Allow-Origin', 'https://vailnote.com');
-	}
-	
+	headers.set('Access-Control-Allow-Origin', origin);
 	headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
 	headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 	headers.set('Access-Control-Max-Age', '86400');
