@@ -131,22 +131,6 @@ export async function handler(
 	// Content Security
 	headers.set('X-Content-Type-Options', 'nosniff');
 	headers.set('X-Frame-Options', 'DENY');
-	
-	// Enhanced CSP to allow Google Fonts
-	const csp = [
-		"default-src 'self'",
-		"script-src 'self'",
-		"style-src 'self' https://fonts.googleapis.com",
-		"font-src 'self' https://fonts.gstatic.com",
-		"img-src 'self' data:",
-		"connect-src 'self'",
-		"object-src 'none'",
-		"base-uri 'self'",
-		"form-action 'self'",
-		"frame-ancestors 'none'",
-		"upgrade-insecure-requests"
-	].join('; ');
-	headers.set('Content-Security-Policy', csp);
 
 	// Transport Security
 	headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
