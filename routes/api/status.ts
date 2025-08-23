@@ -1,6 +1,7 @@
 import { FreshContext } from '$fresh/server.ts';
 import { mergeWithRateLimitHeaders } from '../../utils/rate-limiting/rate-limit-headers.ts';
 import { State } from '../_middleware.ts';
+import process from "node:process";
 
 // Types for the status API response
 interface ServiceStatus {
@@ -161,8 +162,7 @@ function calculateOverallStatus(services: StatusResponse['services']): 'online' 
 }
 
 function getUptime(): number {
-    // Return uptime in seconds using Deno.uptime()
-    return Math.round(Deno.uptime());
+    return Math.round(process.uptime());
 }
 
 function getVersion(): string {

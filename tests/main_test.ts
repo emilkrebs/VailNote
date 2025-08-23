@@ -93,6 +93,25 @@ Deno.test({
 	sanitizeOps: false,
 });
 
+Deno.test({
+	name: 'API - Status endpoint',
+	fn: async (t) => {
+		await TestUtils.setupTestEnvironment();
+
+		const handler = await createHandler(manifest, config);
+
+		await t.step('should return 200 for GET /api/status', async () => {
+			const response = await handler(
+				new Request(`http://${TEST_CONFIG.hostname}/api/status`),
+				CONN_INFO,
+			);
+			assertEquals(response.status, 200);
+		});
+	},
+	sanitizeResources: false,
+	sanitizeOps: false,
+});
+
 // Test suite for note operations
 Deno.test({
 	name: 'Notes - CRUD operations',
