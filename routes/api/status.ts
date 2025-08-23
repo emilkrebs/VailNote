@@ -148,8 +148,8 @@ function calculateOverallStatus(services: StatusResponse['services']): 'online' 
 }
 
 function getUptime(): number {
-    // Return uptime in seconds (using performance.now as approximation)
-    return Math.round(performance.now() / 1000);
+    // Return uptime in seconds using Deno.uptime()
+    return Math.round(Deno.uptime());
 }
 
 function getVersion(): string {
