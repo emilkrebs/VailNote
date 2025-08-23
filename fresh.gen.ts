@@ -8,6 +8,7 @@ import * as $_app from './routes/_app.tsx';
 import * as $_middleware from './routes/_middleware.ts';
 import * as $api_notes from './routes/api/notes.ts';
 import * as $api_notes_id_ from './routes/api/notes/[id].ts';
+import * as $api_status from './routes/api/status.ts';
 import * as $index from './routes/index.tsx';
 import * as $privacy from './routes/privacy.tsx';
 import * as $terms from './routes/terms.tsx';
@@ -25,6 +26,7 @@ const manifest = {
 		'./routes/_middleware.ts': $_middleware,
 		'./routes/api/notes.ts': $api_notes,
 		'./routes/api/notes/[id].ts': $api_notes_id_,
+		'./routes/api/status.ts': $api_status,
 		'./routes/index.tsx': $index,
 		'./routes/privacy.tsx': $privacy,
 		'./routes/terms.tsx': $terms,

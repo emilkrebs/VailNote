@@ -148,4 +148,17 @@ export class NoteDatabase {
 			TerminalColors.format(`All notes cleared from database. &8(${this.BASE_URI})&r`),
 		);
 	}
+
+	async ping(): Promise<boolean> {
+		try {
+			const db = this._client.db(this.DATA_SOURCE);
+			await db.command({ ping: 1 });
+			return true;
+		} catch (error) {
+			this.logger.log(
+				TerminalColors.format(`Database ping failed: ${error} &8(${this.BASE_URI})&r`),
+			);
+			return false;
+		}
+	}
 }
