@@ -64,14 +64,10 @@ function OpenGraphMeta({ title, description, canonicalUrl }: HeadProps) {
 			<meta name='bingbot' content='index, follow' />
 
 			{/* Security and Privacy */}
-			<meta http-equiv='X-Content-Type-Options' content='nosniff' />
-			<meta http-equiv='X-Frame-Options' content='DENY' />
 			<meta http-equiv='Referrer-Policy' content='strict-origin-when-cross-origin' />
 
-			{/* Performance */}
+			{/* Performance - DNS prefetch for other domains */}
 			<meta http-equiv='x-dns-prefetch-control' content='on' />
-			<link rel='dns-prefetch' href='//fonts.googleapis.com' />
-			<link rel='preconnect' href='https://fonts.googleapis.com' crossOrigin='' />
 		</>
 	);
 }
@@ -84,7 +80,24 @@ export default function Header({ title, description, canonicalUrl }: HeadProps) 
 		<head>
 			<meta charset='utf-8' />
 			<title>{pageTitle}</title>
+
+			{/* Preload critical resources for better performance */}
+			<link rel='preload' href='/styles.css' as='style' />
 			<link rel='stylesheet' href='/styles.css' />
+
+			{/* Preload Google Fonts for better performance */}
+			<link rel='preconnect' href='https://fonts.googleapis.com' />
+			<link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='' />
+			<link
+				rel='preload'
+				href='https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap'
+				as='style'
+			/>
+			<link
+				href='https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap'
+				rel='stylesheet'
+			/>
+
 			<link rel='icon' href='/favicon.ico' />
 			<link rel='icon' type='image/png' sizes='32x32' href='/favicon-32x32.png' />
 			<link rel='icon' type='image/png' sizes='16x16' href='/favicon-16x16.png' />
