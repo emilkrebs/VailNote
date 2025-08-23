@@ -106,25 +106,60 @@ export async function handler(
 	req: Request,
 	ctx: FreshContext<State>,
 ) {
-	const origin = req.headers.get("Origin") || "*";
+	// Set context state first
+	ctx.state.context = Context.instance();
+	
 	const resp = await ctx.next();
 	const headers = resp.headers;
 
-	headers.set('Access-Control-Allow-Origin', origin);
+	// CORS Headers - More restrictive origin handling
+	const allowedOrigins = ['https://vailnote.com', 'https://www.vailnote.com', 'http://localhost:8000'];
+	const requestOrigin = req.headers.get("Origin");
+	if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
+		headers.set('Access-Control-Allow-Origin', requestOrigin);
+	} else {
+		headers.set('Access-Control-Allow-Origin', 'https://vailnote.com');
+	}
+	
+	headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+	headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+	headers.set('Access-Control-Max-Age', '86400');
+	
+	// Cross-Origin Policies
 	headers.set('Cross-Origin-Resource-Policy', 'same-site');
 	headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
 	headers.set('Cross-Origin-Opener-Policy', 'same-origin');
 
-	
-	headers.set('Permissions-Policy', 'geolocation=(), camera=(), microphone=()');
-	headers.set('Referrer-Policy', 'strict-origin');
+	// Privacy and Permissions
+	headers.set('Permissions-Policy', 'geolocation=(), camera=(), microphone=(), payment=(), usb=(), bluetooth=(), magnetometer=(), gyroscope=(), accelerometer=()');
+	headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
+	// Content Security
 	headers.set('X-Content-Type-Options', 'nosniff');
-	headers.set('X-Frame-Options', 'SAMEORIGIN');
-	headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self'; object-src 'none';");
+	headers.set('X-Frame-Options', 'DENY');
+	
+	// Enhanced CSP to allow Google Fonts
+	const csp = [
+		"default-src 'self'",
+		"script-src 'self' 'unsafe-inline'", // unsafe-inline needed for Fresh hydration
+		"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+		"font-src 'self' https://fonts.gstatic.com",
+		"img-src 'self' data:",
+		"connect-src 'self'",
+		"object-src 'none'",
+		"base-uri 'self'",
+		"form-action 'self'",
+		"frame-ancestors 'none'",
+		"upgrade-insecure-requests"
+	].join('; ');
+	headers.set('Content-Security-Policy', csp);
 
+	// Transport Security
 	headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+	
+	// Additional Security Headers
+	headers.set('X-XSS-Protection', '1; mode=block');
+	headers.set('X-Robots-Tag', 'noindex, nofollow, nosnippet, noarchive');
 
-	ctx.state.context = Context.instance();
 	return resp;
 }
