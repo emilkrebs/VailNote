@@ -118,12 +118,14 @@ async function checkDatabaseHealth(ctx: FreshContext<State>): Promise<ServiceSta
 }
 
 function checkWebsiteHealth(): ServiceStatus {
+    const startTime = performance.now();
     const lastChecked = new Date().toISOString();
 
     // If this endpoint is responding, the website is operational
+    const responseTime = Math.round(performance.now() - startTime);
     return {
         status: 'online',
-        responseTime: 0,
+        responseTime,
         lastChecked,
         details: {
             endpoint: 'responsive',
