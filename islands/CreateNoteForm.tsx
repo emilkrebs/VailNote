@@ -249,7 +249,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 						Advanced Options
 					</summary>
 					<div class='mt-6 pt-4 border-t border-gray-600/30'>
-						<label class='block text-white text-lg font-semibold' htmlFor='replaceContent'>
+						<label class='block text-white text-lg font-semibold' htmlFor='manualDeletion'>
 							Manual Deletion
 						</label>
 						<p class='text-gray-400 text-sm mb-2'>
