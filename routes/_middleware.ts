@@ -103,9 +103,28 @@ export class Context {
 }
 
 export async function handler(
-	_req: Request,
+	req: Request,
 	ctx: FreshContext<State>,
 ) {
+	const origin = req.headers.get("Origin") || "*";
+	const resp = await ctx.next();
+	const headers = resp.headers;
+
+	headers.set('Access-Control-Allow-Origin', origin);
+	headers.set('Cross-Origin-Resource-Policy', 'same-site');
+	headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
+	headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+
+	
+	headers.set('Permissions-Policy', 'geolocation=(), camera=(), microphone=()');
+	headers.set('Referrer-Policy', 'strict-origin');
+
+	headers.set('X-Content-Type-Options', 'nosniff');
+	headers.set('X-Frame-Options', 'SAMEORIGIN');
+	headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self'; object-src 'none';");
+
+	headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+
 	ctx.state.context = Context.instance();
-	return await ctx.next();
+	return resp;
 }
