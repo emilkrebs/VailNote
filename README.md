@@ -105,10 +105,6 @@ The system has been compromised and is marked with (!).
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
-# Architecture Diagram
-
-![Architecture Diagram](./static/images/architecture.png)
-
 # Screenshots
 
 ![Home Page](https://github.com/user-attachments/assets/fe73890e-0cea-453f-bdcc-eb7e7bf418cb)
