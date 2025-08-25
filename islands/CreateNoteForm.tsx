@@ -156,7 +156,10 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 			onCreate(result.noteId!, MESSAGES.CREATE_SUCCESS, `${globalThis.location.origin}/${link}`);
 			form.reset();
 
-			globalThis.scrollTo({ top: 64, behavior: 'smooth' });
+			// Use requestAnimationFrame to prevent blocking the main thread
+			requestAnimationFrame(() => {
+				globalThis.scrollTo({ top: 64, behavior: 'smooth' });
+			});
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : MESSAGES.UNEXPECTED_ERROR;
 			onError(errorMessage);
