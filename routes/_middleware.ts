@@ -115,8 +115,8 @@ export async function handler(
 
 	headers.set('Access-Control-Allow-Origin', origin);
 	headers.set(
-		"Access-Control-Allow-Methods",
-		"POST, OPTIONS, GET, PUT, DELETE",
+		'Access-Control-Allow-Methods',
+		'POST, OPTIONS, GET, PUT, DELETE',
 	);
 	headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 	headers.set('Access-Control-Max-Age', '86400');
@@ -141,7 +141,7 @@ export async function handler(
 	const csp = [
 		"default-src 'self'",
 		"script-src 'self' 'unsafe-inline'", // unsafe-inline needed for fresh
-		"style-src 'self' https://fonts.googleapis.com",
+		"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
 		"font-src 'self' https://fonts.gstatic.com",
 		"img-src 'self' data:",
 		"connect-src 'self'",
