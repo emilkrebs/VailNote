@@ -14,15 +14,11 @@ interface NotePageProps {
 
 export const handler: Handlers<NotePageProps, State> = {
 	async GET(_req, ctx) {
-		const { id, mode } = ctx.params;
+		const { id } = ctx.params;
 		if (!id) {
 			return ctx.renderNotFound();
 		}
-		if (mode === 'vault') {
-			return ctx.render({
-				message: 'Local Vault mode - note will be handled locally',
-			});
-		}
+
 		const noteDatabase = ctx.state.context.getNoteDatabase();
 		const note = await noteDatabase.getNoteById(id);
 
