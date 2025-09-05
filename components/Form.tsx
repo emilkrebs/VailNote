@@ -45,7 +45,7 @@ export function Label({ required, ...props }: LabelProps) {
 	return (
 		<label class={`text-white text-lg font-semibold ${props.class || ''}`} {...props}>
 			{props.children}
-			{required && <span class={`text-red-600 ml-1`}>*</span>}
+			{required && <span class={`text-red-400 ml-1`}>*</span>}
 		</label>
 	);
 }
