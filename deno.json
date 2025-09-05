@@ -33,7 +33,7 @@
 		"@preact/signals-core": "https://esm.sh/*@preact/signals-core@1.5.1",
 		"tailwindcss": "npm:tailwindcss@3.4.1",
 		"tailwindcss/": "npm:/tailwindcss@3.4.1/",
-		"tailwindcss/plugin": "npm:/tailwindcss@3.4.1/plusgin.js",
+		"tailwindcss/plugin": "npm:/tailwindcss@3.4.1/plugin.js",
 		"$std/": "https://deno.land/std@0.216.0/",
 		"mongodb": "npm:mongodb",
 		"bcrypt": "https://deno.land/x/bcrypt@v0.4.1/mod.ts"
