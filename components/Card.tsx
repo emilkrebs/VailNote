@@ -23,7 +23,7 @@ export function CardHeader({ children, ...props }: JSX.HTMLAttributes<HTMLDivEle
 
 export function CardTitle({ children, ...props }: JSX.HTMLAttributes<HTMLHeadingElement>) {
 	return (
-		<h2 class={`text-4xl font-bold ${props.class || ''}`} {...props}>
+		<h2 class={`text-3xl font-bold ${props.class || ''}`} {...props}>
 			{children}
 		</h2>
 	);

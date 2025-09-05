@@ -5,7 +5,7 @@ import HomeButton from '../components/HomeButton.tsx';
 import { State } from './_middleware.ts';
 import SiteHeader from '../components/SiteHeader.tsx';
 import ViewEncryptedNote from '../islands/ViewNote.tsx';
-import Card, { CardContent, CardHeader, CardTitle } from '../components/Card.tsx';
+import Card, { CardContent, CardFooter, CardHeader, CardTitle } from '../components/Card.tsx';
 
 interface NotePageProps {
 	note?: Note;
@@ -83,11 +83,13 @@ export function NoteErrorPage({ message }: { message?: string }) {
 						<CardTitle>Note Not Found</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<p class='text-gray-300'>
+						<p class='text-gray-300 '>
 							{message || 'The note you are looking for does not exist.'}
 						</p>
 					</CardContent>
-					<HomeButton />
+					<CardFooter>
+						<HomeButton />
+					</CardFooter>
 				</Card>
 			</div>
 		</div>

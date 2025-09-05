@@ -247,16 +247,20 @@ function DisplayDecryptedNote(
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
 			<SiteHeader />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-				<Card class='w-full'>
+				<Card>
 					{/* Header with icon and title */}
 					<CardHeader>
-						<div class='flex items-center justify-start gap-3'>
-							<div class='p-3 bg-blue-600/20 rounded-xl'>
-								<PenIcon />
+						<CardTitle>
+							<div class='flex items-center justify-start gap-3'>
+								<div class='p-3 bg-blue-600/20 rounded-xl'>
+									<PenIcon />
+								</div>
+								<div>
+									Note Retrieved
+									{manualDeletion && <ExpirationMessage expiresIn={expiresIn} />}
+								</div>
 							</div>
-							Note Retrieved
-						</div>
-						{manualDeletion && <ExpirationMessage expiresIn={expiresIn} />}
+						</CardTitle>
 						<Message variant='success'>
 							{message || MESSAGES.AUTO_DELETION_COMPLETE}
 						</Message>
@@ -275,12 +279,10 @@ function DisplayDecryptedNote(
 							<h3 class='text-xl font-semibold text-white'>Content</h3>
 						</div>
 
-						<div class='relative bg-gray-900/80 rounded-lg p-6 shadow-inner border border-gray-700/50'>
-							<div class='pr-12'>
-								<p class='whitespace-pre-wrap break-words text-gray-100 leading-relaxed text-base'>
-									{content}
-								</p>
-							</div>
+						<div class='relative bg-gray-900/80 rounded-lg p-6 shadow-inner border border-gray-700/50 max-w-full max-h-96 overflow-auto'>
+							<p class='inline break-words break-all text-gray-100 leading-relaxed text-base pr-12'>
+								{content}
+							</p>
 						</div>
 					</CardContent>
 
@@ -305,7 +307,7 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
 			<SiteHeader />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-				<Card class='w-full'>
+				<Card>
 					<CardHeader>
 						<div class='flex items-center justify-start gap-3'>
 							<div class='p-3 bg-blue-600/20 rounded-xl'>
@@ -361,7 +363,7 @@ function ConfirmViewNote({ onSubmit }: { onSubmit: () => void }) {
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
 			<SiteHeader />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-				<Card class='w-full'>
+				<Card>
 					{/* Header */}
 					<CardHeader>
 						<CardTitle>Confirm View & Destroy</CardTitle>
