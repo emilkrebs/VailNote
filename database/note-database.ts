@@ -2,6 +2,7 @@ import { MongoClient } from 'mongodb';
 import { TerminalColors } from '../lib/logging.ts';
 import { Note } from '../types/types.ts';
 import { DatabaseLogger } from './database-logger.ts';
+import { NOTE_CONTENT_MAX_LENGTH, NOTE_PASSWORD_MAX_LENGTH } from '../lib/validation/note.ts';
 
 export interface ValidateNoteResult {
 	success: boolean;
@@ -103,12 +104,12 @@ export class NoteDatabase {
 		}
 
 		// Security: Limit input sizes to prevent DoS
-		if (data.content.length > 1024 * 1024) { // 1MB limit
+		if (data.content.length > NOTE_CONTENT_MAX_LENGTH) {
 			return { success: false, message: 'Content too large (max 1MB)' };
 		}
 
-		if (data.password && data.password.length > 1024) { // 1KB password limit
-			return { success: false, message: 'Password too long' };
+		if (data.password && data.password.length > NOTE_PASSWORD_MAX_LENGTH) {
+			return { success: false, message: 'Password too long (max 256 characters)' };
 		}
 
 		return { success: true };

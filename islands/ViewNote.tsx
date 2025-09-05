@@ -13,7 +13,7 @@ import Card, { CardContent, CardFooter, CardHeader, CardTitle } from '../compone
 import { FormGroup, Label } from '../components/Form.tsx';
 import { NoteErrorPage } from '../routes/[id].tsx';
 import { ViewNoteSchema, viewNoteSchema } from '../lib/validation/note.ts';
-import * as v from 'valibot';
+import * as v from '@valibot/valibot';
 
 // Constants for messages
 const MESSAGES = {

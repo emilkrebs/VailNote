@@ -25,6 +25,7 @@
 	"imports": {
 		"$fresh/": "https://deno.land/x/fresh@1.7.3/",
 		"@deno/gfm": "jsr:@deno/gfm@^0.11.0",
+		"@valibot/valibot": "jsr:@valibot/valibot@^1.1.0",
 		"idb": "npm:idb@^8.0.3",
 		"preact": "https://esm.sh/preact@10.27.1",
 		"preact/": "https://esm.sh/preact@10.27.1/",
@@ -35,8 +36,7 @@
 		"tailwindcss/plugin": "npm:/tailwindcss@3.4.1/plusgin.js",
 		"$std/": "https://deno.land/std@0.216.0/",
 		"mongodb": "npm:mongodb",
-		"bcrypt": "https://deno.land/x/bcrypt@v0.4.1/mod.ts",
-		"valibot": "https://deno.land/x/valibot/mod.ts"
+		"bcrypt": "https://deno.land/x/bcrypt@v0.4.1/mod.ts"
 	},
 	"compilerOptions": {
 		"jsx": "react-jsx",

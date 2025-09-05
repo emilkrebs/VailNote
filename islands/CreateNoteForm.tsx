@@ -7,7 +7,7 @@ import Message from '../components/Message.tsx';
 import NoteService from '../lib/services/note-service.ts';
 import Card, { CardContent, CardHeader, CardTitle } from '../components/Card.tsx';
 import { Collapsible, FormGroup, Label, Select, SelectOption, Textarea } from '../components/Form.tsx';
-import * as v from 'valibot';
+import * as v from '@valibot/valibot';
 import {
 	CreateNoteSchema,
 	createNoteSchema,
@@ -93,7 +93,8 @@ export default function CreateNote({ message }: { message?: string }) {
 					<p class='text-gray-300 text-lg max-w-2xl mx-auto leading-relaxed'>
 						Share your notes securely with a password. Notes are{' '}
 						<span class='font-semibold text-blue-300 bg-blue-500/10 px-2 py-1 rounded'>encrypted</span> and{' '}
-						<span class='font-semibold text-blue-300 bg-blue-500/10 px-2 py-1 rounded'>self-destruct</span>{' '}
+						<span class='font-semibold text-blue-300 bg-blue-500/10 px-2 py-1 rounded text-nowrap'>self-destruct</span>
+						{' '}
 						after a set time or after being viewed.
 					</p>
 					<MessageDisplay data={formData} />

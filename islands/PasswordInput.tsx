@@ -23,7 +23,7 @@ export default function PasswordInput(
 			/>
 			<button
 				type='button'
-				class='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors'
+				class='absolute right-3 top-1/2 transform text-gray-400 hover:text-white transition-colors'
 				onClick={() => setIsHidden(!isHidden)}
 			>
 				<span title={isHidden ? 'Show' : 'Hide'}>

@@ -1,4 +1,4 @@
-import * as v from 'valibot';
+import * as v from '@valibot/valibot';
 
 export enum EXPIRY_OPTIONS {
 	'10m' = '10 minutes',
@@ -16,11 +16,21 @@ export enum MANUAL_DELETION_OPTIONS {
 	'enabled' = 'Enable Manual Deletion',
 }
 
+export const NOTE_CONTENT_MAX_LENGTH = 1024 * 1024; // 1 MB
+export const NOTE_PASSWORD_MAX_LENGTH = 256; // 256 characters
+
 export const createNoteSchema = v.object({
-	content: v.pipe(v.string(), v.minLength(1, 'Note content is required'), v.trim()),
-	password: v.optional(v.string()),
+	content: v.pipe(
+		v.string(),
+		v.minLength(1, 'Note content is required'),
+		v.maxLength(NOTE_CONTENT_MAX_LENGTH, 'Note content is too long (max 1MB)'),
+		v.trim(),
+	),
+	password: v.optional(
+		v.pipe(v.string(), v.maxLength(NOTE_PASSWORD_MAX_LENGTH, 'Password is too long (max 256 characters)'), v.trim()),
+	), // Optional password with max length
 	expiresIn: v.enum(EXPIRY_OPTIONS, 'Wrong expiration value'),
-	manualDeletion: v.union([v.optional(v.enum(MANUAL_DELETION_OPTIONS, 'Wrong manual deletion value')), v.boolean()]), // Allow empty string for default value
+	manualDeletion: v.union([v.optional(v.enum(MANUAL_DELETION_OPTIONS)), v.boolean()], 'Wrong manual deletion value'), // Allow empty string for default value
 });
 
 export const viewNoteSchema = v.object({

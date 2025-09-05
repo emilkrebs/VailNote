@@ -11,20 +11,49 @@ body {
 	background-color: #1e293b;
 }
 
-.background-animate {
-	background-size: 300%;
+@layer utilities {
+	.input {
+		@apply w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-600 text-white placeholder-gray-400
+			focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors;
+	}
 
-	-webkit-animation: animateBackground var(--animation-time) ease alternate infinite;
-	-moz-animation: animateBackground var(--animation-time) ease alternate infinite;
-	animation: animateBackground var(--animation-time) ease alternate infinite;
+	/* Animation Utilities */
 
-	background-image: linear-gradient(
-		45deg,
-		#2563eb 0%,
-		#10b981 46%,
-		#2563eb 62%,
-		#1e293b 100%
-	);
+	.animate-fade-in {
+		animation: fadeInBio 0.5s ease forwards;
+	}
+
+	.animate-slide-up {
+		animation: slideUpBio 0.4s ease-out;
+	}
+
+	.animation-delay-sm {
+		animation-delay: 10ms;
+	}
+
+	.animation-delay-md {
+		animation-delay: 20ms;
+	}
+
+	.animation-delay-lg {
+		animation-delay: 30ms;
+	}
+
+	.background-animate {
+		background-size: 300%;
+
+		-webkit-animation: animateBackground var(--animation-time) ease alternate infinite;
+		-moz-animation: animateBackground var(--animation-time) ease alternate infinite;
+		animation: animateBackground var(--animation-time) ease alternate infinite;
+
+		background-image: linear-gradient(
+			45deg,
+			#2563eb 0%,
+			#10b981 46%,
+			#2563eb 62%,
+			#1e293b 100%
+		);
+	}
 }
 
 @keyframes animateBackground {
@@ -37,10 +66,27 @@ body {
 	}
 }
 
-@layer utilities {
-	.input {
-		@apply w-full p-3 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-400 focus:outline-none
-			focus:ring-2 focus:ring-blue-500 transition-colors;
+@keyframes fadeInBio {
+	from {
+		opacity: 0;
+		filter: blur(10px);
+	}
+	to {
+		opacity: 1;
+		filter: blur(0);
+	}
+}
+
+@keyframes slideUpBio {
+	from {
+		opacity: 0;
+		transform: translateY(30px) scale(0.95);
+		filter: blur(5px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+		filter: blur(0);
 	}
 }
 

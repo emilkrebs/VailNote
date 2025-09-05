@@ -4,7 +4,7 @@ import { formatExpiration, Note } from '../../types/types.ts';
 import { generateHash } from '../../lib/hashing.ts';
 import { mergeWithRateLimitHeaders } from '../../lib/rate-limiting/rate-limit-headers.ts';
 import { State } from '../_middleware.ts';
-import * as v from 'valibot';
+import * as v from '@valibot/valibot';
 
 /* used for client side note creation and encryption
 	* This endpoint handles only POST requests.
@@ -47,27 +47,31 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 		);
 	}
 
-	const { content, iv, password, expiresIn, manualDeletion } = await req.json();
 	try {
-		v.parse(createNoteSchema, { content, iv, password, expiresIn, manualDeletion });
-	} catch (err) {
-		return new Response(
-			JSON.stringify({
-				message: 'Invalid request data',
-				error: err instanceof Error ? err.message : 'Unknown error',
-			}),
-			{
-				headers: mergeWithRateLimitHeaders(
-					{ 'Content-Type': 'application/json' },
-					rateLimitResult,
-				),
-				status: 400,
-			},
-		);
-	}
-	try {
+		const { content, iv, password, expiresIn, manualDeletion } = await req.json();
+
+		// Validate input using valibot
+		try {
+			v.parse(createNoteSchema, { content, iv, password, expiresIn, manualDeletion });
+		} catch (err) {
+			return new Response(
+				JSON.stringify({
+					message: 'Invalid request data',
+					error: err instanceof Error ? err.message : 'Unknown error',
+				}),
+				{
+					headers: mergeWithRateLimitHeaders(
+						{ 'Content-Type': 'application/json' },
+						rateLimitResult,
+					),
+					status: 400,
+				},
+			);
+		}
+
 		const noteId = await noteDatabase.generateNoteId();
 		const hasPassword = password && password.trim() !== '';
+
 		// if password is provided, hash it with bcrypt (password should be PBKDF2 hashed on client before sending)
 		const passwordHash = hasPassword ? generateHash(password) : undefined;
 
@@ -113,6 +117,7 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 			},
 		);
 	} catch (error) {
+		// Unexpected error handling
 		return new Response(
 			JSON.stringify({
 				message: 'Failed to process request',
