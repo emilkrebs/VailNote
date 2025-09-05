@@ -1,6 +1,6 @@
 import { JSX } from 'preact';
 
-interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends JSX.ButtonHTMLAttributes {
 	variant?: 'primary' | 'secondary' | 'danger';
 }
 

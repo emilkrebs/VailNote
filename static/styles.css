@@ -37,6 +37,13 @@ body {
 	}
 }
 
+@layer utilities {
+	.input {
+		@apply w-full p-3 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-400 focus:outline-none
+			focus:ring-2 focus:ring-blue-500 transition-colors;
+	}
+}
+
 /* Loading Spinner Animations */
 .animate-reverse {
 	animation-direction: reverse;

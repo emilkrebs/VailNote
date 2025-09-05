@@ -3,9 +3,18 @@ import { useState } from 'preact/hooks';
 import CopyContent from './CopyContent.tsx';
 import PasswordInput from './PasswordInput.tsx';
 import PenIcon from '../components/PenIcon.tsx';
-import Select from '../components/Select.tsx';
-import NoteAPIService from '../utils/note-api-service.ts';
 import Message from '../components/Message.tsx';
+import NoteService from '../lib/services/note-service.ts';
+import Card, { CardContent, CardHeader, CardTitle } from '../components/Card.tsx';
+import { Collapsible, FormGroup, Label, Select, SelectOption, Textarea } from '../components/Form.tsx';
+import * as v from 'valibot';
+import {
+	CreateNoteSchema,
+	createNoteSchema,
+	expirationOptions,
+	MANUAL_DELETION_OPTIONS,
+	manualDeletionOptions,
+} from '../lib/validation/note.ts';
 
 // Constants
 const MESSAGES = {
@@ -13,22 +22,6 @@ const MESSAGES = {
 	CREATE_ERROR: 'Failed to create note.',
 	UNEXPECTED_ERROR: 'An error occurred while creating the note.',
 } as const;
-
-const EXPIRY_OPTIONS = [
-	{ value: '10m', label: '10 minutes' },
-	{ value: '1h', label: '1 hour' },
-	{ value: '6h', label: '6 hours' },
-	{ value: '12h', label: '12 hours' },
-	{ value: '24h', label: '24 hours', default: true },
-	{ value: '3d', label: '3 days' },
-	{ value: '7d', label: '7 days' },
-	{ value: '30d', label: '30 days' },
-];
-
-const MANUAL_DELETION_OPTIONS = [
-	{ value: 'disabled', label: 'Disable Manual Deletion', default: true },
-	{ value: 'enabled', label: 'Enable Manual Deletion' },
-];
 
 // Types
 interface CreateNoteData {
@@ -48,7 +41,7 @@ function MessageDisplay({ data }: { data: CreateNoteData }) {
 		<Message
 			variant={isSuccess ? 'success' : 'error'}
 			visible={!!data.message}
-			class='mt-6 p-6 w-full'
+			class='p-6 w-full'
 		>
 			<div class='flex items-start gap-3'>
 				<div
@@ -71,7 +64,7 @@ function MessageDisplay({ data }: { data: CreateNoteData }) {
 			</div>
 
 			{data.noteId && data.noteLink && (
-				<div class='mt-4 pt-4 border-t border-green-400/20 w-72 sm:w-max'>
+				<div class='mt-4 pt-4 border-t border-green-400/20 w-72 sm:w-full'>
 					<CopyContent
 						content={data.noteLink}
 						label={data.noteLink}
@@ -82,50 +75,40 @@ function MessageDisplay({ data }: { data: CreateNoteData }) {
 	);
 }
 
-function CreateNoteHeader() {
-	return (
-		<div class='text-start mb-8'>
-			<div class='flex items-center justify-start gap-3 mb-4'>
-				<div class='p-3 bg-blue-600/20 rounded-xl'>
-					<PenIcon />
-				</div>
-				<h2 class='text-4xl font-bold text-white'>
-					Create a Note
-				</h2>
-			</div>
-			<p class='text-gray-300 text-lg max-w-2xl mx-auto leading-relaxed'>
-				Share your notes securely with a password. Notes are{' '}
-				<span class='font-semibold text-blue-300 bg-blue-500/10 px-2 py-1 rounded'>encrypted</span> and{' '}
-				<span class='font-semibold text-blue-300 bg-blue-500/10 px-2 py-1 rounded'>self-destruct</span>{' '}
-				after a set time or after being viewed.
-			</p>
-		</div>
-	);
-}
-
 export default function CreateNote({ message }: { message?: string }) {
 	const [formData, setFormData] = useState<CreateNoteData>({ message });
 
 	return (
 		<div class='max-w-4xl mx-auto'>
-			<div class='bg-gradient-to-br from-gray-800/95 to-gray-700/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-600/50'>
-				<div class='p-4 sm:p-12'>
-					<CreateNoteHeader />
-
+			<Card>
+				<CardHeader>
+					<CardTitle>
+						<div class='flex items-center justify-start gap-3'>
+							<div class='p-3 bg-blue-600/20 rounded-xl'>
+								<PenIcon />
+							</div>
+							Create a Note
+						</div>
+					</CardTitle>
+					<p class='text-gray-300 text-lg max-w-2xl mx-auto leading-relaxed'>
+						Share your notes securely with a password. Notes are{' '}
+						<span class='font-semibold text-blue-300 bg-blue-500/10 px-2 py-1 rounded'>encrypted</span> and{' '}
+						<span class='font-semibold text-blue-300 bg-blue-500/10 px-2 py-1 rounded'>self-destruct</span>{' '}
+						after a set time or after being viewed.
+					</p>
 					<MessageDisplay data={formData} />
-
-					<div class='mt-8 w-full'>
-						<CreateNoteForm
-							onCreate={(id, message, noteLink) => {
-								setFormData({ message, noteId: id, noteLink });
-							}}
-							onError={(error) => {
-								setFormData({ message: error, noteId: undefined, noteLink: '' });
-							}}
-						/>
-					</div>
-				</div>
-			</div>
+				</CardHeader>
+				<CardContent>
+					<CreateNoteForm
+						onCreate={(id, message, noteLink) => {
+							setFormData({ message, noteId: id, noteLink });
+						}}
+						onError={(error) => {
+							setFormData({ message: error, noteId: undefined, noteLink: '' });
+						}}
+					/>
+				</CardContent>
+			</Card>
 		</div>
 	);
 }
@@ -133,17 +116,20 @@ export default function CreateNote({ message }: { message?: string }) {
 function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 	const handleSubmit = async (event: Event) => {
 		event.preventDefault();
-		const form = event.target as HTMLFormElement;
-		const formData = new FormData(form);
-		const noteContent = formData.get('noteContent')?.toString() || '';
-		const notePassword = formData.get('notePassword')?.toString() || undefined;
-		const expiresIn = formData.get('expiresIn')?.toString() || '';
-		const manualDeletion = formData.get('manualDeletion') === 'enabled';
 
+		const form = event.target as HTMLFormElement;
 		try {
-			const result = await NoteAPIService.createNote({
-				noteContent,
-				notePassword,
+			const data = Object.fromEntries(new FormData(form));
+			const formData = v.parse(createNoteSchema, data) as CreateNoteSchema;
+
+			const content = formData.content;
+			const password = formData.password;
+			const expiresIn = formData.expiresIn;
+			const manualDeletion = formData.manualDeletion === MANUAL_DELETION_OPTIONS.enabled;
+
+			const result = await NoteService.createNote({
+				content,
+				password,
 				expiresIn,
 				manualDeletion,
 			});
@@ -152,8 +138,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 				throw new Error(result.message || MESSAGES.CREATE_ERROR);
 			}
 
-			const link = notePassword ? result.noteId : `${result.noteId}#auth=${result.authKey}`;
-			onCreate(result.noteId!, MESSAGES.CREATE_SUCCESS, `${globalThis.location.origin}/${link}`);
+			onCreate(result.noteId!, MESSAGES.CREATE_SUCCESS, `${globalThis.location.origin}/${result.link}`);
 			form.reset();
 
 			// Use requestAnimationFrame to prevent blocking the main thread
@@ -170,112 +155,88 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 		<form class='space-y-8' method='post' onSubmit={handleSubmit} autoComplete='off'>
 			<div class='grid gap-8'>
 				{/* Note Content Field */}
-				<div>
-					<label
+				<FormGroup>
+					<Label
 						class='block text-white text-lg font-semibold mb-2'
-						htmlFor='noteContent'
-					>
-						Note Content <span class='text-red-400 ml-1'>*</span>
-					</label>
-					<textarea
-						class='w-full h-52 p-2 border border-gray-600 rounded-xl bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 transition'
-						placeholder='Type your note here...'
-						name='noteContent'
-						id='noteContent'
+						htmlFor='content'
 						required
 					>
-					</textarea>
-				</div>
+						Note Content
+					</Label>
+					<Textarea
+						class='w-full h-52'
+						placeholder='Type your note here...'
+						name='content'
+						id='content'
+						required
+					>
+					</Textarea>
+				</FormGroup>
 
 				{/* Password Field */}
-				<div>
-					<label
-						class='block text-white text-lg font-semibold mb-2'
-						htmlFor='notePassword'
+				<FormGroup>
+					<Label
+						htmlFor='password'
 						title='Set a password to protect and encrypt your note'
 					>
-						Password <span class='text-gray-400 font-normal text-base'>(optional)</span>
-					</label>
-					<p class='text-gray-400 text-sm -mt-1'>
-						Optional: Add password protection for enhanced security
-					</p>
+						Password
+					</Label>
 					<PasswordInput
 						type='password'
-						name='notePassword'
-						id='notePassword'
+						name='password'
+						id='password'
 						placeholder='Enter to set a password'
+						helpText='Optional: Add password protection for enhanced security'
 					/>
-				</div>
+				</FormGroup>
 
 				{/* Expiration Field */}
-				<div>
-					<label
-						class='block text-white text-lg font-semibold mb-2'
-						htmlFor='expiresIn'
-					>
+				<FormGroup>
+					<Label htmlFor='expiresIn'>
 						Expire After
-					</label>
-					<p class='text-gray-400 text-sm -mt-1'>
-						Note will automatically self-destruct after this time period
-					</p>
+					</Label>
+
 					<Select
 						name='expiresIn'
 						id='expiresIn'
 						defaultValue='24h'
+						helpText='Note will automatically self-destruct after this time period'
 					>
-						{EXPIRY_OPTIONS.map((option) => (
-							<option
-								key={option.value}
-								value={option.value}
-								selected={option.default}
+						{expirationOptions.map((option) => (
+							<SelectOption
+								key={option}
+								value={option}
+								selected={option === '24h'}
 							>
-								{option.label}
-							</option>
+								{option}
+							</SelectOption>
 						))}
 					</Select>
-				</div>
+				</FormGroup>
 
 				{/* Advanced Options */}
-				<details class='group bg-gradient-to-br from-gray-800/60 to-gray-900/40 rounded-xl p-6 border border-gray-600/30 hover:border-gray-500/50 transition-all duration-200'>
-					<summary class='text-white text-lg font-semibold cursor-pointer flex items-center gap-2 hover:text-blue-300 transition-colors'>
-						<span class='transform group-open:rotate-90 transition-transform duration-200'>
-							<svg
-								xmlns='http://www.w3.org/2000/svg'
-								class='h-5 w-5'
-								fill='none'
-								viewBox='0 0 24 24'
-								stroke='currentColor'
+				<Collapsible title='Advanced Options'>
+					<Label htmlFor='manualDeletion'>
+						Manual Deletion
+					</Label>
+					<Select
+						name='manualDeletion'
+						id='manualDeletion'
+						defaultValue='disabled'
+						helpText='Let anybody with access to the note delete it manually at any time. This will turn off self-destruction
+						after viewing - use with caution.'
+					>
+						{manualDeletionOptions.map((option) => (
+							<SelectOption
+								key={option}
+								value={option}
+								selected={option === 'disabled'}
 							>
-								<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5l7 7-7 7' />
-							</svg>
-						</span>
-						Advanced Options
-					</summary>
-					<div class='mt-6 pt-4 border-t border-gray-600/30'>
-						<label class='block text-white text-lg font-semibold' htmlFor='manualDeletion'>
-							Manual Deletion
-						</label>
-						<p class='text-gray-400 text-sm mb-2'>
-							Let anybody with access to the note delete it manually at any time. This will turn off self-destruction
-							after viewing - use with caution.
-						</p>
-						<Select
-							name='manualDeletion'
-							id='manualDeletion'
-							defaultValue='disabled'
-						>
-							{MANUAL_DELETION_OPTIONS.map((option) => (
-								<option
-									key={option.value}
-									value={option.value}
-									selected={option.default}
-								>
-									{option.label}
-								</option>
-							))}
-						</Select>
-					</div>
-				</details>
+								{option}
+							</SelectOption>
+						))}
+					</Select>
+				</Collapsible>
 			</div>
 
 			{/* Submit Button */}

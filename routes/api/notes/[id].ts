@@ -1,7 +1,7 @@
 import { FreshContext } from '$fresh/server.ts';
 import { Note } from '../../../types/types.ts';
-import { compareHash } from '../../../utils/hashing.ts';
-import { mergeWithRateLimitHeaders } from '../../../utils/rate-limiting/rate-limit-headers.ts';
+import { compareHash } from '../../../lib/hashing.ts';
+import { mergeWithRateLimitHeaders } from '../../../lib/rate-limiting/rate-limit-headers.ts';
 import { State } from '../../_middleware.ts';
 
 export const handler = async (req: Request, ctx: FreshContext<State>): Promise<Response> => {
@@ -58,7 +58,7 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 				id: note.id,
 				content: note.content,
 				iv: note.iv,
-				expiresAt: note.expiresAt,
+				expiresIn: note.expiresIn,
 				manualDeletion: note.manualDeletion,
 			} as Note),
 			{

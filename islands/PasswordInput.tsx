@@ -1,18 +1,25 @@
 import { asset } from '$fresh/runtime.ts';
 import { useState } from 'preact/hooks';
 import { JSX } from 'preact';
+import { Input } from '../components/Form.tsx';
+
+interface PasswordInputProps extends JSX.InputHTMLAttributes {
+	error?: string;
+	helpText?: string;
+}
 
 export default function PasswordInput(
-	props: JSX.IntrinsicElements['input'],
+	props: PasswordInputProps,
 ) {
 	const [isHidden, setIsHidden] = useState(true);
 
 	return (
 		<div class='relative w-full'>
-			<input
+			<Input
 				{...props}
 				type={isHidden ? 'password' : 'text'}
-				class='w-full px-4 py-2 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors'
+				error={props.error}
+				helpText={props.helpText}
 			/>
 			<button
 				type='button'

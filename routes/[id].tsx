@@ -7,15 +7,20 @@ import SiteHeader from '../components/SiteHeader.tsx';
 import ViewEncryptedNote from '../islands/ViewNote.tsx';
 
 interface NotePageProps {
-	note: Note;
+	note?: Note;
 	message?: string;
 }
 
 export const handler: Handlers<NotePageProps, State> = {
 	async GET(_req, ctx) {
-		const { id } = ctx.params;
+		const { id, mode } = ctx.params;
 		if (!id) {
 			return ctx.renderNotFound();
+		}
+		if (mode === 'vault') {
+			return ctx.render({
+				message: 'Local Vault mode - note will be handled locally',
+			});
 		}
 		const noteDatabase = ctx.state.context.getNoteDatabase();
 		const note = await noteDatabase.getNoteById(id);
@@ -70,7 +75,7 @@ export default function NotePage(ctx: PageProps<NotePageProps>) {
 	);
 }
 
-function NoteErrorPage({ message }: { message?: string }) {
+export function NoteErrorPage({ message }: { message?: string }) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
 			<SiteHeader />

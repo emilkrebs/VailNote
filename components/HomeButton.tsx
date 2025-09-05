@@ -1,6 +1,6 @@
 import { JSX } from 'preact';
 
-export default function HomeButton(props: JSX.HTMLAttributes<HTMLAnchorElement>) {
+export default function HomeButton(props: JSX.AnchorHTMLAttributes) {
 	return (
 		<a
 			href='/'
