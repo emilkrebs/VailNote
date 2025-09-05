@@ -16,7 +16,7 @@ export function FormError({ error }: FormErrorProps) {
 	if (!error) return null;
 
 	return (
-		<div class='text-sm font-medium text-red-600 bg-danger border border-red-600 px-4 py-3 rounded-lg'>
+		<div class='text-sm font-medium text-red-600 bg-red-100 border border-red-600 px-4 py-3 rounded-lg'>
 			{error}
 		</div>
 	);
