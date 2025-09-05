@@ -58,6 +58,11 @@ function OpenGraphMeta({ title, description, canonicalUrl }: HeadProps) {
 			<meta name='twitter:creator' content='@emilkrebs' />
 			<meta name='twitter:site' content='@emilkrebs' />
 
+			{/* Apple Meta Tags */}
+			<meta name='apple-mobile-web-app-capable' content='yes' />
+			<meta name='apple-mobile-web-app-status-bar-style' content='black-translucent' />
+			<meta name='apple-mobile-web-app-title' content='VailNote' />
+
 			{/* Additional SEO */}
 			<meta name='robots' content='index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1' />
 			<meta name='googlebot' content='index, follow' />
@@ -101,7 +106,12 @@ export default function Header({ title, description, canonicalUrl }: HeadProps) 
 			<link rel='icon' href='/favicon.ico' />
 			<link rel='icon' type='image/png' sizes='32x32' href='/favicon-32x32.png' />
 			<link rel='icon' type='image/png' sizes='16x16' href='/favicon-16x16.png' />
+
+			{/* Apple Touch Icons */}
 			<link rel='apple-touch-icon' href='/apple-touch-icon.png' />
+			<link rel='apple-touch-icon' href='/web-app-manifest-192x192.png' />
+			<link rel='apple-touch-icon' href='/web-app-manifest-512x512.png' />
+
 			<link rel='canonical' href={finalCanonicalUrl} />
 			<link rel='manifest' href='/site.webmanifest' />
 			<script type='module' src='/pwa-update.js' />
