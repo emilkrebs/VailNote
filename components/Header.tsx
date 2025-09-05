@@ -103,7 +103,18 @@ export default function Header({ title, description, canonicalUrl }: HeadProps) 
 			<link rel='icon' type='image/png' sizes='16x16' href='/favicon-16x16.png' />
 			<link rel='apple-touch-icon' href='/apple-touch-icon.png' />
 			<link rel='canonical' href={finalCanonicalUrl} />
+			<link
+				crossorigin="use-credentials"
+				rel="manifest"
+				href="/site.webmanifest"
+			/>
 
+			<script type="module">
+				import
+				"https://cdn.jsdelivr.net/npm/@pwabuilder/pwaupdate/dist/pwa-update.js"; const
+				el = document.createElement("pwa-update"); document.body.appendChild(el);
+			</script>
+			
 			{/* SEO and Social Media Meta Tags */}
 			<OpenGraphMeta title={title} description={description} canonicalUrl={canonicalUrl} />
 		</head>
