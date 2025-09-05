@@ -1,8 +1,8 @@
 {
   "name": "VailNote",
   "short_name": "VailNote",
-  "theme_color": "#000000",
-  "background_color": "#000000",
+  "theme_color": "#2563eb",
+  "background_color": "#374151 ",
   "display": "standalone",
   "scope": "/",
   "start_url": "/",

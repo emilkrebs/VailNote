@@ -16,7 +16,7 @@ function OpenGraphMeta({ title, description, canonicalUrl }: HeadProps) {
 	return (
 		<>
 			<meta name='viewport' content='width=device-width, initial-scale=1' />
-			<meta name='theme-color' content='#000000' />
+			<meta name='theme-color' content='#2563eb' />
 			<meta name='description' content={ogDescription} />
 
 			{/* SEO Meta Tags */}
@@ -104,7 +104,7 @@ export default function Header({ title, description, canonicalUrl }: HeadProps) 
 			<link rel='apple-touch-icon' href='/apple-touch-icon.png' />
 			<link rel='canonical' href={finalCanonicalUrl} />
 			<link
-				crossorigin="use-credentials"
+				crossorigin="anonymous"
 				rel="manifest"
 				href="/site.webmanifest"
 			/>
