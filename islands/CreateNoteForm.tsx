@@ -224,8 +224,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 						name='manualDeletion'
 						id='manualDeletion'
 						defaultValue='disabled'
-						helpText='Let anybody with access to the note delete it manually at any time. This will turn off self-destruction
-						after viewing - use with caution.'
+						helpText={`Let anybody with access to the note delete it manually at any time. This will turn off self-destruction after viewing - use with caution.`}
 					>
 						{manualDeletionOptions.map((option) => (
 							<SelectOption
