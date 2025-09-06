@@ -22,10 +22,8 @@ export default function CopyContent(
 	};
 
 	return (
-		<button
-			type='button'
+		<span
 			onClick={handleCopy}
-			disabled={copied}
 			class='cursor-pointer mt-2 flex items-center gap-3 border-2 border-blue-500 rounded-lg p-3 bg-blue-600/20 text-blue-300'
 		>
 			<span
@@ -68,6 +66,6 @@ export default function CopyContent(
 						<path d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1' />
 					</svg>
 				)}
-		</button>
+		</span>
 	);
 }

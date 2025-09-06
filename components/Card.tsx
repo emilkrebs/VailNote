@@ -15,7 +15,7 @@ export default function Card({ children, ...props }: JSX.HTMLAttributes<HTMLDivE
 
 export function CardHeader({ children, ...props }: JSX.HTMLAttributes<HTMLDivElement>) {
 	return (
-		<div class={`flex flex-col space-y-2 p-8 ${props.class ?? ''}`} {...props}>
+		<div class={`flex flex-col space-y-2 p-4 sm:p-8 ${props.class ?? ''}`} {...props}>
 			{children}
 		</div>
 	);
@@ -31,7 +31,7 @@ export function CardTitle({ children, ...props }: JSX.HTMLAttributes<HTMLHeading
 
 export function CardContent({ children, ...props }: JSX.HTMLAttributes<HTMLDivElement>) {
 	return (
-		<div class={`p-8 pt-0 ${props.class || ''}`} {...props}>
+		<div class={`p-4 sm:p-8 !pt-0 ${props.class || ''}`} {...props}>
 			{children}
 		</div>
 	);
@@ -39,7 +39,7 @@ export function CardContent({ children, ...props }: JSX.HTMLAttributes<HTMLDivEl
 
 export function CardFooter({ children, ...props }: JSX.HTMLAttributes<HTMLDivElement>) {
 	return (
-		<div class={`p-8 border-t border-gray-600/50 ${props.class || ''}`} {...props}>
+		<div class={`p-4 sm:p-8 border-t border-gray-600/50 ${props.class || ''}`} {...props}>
 			{children}
 		</div>
 	);

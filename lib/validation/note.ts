@@ -30,7 +30,10 @@ export const createNoteSchema = v.object({
 		v.pipe(v.string(), v.maxLength(NOTE_PASSWORD_MAX_LENGTH, 'Password is too long (max 256 characters)'), v.trim()),
 	), // Optional password with max length
 	expiresIn: v.enum(EXPIRY_OPTIONS, 'Invalid expiration time. Please select a valid option.'),
-	manualDeletion: v.union([v.optional(v.enum(MANUAL_DELETION_OPTIONS)), v.boolean()], 'Invalid manual deletion setting. Please select a valid option.'), // Allow empty string for default value
+	manualDeletion: v.union(
+		[v.optional(v.enum(MANUAL_DELETION_OPTIONS)), v.boolean()],
+		'Invalid manual deletion setting. Please select a valid option.',
+	), // Allow empty string for default value
 });
 
 export const viewNoteSchema = v.object({

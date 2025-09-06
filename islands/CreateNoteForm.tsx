@@ -41,7 +41,6 @@ function MessageDisplay({ data }: { data: CreateNoteData }) {
 		<Message
 			variant={isSuccess ? 'success' : 'error'}
 			visible={!!data.message}
-			class='p-6 w-full'
 		>
 			<div class='flex items-start gap-3'>
 				<div
@@ -64,7 +63,7 @@ function MessageDisplay({ data }: { data: CreateNoteData }) {
 			</div>
 
 			{data.noteId && data.noteLink && (
-				<div class='mt-4 pt-4 border-t border-green-400/20 w-72 sm:w-full'>
+				<div class='mt-4 pt-4 border-t border-green-400/20 w-72 sm:w-max'>
 					<CopyContent
 						content={data.noteLink}
 						label={data.noteLink}
@@ -183,7 +182,6 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 						Password
 					</Label>
 					<PasswordInput
-						type='password'
 						name='password'
 						id='password'
 						placeholder='Enter to set a password'
