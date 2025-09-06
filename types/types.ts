@@ -3,7 +3,7 @@ export interface Note {
 	content: string;
 
 	iv: string; // Initialization vector for encryption
-	expiresAt: Date;
+	expiresIn: Date;
 
 	// Optional fields for additional functionality
 	password?: string; // password hash for private notes
@@ -33,10 +33,10 @@ export function formatExpiration(expiresIn: string): Date {
 	return new Date(now.getTime() + ms);
 }
 
-export function formatExpirationMessage(expiresAt: Date): string {
+export function formatExpirationMessage(expiresIn: Date): string {
 	const now = new Date();
-	expiresAt = new Date(expiresAt);
-	const diff = expiresAt.getTime() - now.getTime();
+	expiresIn = new Date(expiresIn);
+	const diff = expiresIn.getTime() - now.getTime();
 
 	if (diff <= 0) {
 		return 'Expired';

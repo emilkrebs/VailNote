@@ -2,8 +2,8 @@ import { createHandler, ServeHandlerInfo } from '$fresh/server.ts';
 import manifest from '../fresh.gen.ts';
 import config from '../fresh.config.ts';
 import { assertEquals, assertExists } from '$std/assert/mod.ts';
-import { generateDeterministicClientHash } from '../utils/hashing.ts';
-import { encryptNoteContent } from '../utils/encryption.ts';
+import { generateDeterministicClientHash } from '../lib/hashing.ts';
+import { encryptNoteContent } from '../lib/encryption.ts';
 import { Context } from '../routes/_middleware.ts';
 
 // Test configuration constants
@@ -115,7 +115,7 @@ Deno.test({
 						content: encryptedContent.encrypted,
 						iv: encryptedContent.iv,
 						password: passwordClientHash,
-						expiresAt: testData.expiresIn,
+						expiresIn: testData.expiresIn,
 					}),
 					headers: { 'Content-Type': 'application/json' },
 				}),
@@ -178,7 +178,7 @@ Deno.test({
 					body: JSON.stringify({
 						// Missing content
 						password: 'test123',
-						expiresAt: '1 hour',
+						expiresIn: '1 hour',
 					}),
 					headers: { 'Content-Type': 'application/json' },
 				}),

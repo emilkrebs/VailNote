@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import Header from '../components/Header.tsx';
 import HomeButton from '../components/HomeButton.tsx';
 import Message from '../components/Message.tsx';
 import PenIcon from '../components/PenIcon.tsx';
@@ -7,9 +6,14 @@ import SiteHeader from '../components/SiteHeader.tsx';
 import PasswordInput from './PasswordInput.tsx';
 import { Button } from '../components/Button.tsx';
 import { formatExpirationMessage, Note } from '../types/types.ts';
-import { decryptNoteContent } from '../utils/encryption.ts';
-import NoteAPIService from '../utils/note-api-service.ts';
+import { decryptNoteContent } from '../lib/encryption.ts';
 import LoadingPage from '../components/LoadingPage.tsx';
+import NoteService from '../lib/services/note-service.ts';
+import Card, { CardContent, CardFooter, CardHeader, CardTitle } from '../components/Card.tsx';
+import { FormGroup, Label } from '../components/Form.tsx';
+import { NoteErrorPage } from '../routes/[id].tsx';
+import { ViewNoteSchema, viewNoteSchema } from '../lib/validation/note.ts';
+import * as v from '@valibot/valibot';
 
 // Constants for messages
 const MESSAGES = {
@@ -39,7 +43,7 @@ interface DisplayDecryptedNoteProps {
 	content: string;
 	message?: string;
 	manualDeletion?: boolean;
-	expiresAt: Date;
+	expiresIn: Date;
 	onDeleteNote: () => void;
 }
 
@@ -54,7 +58,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 	const [decryptionError, setDecryptionError] = useState<string | undefined>(undefined);
 	const [message, setMessage] = useState<string | undefined>(undefined);
 
-	const notePassword = useRef<string | undefined>(undefined);
+	const password = useRef<string | undefined>(undefined);
 
 	// Helper functions
 	const getAuthKey = (): string | null => {
@@ -75,12 +79,12 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 
 	const handleAuthKey = async (authKey: string) => {
 		try {
-			const result = await NoteAPIService.getEncryptedNote(noteId, authKey);
+			const result = await NoteService.getNote(noteId, authKey);
 			if (!result.success || !result.note) {
 				throw new Error(result.message);
 			}
 
-			notePassword.current = manualDeletion ? authKey : undefined;
+			password.current = manualDeletion ? authKey : undefined;
 			const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, authKey);
 
 			setNote({ ...result.note, content: decryptedContent });
@@ -134,8 +138,10 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 		setLoading(true);
 
 		const form = event.target as HTMLFormElement;
-		const formData = new FormData(form);
-		const password = formData.get('password')?.toString() || '';
+		const data = Object.fromEntries(new FormData(form));
+		const formData = v.parse(viewNoteSchema, data) as ViewNoteSchema;
+
+		const password = formData.password;
 
 		if (!password.trim()) {
 			setDecryptionError(MESSAGES.ENTER_PASSWORD);
@@ -145,7 +151,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 
 		try {
 			setDecryptionError(undefined);
-			const result = await NoteAPIService.getEncryptedNote(noteId, password);
+			const result = await NoteService.getNote(noteId, password);
 
 			if (!result.success || !result.note) {
 				setDecryptionError(MESSAGES.INVALID_PASSWORD);
@@ -153,7 +159,6 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 				return;
 			}
 
-			notePassword.current = manualDeletion ? password : undefined;
 			const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, password);
 
 			setNote({ ...result.note, content: decryptedContent });
@@ -169,13 +174,13 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 	};
 
 	const handleDeleteNote = async () => {
-		if (!notePassword.current) {
+		if (!password.current) {
 			setMessage(MESSAGES.NO_PASSWORD);
 			return;
 		}
 
 		try {
-			await NoteAPIService.deleteNote(noteId, notePassword.current);
+			await NoteService.deleteNote(noteId, password.current);
 			setMessage(MESSAGES.DELETE_SUCCESS);
 			globalThis.location.href = '/';
 		} catch (error) {
@@ -213,7 +218,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 	}
 
 	if (!note) {
-		return <NoteErrorPage message={message || 'Note not found'} />;
+		return <NoteErrorPage message={MESSAGES.NOTE_NOT_AVAILABLE} />;
 	}
 
 	return (
@@ -221,7 +226,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 			content={note.content}
 			message={message}
 			manualDeletion={manualDeletion}
-			expiresAt={note.expiresAt}
+			expiresIn={note.expiresIn}
 			onDeleteNote={handleDeleteNote}
 		/>
 	);
@@ -231,35 +236,38 @@ interface DisplayDecryptedNoteProps {
 	content: string;
 	message?: string;
 	manualDeletion?: boolean;
-	expiresAt: Date;
+	expiresIn: Date;
 	onDeleteNote: () => void;
 }
 
 function DisplayDecryptedNote(
-	{ content, message, manualDeletion, expiresAt, onDeleteNote }: DisplayDecryptedNoteProps,
+	{ content, message, manualDeletion, expiresIn, onDeleteNote }: DisplayDecryptedNoteProps,
 ) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
 			<SiteHeader />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-				<div class='flex flex-col mt-6 p-4 sm:p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
+				<Card>
 					{/* Header with icon and title */}
-					<div class='flex items-center justify-start gap-2 mb-6 pb-4 border-b border-gray-600/50'>
-						<div class='p-3 bg-gray-800 rounded-xl'>
-							<PenIcon />
-						</div>
-						<div>
-							<h2 class='text-3xl font-bold text-white'>Note Retrieved</h2>
-							{manualDeletion && <ExpirationMessage expiresAt={expiresAt} />}
-						</div>
-					</div>
-
-					<Message variant='success'>
-						{message || MESSAGES.AUTO_DELETION_COMPLETE}
-					</Message>
+					<CardHeader>
+						<CardTitle>
+							<div class='flex items-center justify-start gap-3'>
+								<div class='p-3 bg-blue-600/20 rounded-xl'>
+									<PenIcon />
+								</div>
+								<div>
+									Note Retrieved
+									{manualDeletion && <ExpirationMessage expiresIn={expiresIn} />}
+								</div>
+							</div>
+						</CardTitle>
+						<Message variant='success'>
+							{message || MESSAGES.AUTO_DELETION_COMPLETE}
+						</Message>
+					</CardHeader>
 
 					{/* Content section */}
-					<div class='mt-6'>
+					<CardContent>
 						<div class='flex items-center gap-2 mb-4'>
 							<svg class='w-5 h-5 text-gray-300' fill='currentColor' viewBox='0 0 20 20'>
 								<path
@@ -271,25 +279,24 @@ function DisplayDecryptedNote(
 							<h3 class='text-xl font-semibold text-white'>Content</h3>
 						</div>
 
-						<div class='relative bg-gray-900/80 rounded-lg p-6 shadow-inner border border-gray-700/50'>
-							<div class='pr-12'>
-								<p class='whitespace-pre-wrap break-words text-gray-100 leading-relaxed text-base'>
-									{content}
-								</p>
-							</div>
+						<div class='relative bg-gray-900/80 rounded-lg p-6 shadow-inner border border-gray-700/50 max-w-full max-h-96 overflow-auto'>
+							<p class='inline break-words break-all text-gray-100 leading-relaxed text-base pr-12'>
+								{content}
+							</p>
 						</div>
-					</div>
+					</CardContent>
 
-					{/* Action buttons */}
-					<div class='flex flex-col sm:flex-row gap-4 mt-8 pt-6 border-t border-gray-600/50 w-full'>
-						<HomeButton />
-						{manualDeletion && (
-							<Button variant='danger' onClick={onDeleteNote}>
-								Delete Note
-							</Button>
-						)}
-					</div>
-				</div>
+					<CardFooter>
+						<div class='flex flex-col sm:flex-row gap-4'>
+							<HomeButton />
+							{manualDeletion && (
+								<Button variant='danger' onClick={onDeleteNote}>
+									Delete Note
+								</Button>
+							)}
+						</div>
+					</CardFooter>
+				</Card>
 			</div>
 		</div>
 	);
@@ -300,51 +307,52 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
 			<SiteHeader />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-				<div class='flex flex-col mt-6 p-4 sm:p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
-					{/* Header */}
-					<div class='flex items-center justify-start gap-2 mb-6 pb-4 border-b border-gray-600/50'>
-						<div class='p-3 bg-gray-800 rounded-xl'>
-							<PenIcon />
+				<Card>
+					<CardHeader>
+						<div class='flex items-center justify-start gap-3'>
+							<div class='p-3 bg-blue-600/20 rounded-xl'>
+								<PenIcon />
+							</div>
+							Enter Password
 						</div>
-						<div>
-							<h2 class='text-3xl font-bold text-white'>Enter Password</h2>
-							<p class='text-yellow-300 text-sm font-medium'>This note is encrypted and requires a password</p>
-						</div>
-					</div>
+						<p class='text-yellow-300 text-sm font-medium'>This note is encrypted and requires a password</p>
 
-					{error && (
-						<div class='mb-6 p-4 rounded-lg border bg-red-600/20 border-red-400 text-red-200'>
-							<span class='font-medium'>{error}</span>
-						</div>
-					)}
+						{error && (
+							<div class='mb-6 p-4 rounded-lg border bg-red-600/20 border-red-400 text-red-200'>
+								<span class='font-medium'>{error}</span>
+							</div>
+						)}
+					</CardHeader>
 
-					{!manualDeletion && <WarningMessage />}
+					<CardContent>
+						{!manualDeletion && <WarningMessage />}
 
-					<NoScriptWarning />
+						<NoScriptWarning />
 
-					{/* Password form */}
-					<form class='space-y-6' onSubmit={onSubmit} autoComplete='off'>
-						<div>
-							<label class='block text-white text-lg font-semibold mb-3' htmlFor='password'>
-								Enter Password
-							</label>
-							<PasswordInput
-								type='password'
-								name='password'
-								id='password'
-								placeholder='Enter password to decrypt note'
-								required
-							/>
-						</div>
-						<Button type='submit' variant={manualDeletion ? 'primary' : 'danger'} class='w-full'>
-							{manualDeletion ? 'View Note' : 'View & Destroy'}
-						</Button>
-					</form>
+						{/* Password form */}
+						<form className='space-y-6' onSubmit={onSubmit} autoComplete='off'>
+							<FormGroup>
+								<Label htmlFor='password'>
+									Enter Password
+								</Label>
+								<PasswordInput
+									type='password'
+									name='password'
+									id='password'
+									placeholder='Enter password to decrypt note'
+									required
+								/>
+							</FormGroup>
+							<Button type='submit' variant={manualDeletion ? 'primary' : 'danger'} class='w-full'>
+								{manualDeletion ? 'View Note' : 'View & Destroy'}
+							</Button>
+						</form>
+					</CardContent>
 
-					<div class='block mt-8 pt-6 border-t border-gray-600/50'>
-						<HomeButton />
-					</div>
-				</div>
+					<CardFooter>
+						<HomeButton class='w-full' />
+					</CardFooter>
+				</Card>
 			</div>
 		</div>
 	);
@@ -355,30 +363,30 @@ function ConfirmViewNote({ onSubmit }: { onSubmit: () => void }) {
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
 			<SiteHeader />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-				<div class='mt-6 p-4 sm:p-8 rounded-3xl shadow-2xl w-full bg-gradient-to-br from-gray-800/95 to-gray-700/95 border border-gray-600/50 backdrop-blur-sm'>
+				<Card>
 					{/* Header */}
-					<div class='mb-8'>
-						<h2 class='text-3xl font-bold text-white mb-3'>Confirm View & Destroy</h2>
+					<CardHeader>
+						<CardTitle>Confirm View & Destroy</CardTitle>
 						<p class='text-gray-300 text-base leading-relaxed'>
 							This action is{' '}
 							<span class='text-red-400 font-semibold'>irreversible</span>. The note will be permanently destroyed after
 							viewing.
 						</p>
-					</div>
+					</CardHeader>
 
-					<WarningMessage />
+					<CardContent>
+						<WarningMessage />
 
-					<NoScriptWarning />
+						<NoScriptWarning />
 
-					<div class='space-y-6'>
 						<div class='flex flex-col sm:flex-row w-full justify-between gap-4'>
 							<HomeButton class='w-full sm:min-w-max' />
 							<Button variant='danger' class='w-full' onClick={onSubmit}>
 								View and Destroy Note
 							</Button>
 						</div>
-					</div>
-				</div>
+					</CardContent>
+				</Card>
 			</div>
 		</div>
 	);
@@ -418,11 +426,11 @@ function WarningMessage() {
 	);
 }
 
-function ExpirationMessage({ expiresAt }: { expiresAt: Date }) {
+function ExpirationMessage({ expiresIn }: { expiresIn: Date }) {
 	const [message, setMessage] = useState('');
 
 	const updateMessage = () => {
-		const timeString = formatExpirationMessage(expiresAt);
+		const timeString = formatExpirationMessage(expiresIn);
 		setMessage(`Expires in: ${timeString}`);
 	};
 
@@ -430,30 +438,12 @@ function ExpirationMessage({ expiresAt }: { expiresAt: Date }) {
 		updateMessage();
 		const interval = setInterval(updateMessage, 1000);
 		return () => clearInterval(interval);
-	}, [expiresAt]);
+	}, [expiresIn]);
 
 	return (
 		<p class='text-yellow-300 text-xs font-medium mt-1'>
 			{message}
 		</p>
-	);
-}
-
-function NoteErrorPage({ message }: { message?: string }) {
-	return (
-		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
-			<SiteHeader />
-			<Header title='Note Not Found' />
-			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-				<div class='flex flex-col mt-6 p-8 rounded-2xl shadow-xl w-full bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600'>
-					<h2 class='text-3xl font-bold text-white mb-2'>Error</h2>
-					<p class='text-gray-300'>
-						{message || 'The note you are looking for does not exist.'}
-					</p>
-					<HomeButton />
-				</div>
-			</div>
-		</div>
 	);
 }
 

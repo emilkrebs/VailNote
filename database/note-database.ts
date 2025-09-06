@@ -1,7 +1,8 @@
 import { MongoClient } from 'mongodb';
-import { TerminalColors } from '../utils/logging.ts';
+import { TerminalColors } from '../lib/logging.ts';
 import { Note } from '../types/types.ts';
 import { DatabaseLogger } from './database-logger.ts';
+import { NOTE_CONTENT_MAX_LENGTH, NOTE_PASSWORD_MAX_LENGTH } from '../lib/validation/note.ts';
 
 export interface ValidateNoteResult {
 	success: boolean;
@@ -45,7 +46,7 @@ export class NoteDatabase {
 		const db = this._client.db(this.DATA_SOURCE);
 		const rooms = db.collection<Note>(this.COLLECTION);
 
-		await rooms.createIndex({ 'expiresAt': 1 }, { expireAfterSeconds: 1 });
+		await rooms.createIndex({ 'expiresIn': 1 }, { expireAfterSeconds: 1 });
 		await rooms.createIndex({ 'id': 1 }, { unique: true });
 	}
 
@@ -98,17 +99,17 @@ export class NoteDatabase {
 	}
 
 	validateNote(data: Note): ValidateNoteResult {
-		if (!data.content || !data.iv || !data.expiresAt) {
+		if (!data.content || !data.iv || !data.expiresIn) {
 			return { success: false, message: 'Content, IV, and expiration time are required' };
 		}
 
 		// Security: Limit input sizes to prevent DoS
-		if (data.content.length > 1024 * 1024) { // 1MB limit
+		if (data.content.length > NOTE_CONTENT_MAX_LENGTH) {
 			return { success: false, message: 'Content too large (max 1MB)' };
 		}
 
-		if (data.password && data.password.length > 1024) { // 1KB password limit
-			return { success: false, message: 'Password too long' };
+		if (data.password && data.password.length > NOTE_PASSWORD_MAX_LENGTH) {
+			return { success: false, message: 'Password too long (max 256 characters)' };
 		}
 
 		return { success: true };

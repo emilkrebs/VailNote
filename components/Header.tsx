@@ -16,7 +16,7 @@ function OpenGraphMeta({ title, description, canonicalUrl }: HeadProps) {
 	return (
 		<>
 			<meta name='viewport' content='width=device-width, initial-scale=1' />
-			<meta name='theme-color' content='#000000' />
+			<meta name='theme-color' content='#2563eb' />
 			<meta name='description' content={ogDescription} />
 
 			{/* SEO Meta Tags */}
@@ -58,6 +58,11 @@ function OpenGraphMeta({ title, description, canonicalUrl }: HeadProps) {
 			<meta name='twitter:creator' content='@emilkrebs' />
 			<meta name='twitter:site' content='@emilkrebs' />
 
+			{/* Apple Meta Tags */}
+			<meta name='apple-mobile-web-app-capable' content='yes' />
+			<meta name='apple-mobile-web-app-status-bar-style' content='black-translucent' />
+			<meta name='apple-mobile-web-app-title' content='VailNote' />
+
 			{/* Additional SEO */}
 			<meta name='robots' content='index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1' />
 			<meta name='googlebot' content='index, follow' />
@@ -87,7 +92,8 @@ export default function Header({ title, description, canonicalUrl }: HeadProps) 
 
 			{/* Preload Google Fonts for better performance */}
 			<link rel='preconnect' href='https://fonts.googleapis.com' />
-			<link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='' />
+			<link rel='preconnect' href='https://fonts.gstatic.com' />
+
 			<link
 				rel='preload'
 				href='https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap'
@@ -101,8 +107,15 @@ export default function Header({ title, description, canonicalUrl }: HeadProps) 
 			<link rel='icon' href='/favicon.ico' />
 			<link rel='icon' type='image/png' sizes='32x32' href='/favicon-32x32.png' />
 			<link rel='icon' type='image/png' sizes='16x16' href='/favicon-16x16.png' />
+
+			{/* Apple Touch Icons */}
 			<link rel='apple-touch-icon' href='/apple-touch-icon.png' />
+			<link rel='apple-touch-icon' href='/web-app-manifest-192x192.png' />
+			<link rel='apple-touch-icon' href='/web-app-manifest-512x512.png' />
+
 			<link rel='canonical' href={finalCanonicalUrl} />
+			<link rel='manifest' href='/site.webmanifest' />
+			<script type='module' src='/pwa-update.js' />
 
 			{/* SEO and Social Media Meta Tags */}
 			<OpenGraphMeta title={title} description={description} canonicalUrl={canonicalUrl} />

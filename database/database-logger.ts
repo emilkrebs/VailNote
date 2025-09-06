@@ -1,4 +1,4 @@
-import { log, Logger, TerminalColors } from '../utils/logging.ts';
+import { log, Logger, TerminalColors } from '../lib/logging.ts';
 
 export class DatabaseLogger extends Logger {
 	constructor() {

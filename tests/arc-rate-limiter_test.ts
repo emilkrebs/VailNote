@@ -1,5 +1,5 @@
 import { assertEquals } from '$std/assert/assert_equals.ts';
-import { ArcRateLimiter } from '../utils/rate-limiting/arc-rate-limiter.ts';
+import { ArcRateLimiter } from '../lib/rate-limiting/arc-rate-limiter.ts';
 
 Deno.test('ARC Rate Limiter - basic functionality', async () => {
 	const rateLimiter = new ArcRateLimiter(3, 1000, 2000); // 3 requests per second

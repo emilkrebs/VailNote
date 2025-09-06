@@ -5,9 +5,10 @@ import HomeButton from '../components/HomeButton.tsx';
 import { State } from './_middleware.ts';
 import SiteHeader from '../components/SiteHeader.tsx';
 import ViewEncryptedNote from '../islands/ViewNote.tsx';
+import Card, { CardContent, CardFooter, CardHeader, CardTitle } from '../components/Card.tsx';
 
 interface NotePageProps {
-	note: Note;
+	note?: Note;
 	message?: string;
 }
 
@@ -17,6 +18,7 @@ export const handler: Handlers<NotePageProps, State> = {
 		if (!id) {
 			return ctx.renderNotFound();
 		}
+
 		const noteDatabase = ctx.state.context.getNoteDatabase();
 		const note = await noteDatabase.getNoteById(id);
 
@@ -70,19 +72,25 @@ export default function NotePage(ctx: PageProps<NotePageProps>) {
 	);
 }
 
-function NoteErrorPage({ message }: { message?: string }) {
+export function NoteErrorPage({ message }: { message?: string }) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
 			<SiteHeader />
 			<Header title='Note Not Found' />
 			<div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-				<div class='flex flex-col mt-6 p-8 rounded-2xl shadow-xl w-full bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600'>
-					<h2 class='text-3xl font-bold text-white mb-2'>Error</h2>
-					<p class='text-gray-300'>
-						{message || 'The note you are looking for does not exist.'}
-					</p>
-					<HomeButton />
-				</div>
+				<Card>
+					<CardHeader>
+						<CardTitle>Note Not Found</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<p class='text-gray-300 '>
+							{message || 'The note you are looking for does not exist.'}
+						</p>
+					</CardContent>
+					<CardFooter>
+						<HomeButton />
+					</CardFooter>
+				</Card>
 			</div>
 		</div>
 	);

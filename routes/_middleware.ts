@@ -1,6 +1,6 @@
 import { FreshContext } from '$fresh/server.ts';
 import { NoteDatabase } from '../database/note-database.ts';
-import { ArcRateLimiter } from '../utils/rate-limiting/arc-rate-limiter.ts';
+import { ArcRateLimiter } from '../lib/rate-limiting/arc-rate-limiter.ts';
 
 export interface State {
 	context: Context;
