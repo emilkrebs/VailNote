@@ -1,7 +1,7 @@
 import { asset } from '$fresh/runtime.ts';
 import { useState } from 'preact/hooks';
 import { JSX } from 'preact';
-import { FormField, Input } from '../components/Form.tsx';
+import { FormField } from '../components/Form.tsx';
 
 interface PasswordInputProps extends JSX.InputHTMLAttributes {
 	error?: string;
