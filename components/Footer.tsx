@@ -21,7 +21,7 @@ export default function Footer() {
 			href: 'https://github.com/emilkrebs/VailNote/wiki',
 			label: 'Wiki',
 			external: true,
-		}
+		},
 	];
 
 	return (

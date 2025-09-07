@@ -3,9 +3,7 @@ import { JSX } from 'preact/jsx-runtime';
 export default function Card({ children, ...props }: JSX.HTMLAttributes<HTMLDivElement>) {
 	return (
 		<div
-			class={`bg-gradient-to-br from-gray-800/95 to-gray-700/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-600/50 ${
-				props.class || ''
-			}`}
+			class={`card ${props.class || ''}`}
 			{...props}
 		>
 			{children}
