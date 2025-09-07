@@ -59,11 +59,15 @@ export class NoteDatabase {
 				// Force close the client and wait for it to complete
 				await this._client.close();
 				this.logger.log(
-					TerminalColors.format(`Database connection closed. &8(${this.BASE_URI})&r`),
+					TerminalColors.format(
+						`Database connection closed. &8(${this.BASE_URI})&r`,
+					),
 				);
 			} catch (error) {
 				this.logger.log(
-					TerminalColors.format(`Error closing database connection: ${error} &8(${this.BASE_URI})&r`),
+					TerminalColors.format(
+						`Error closing database connection: ${error} &8(${this.BASE_URI})&r`,
+					),
 				);
 			}
 		}
@@ -100,7 +104,10 @@ export class NoteDatabase {
 
 	validateNote(data: Note): ValidateNoteResult {
 		if (!data.content || !data.iv || !data.expiresIn) {
-			return { success: false, message: 'Content, IV, and expiration time are required' };
+			return {
+				success: false,
+				message: 'Content, IV, and expiration time are required',
+			};
 		}
 
 		// Security: Limit input sizes to prevent DoS
@@ -109,7 +116,10 @@ export class NoteDatabase {
 		}
 
 		if (data.password && data.password.length > NOTE_PASSWORD_MAX_LENGTH) {
-			return { success: false, message: 'Password too long (max 256 characters)' };
+			return {
+				success: false,
+				message: 'Password too long (max 256 characters)',
+			};
 		}
 
 		return { success: true };
@@ -146,7 +156,9 @@ export class NoteDatabase {
 		const notes = db.collection<Note>(this.COLLECTION);
 		await notes.deleteMany({});
 		this.logger.log(
-			TerminalColors.format(`All notes cleared from database. &8(${this.BASE_URI})&r`),
+			TerminalColors.format(
+				`All notes cleared from database. &8(${this.BASE_URI})&r`,
+			),
 		);
 	}
 }

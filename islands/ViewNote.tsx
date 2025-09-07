@@ -48,14 +48,18 @@ interface DisplayDecryptedNoteProps {
 }
 
 // https://vailnote.com/[id]#[authKey] or https://vailnote.com/[id] (password required)
-export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryptedNoteProps) {
+export default function ViewEncryptedNote(
+	{ noteId, manualDeletion }: ViewEncryptedNoteProps,
+) {
 	// State management
 	const [note, setNote] = useState<Note | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [needsPassword, setNeedsPassword] = useState(false);
 	const [confirmed, setConfirmed] = useState(manualDeletion ? true : false);
-	const [decryptionError, setDecryptionError] = useState<string | undefined>(undefined);
+	const [decryptionError, setDecryptionError] = useState<string | undefined>(
+		undefined,
+	);
 	const [message, setMessage] = useState<string | undefined>(undefined);
 
 	const password = useRef<string | undefined>(undefined);
@@ -85,7 +89,11 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 			}
 
 			password.current = manualDeletion ? authKey : undefined;
-			const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, authKey);
+			const decryptedContent = await decryptNoteContent(
+				result.note.content,
+				result.note.iv,
+				authKey,
+			);
 
 			setNote({ ...result.note, content: decryptedContent });
 			setMessage(
@@ -159,12 +167,18 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 				return;
 			}
 
-			const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, password);
+			const decryptedContent = await decryptNoteContent(
+				result.note.content,
+				result.note.iv,
+				password,
+			);
 
 			setNote({ ...result.note, content: decryptedContent });
 			setNeedsPassword(false);
 			setConfirmed(true);
-			setMessage(manualDeletion ? MESSAGES.MANUAL_DELETION_PROMPT : MESSAGES.AUTO_DELETION_COMPLETE);
+			setMessage(
+				manualDeletion ? MESSAGES.MANUAL_DELETION_PROMPT : MESSAGES.AUTO_DELETION_COMPLETE,
+			);
 		} catch (error) {
 			setDecryptionError(MESSAGES.INVALID_PASSWORD);
 			console.error('Decryption failed:', error);
@@ -257,7 +271,11 @@ function DisplayDecryptedNote(
 								</div>
 								<div>
 									Note Retrieved
-									{manualDeletion && <ExpirationMessage expiresIn={expiresIn} />}
+									{manualDeletion && (
+										<ExpirationMessage
+											expiresIn={expiresIn}
+										/>
+									)}
 								</div>
 							</div>
 						</CardTitle>
@@ -269,7 +287,11 @@ function DisplayDecryptedNote(
 					{/* Content section */}
 					<CardContent>
 						<div class='flex items-center gap-2 mb-4'>
-							<svg class='w-5 h-5 text-gray-300' fill='currentColor' viewBox='0 0 20 20'>
+							<svg
+								class='w-5 h-5 text-gray-300'
+								fill='currentColor'
+								viewBox='0 0 20 20'
+							>
 								<path
 									fill-rule='evenodd'
 									d='M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z'
@@ -302,7 +324,9 @@ function DisplayDecryptedNote(
 	);
 }
 
-function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequiredViewProps) {
+function PasswordRequiredView(
+	{ onSubmit, manualDeletion, error }: PasswordRequiredViewProps,
+) {
 	return (
 		<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
 			<SiteHeader />
@@ -315,7 +339,9 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
 							</div>
 							Enter Password
 						</div>
-						<p class='text-yellow-300 text-sm font-medium'>This note is encrypted and requires a password</p>
+						<p class='text-yellow-300 text-sm font-medium'>
+							This note is encrypted and requires a password
+						</p>
 
 						{error && (
 							<div class='mb-6 p-4 rounded-lg border bg-red-600/20 border-red-400 text-red-200'>
@@ -343,7 +369,11 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
 									required
 								/>
 							</FormGroup>
-							<Button type='submit' variant={manualDeletion ? 'primary' : 'danger'} class='w-full'>
+							<Button
+								type='submit'
+								variant={manualDeletion ? 'primary' : 'danger'}
+								class='w-full'
+							>
 								{manualDeletion ? 'View Note' : 'View & Destroy'}
 							</Button>
 						</form>
@@ -396,7 +426,11 @@ function WarningMessage() {
 	return (
 		<div class='bg-red-900/20 border border-red-700/30 rounded-xl p-6 mb-8'>
 			<div class='flex items-start gap-4'>
-				<svg class='w-6 h-6 text-red-400 mt-1 flex-shrink-0' fill='currentColor' viewBox='0 0 20 20'>
+				<svg
+					class='w-6 h-6 text-red-400 mt-1 flex-shrink-0'
+					fill='currentColor'
+					viewBox='0 0 20 20'
+				>
 					<path
 						fill-rule='evenodd'
 						d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z'
@@ -405,7 +439,9 @@ function WarningMessage() {
 					</path>
 				</svg>
 				<div>
-					<h3 class='text-red-300 font-semibold text-lg mb-2'>What happens next:</h3>
+					<h3 class='text-red-300 font-semibold text-lg mb-2'>
+						What happens next:
+					</h3>
 					<ul class='text-red-200 text-sm space-y-2'>
 						<li class='flex items-center gap-2'>
 							<span class='w-1.5 h-1.5 bg-red-400 rounded-full'></span>
@@ -452,7 +488,11 @@ function NoScriptWarning() {
 		<noscript>
 			<div class='bg-yellow-900/20 border border-yellow-700/30 rounded-xl p-6 mb-8'>
 				<div class='flex items-start gap-4'>
-					<svg class='w-6 h-6 text-yellow-400 mt-1 flex-shrink-0' fill='currentColor' viewBox='0 0 20 20'>
+					<svg
+						class='w-6 h-6 text-yellow-400 mt-1 flex-shrink-0'
+						fill='currentColor'
+						viewBox='0 0 20 20'
+					>
 						<path
 							fill-rule='evenodd'
 							d='M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v4a1 1 0 102 0V7zm-1 6a1.5 1.5 0 110-3 1.5 1.5 0 010 3z'
@@ -460,11 +500,18 @@ function NoScriptWarning() {
 						/>
 					</svg>
 					<div>
-						<h3 class='text-yellow-300 font-semibold text-lg mb-2'>JavaScript is required</h3>
+						<h3 class='text-yellow-300 font-semibold text-lg mb-2'>
+							JavaScript is required
+						</h3>
 						<p class='text-yellow-200 text-sm'>
 							To ensure the security and functionality of VailNote, please enable JavaScript in your browser settings.
 							{' '}
-							<a href='https://www.enable-javascript.com/' target='_blank' rel='noopener noreferrer' class='underline'>
+							<a
+								href='https://www.enable-javascript.com/'
+								target='_blank'
+								rel='noopener noreferrer'
+								class='underline'
+							>
 								Learn more
 							</a>
 						</p>

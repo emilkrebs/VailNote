@@ -44,7 +44,10 @@ function OpenGraphMeta({ title, description, canonicalUrl }: HeadProps) {
 			<meta property='og:image:width' content='512' />
 			<meta property='og:image:height' content='512' />
 			<meta property='og:image:type' content='image/png' />
-			<meta property='og:image:alt' content='VailNote - Secure Note Sharing Logo' />
+			<meta
+				property='og:image:alt'
+				content='VailNote - Secure Note Sharing Logo'
+			/>
 			<meta property='og:site_name' content='VailNote' />
 			<meta property='og:locale' content='en_US' />
 
@@ -54,22 +57,34 @@ function OpenGraphMeta({ title, description, canonicalUrl }: HeadProps) {
 			<meta name='twitter:title' content={ogTitle} />
 			<meta name='twitter:description' content={ogDescription} />
 			<meta name='twitter:image' content={ogImage} />
-			<meta name='twitter:image:alt' content='VailNote - Secure Note Sharing Logo' />
+			<meta
+				name='twitter:image:alt'
+				content='VailNote - Secure Note Sharing Logo'
+			/>
 			<meta name='twitter:creator' content='@emilkrebs' />
 			<meta name='twitter:site' content='@emilkrebs' />
 
 			{/* Apple Meta Tags */}
 			<meta name='apple-mobile-web-app-capable' content='yes' />
-			<meta name='apple-mobile-web-app-status-bar-style' content='black-translucent' />
+			<meta
+				name='apple-mobile-web-app-status-bar-style'
+				content='black-translucent'
+			/>
 			<meta name='apple-mobile-web-app-title' content='VailNote' />
 
 			{/* Additional SEO */}
-			<meta name='robots' content='index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1' />
+			<meta
+				name='robots'
+				content='index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
+			/>
 			<meta name='googlebot' content='index, follow' />
 			<meta name='bingbot' content='index, follow' />
 
 			{/* Security and Privacy */}
-			<meta http-equiv='Referrer-Policy' content='strict-origin-when-cross-origin' />
+			<meta
+				http-equiv='Referrer-Policy'
+				content='strict-origin-when-cross-origin'
+			/>
 
 			{/* Performance - DNS prefetch for other domains */}
 			<meta http-equiv='x-dns-prefetch-control' content='on' />
@@ -77,7 +92,9 @@ function OpenGraphMeta({ title, description, canonicalUrl }: HeadProps) {
 	);
 }
 
-export default function Header({ title, description, canonicalUrl }: HeadProps) {
+export default function Header(
+	{ title, description, canonicalUrl }: HeadProps,
+) {
 	const pageTitle = title ? `VailNote - ${title}` : 'VailNote - Secure Encrypted Note Sharing';
 	const finalCanonicalUrl = canonicalUrl || 'https://vailnote.com';
 
@@ -105,8 +122,18 @@ export default function Header({ title, description, canonicalUrl }: HeadProps) 
 			/>
 
 			<link rel='icon' href='/favicon.ico' />
-			<link rel='icon' type='image/png' sizes='32x32' href='/favicon-32x32.png' />
-			<link rel='icon' type='image/png' sizes='16x16' href='/favicon-16x16.png' />
+			<link
+				rel='icon'
+				type='image/png'
+				sizes='32x32'
+				href='/favicon-32x32.png'
+			/>
+			<link
+				rel='icon'
+				type='image/png'
+				sizes='16x16'
+				href='/favicon-16x16.png'
+			/>
 
 			{/* Apple Touch Icons */}
 			<link rel='apple-touch-icon' href='/apple-touch-icon.png' />
@@ -115,10 +142,13 @@ export default function Header({ title, description, canonicalUrl }: HeadProps) 
 
 			<link rel='canonical' href={finalCanonicalUrl} />
 			<link rel='manifest' href='/site.webmanifest' />
-			<script type='module' src='/pwa-update.js' />
 
 			{/* SEO and Social Media Meta Tags */}
-			<OpenGraphMeta title={title} description={description} canonicalUrl={canonicalUrl} />
+			<OpenGraphMeta
+				title={title}
+				description={description}
+				canonicalUrl={canonicalUrl}
+			/>
 		</head>
 	);
 }

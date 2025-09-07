@@ -22,7 +22,11 @@ export async function generateSHA256Hash(input: string): Promise<string> {
  * @param iterations Number of iterations (default: 600000 for security)
  * @returns Base64 encoded hash with salt prepended
  */
-export async function generateClientHash(password: string, salt?: string, iterations = 600000): Promise<string> {
+export async function generateClientHash(
+	password: string,
+	salt?: string,
+	iterations = 600000,
+): Promise<string> {
 	const encoder = new TextEncoder();
 
 	// Generate random salt if not provided
@@ -62,16 +66,25 @@ export async function generateClientHash(password: string, salt?: string, iterat
  * @param hash The stored hash (format: pbkdf2:iterations:salt:hash)
  * @returns True if password matches, false otherwise
  */
-export async function verifyClientHash(password: string, hash: string): Promise<boolean> {
+export async function verifyClientHash(
+	password: string,
+	hash: string,
+): Promise<boolean> {
 	try {
-		const [algorithm, iterations, saltBase64, storedHashBase64] = hash.split(':');
+		const [algorithm, iterations, saltBase64, storedHashBase64] = hash.split(
+			':',
+		);
 
 		if (algorithm !== 'pbkdf2') {
 			throw new Error('Unsupported hash algorithm');
 		}
 
 		const saltBytes = Uint8Array.from(atob(saltBase64), (c) => c.charCodeAt(0));
-		const computedHash = await generateClientHash(password, new TextDecoder().decode(saltBytes), parseInt(iterations));
+		const computedHash = await generateClientHash(
+			password,
+			new TextDecoder().decode(saltBytes),
+			parseInt(iterations),
+		);
 
 		// Extract just the hash part for comparison
 		const [, , , computedHashBase64] = computedHash.split(':');
@@ -99,11 +112,17 @@ export function compareHash(plainText: string, hash: string): boolean {
  * @param iterations Number of iterations (default: 600000 for security)
  * @returns Base64 encoded hash that's deterministic for the same password
  */
-export async function generateDeterministicClientHash(password: string, iterations = 600000): Promise<string> {
+export async function generateDeterministicClientHash(
+	password: string,
+	iterations = 600000,
+): Promise<string> {
 	const encoder = new TextEncoder();
 
 	// Use SHA-256 of password as deterministic salt (this ensures same password = same salt)
-	const saltBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(password + 'vailnote_salt'));
+	const saltBuffer = await crypto.subtle.digest(
+		'SHA-256',
+		encoder.encode(password + 'vailnote_salt'),
+	);
 	const saltBytes = new Uint8Array(saltBuffer);
 
 	// Import password as key material

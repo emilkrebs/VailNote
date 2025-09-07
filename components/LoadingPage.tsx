@@ -23,7 +23,9 @@ export default function LoadingPage({ title, message }: LoadingPageProps) {
 
 					{/* Loading text */}
 					<div class='text-center'>
-						<h2 class='text-2xl font-bold text-white mb-2'>{title || 'Loading'}</h2>
+						<h2 class='text-2xl font-bold text-white mb-2'>
+							{title || 'Loading'}
+						</h2>
 						<p class='text-gray-300 text-sm'>
 							{message || 'Please wait...'}
 						</p>
@@ -32,8 +34,10 @@ export default function LoadingPage({ title, message }: LoadingPageProps) {
 					{/* Progress dots */}
 					<div class='flex space-x-2 mt-6'>
 						<div class='w-2 h-2 bg-blue-400 rounded-full animate-bounce'></div>
-						<div class='w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:0.1s]'></div>
-						<div class='w-2 h-2 bg-blue-400 rounded-full animate-bounce [animation-delay:0.2s]'></div>
+						<div class='w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:0.1s]'>
+						</div>
+						<div class='w-2 h-2 bg-blue-400 rounded-full animate-bounce [animation-delay:0.2s]'>
+						</div>
 					</div>
 				</div>
 			</div>

@@ -2,6 +2,8 @@ import { Handlers, PageProps } from '$fresh/server.ts';
 import Header from '../components/Header.tsx';
 import HomeButton from '../components/HomeButton.tsx';
 import { CSS, render } from '@deno/gfm';
+import Markdown from '../components/Markdown.tsx';
+import Card, { CardContent, CardFooter, CardHeader, CardTitle } from '../components/Card.tsx';
 
 interface Page {
 	markdown: string;
@@ -34,15 +36,15 @@ export default function Terms({ data }: PageProps<Page | null>) {
 					Legal terms and conditions for using VailNote.
 				</p>
 				<div class='flex items-center justify-center w-full max-w-screen-md mx-auto px-2 sm:px-4 py-8 gap-8'>
-					<div class='flex flex-col gap-4 p-4 sm:p-8 rounded-2xl shadow-xl w-full bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600'>
-						<div
-							class='markdown-body'
-							// deno-lint-ignore react-no-danger
-							dangerouslySetInnerHTML={{ __html: render(data?.markdown) }}
-						/>
+					<Card>
+						<CardContent>
+							<Markdown content={data.markdown} />
+						</CardContent>
 
-						<HomeButton />
-					</div>
+						<CardFooter>
+							<HomeButton />
+						</CardFooter>
+					</Card>
 				</div>
 			</div>
 		</>

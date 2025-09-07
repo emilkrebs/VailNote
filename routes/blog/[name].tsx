@@ -5,6 +5,7 @@ import SiteHeader from '../../components/SiteHeader.tsx';
 import Footer from '../../components/Footer.tsx';
 import { getPost, Post } from './index.tsx';
 import Navbar from '../../components/Navbar.tsx';
+import Markdown from '../../components/Markdown.tsx';
 
 export const handler: Handlers<Post> = {
 	async GET(_req, ctx) {
@@ -54,14 +55,17 @@ export default function BlogPage({ data }: PageProps<Post | null>) {
 		<>
 			<Head>
 				<title>{data.title} - VailNote Blog</title>
-				<meta name='description' content={data.snippet || `Read "${data.title}" on VailNote Blog`} />
+				<meta
+					name='description'
+					content={data.snippet || `Read "${data.title}" on VailNote Blog`}
+				/>
 				<meta name='viewport' content='width=device-width, initial-scale=1.0' />
 			</Head>
 			<style>
 				{CSS}
 			</style>
 
-			<div class='min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800'>
+			<div class='min-h-screen'>
 				<SiteHeader />
 
 				<main class='container mx-auto px-4 py-8'>
@@ -72,8 +76,18 @@ export default function BlogPage({ data }: PageProps<Post | null>) {
 								href='/blog'
 								class='inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors'
 							>
-								<svg class='w-4 h-4 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-									<path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M15 19l-7-7 7-7' />
+								<svg
+									class='w-4 h-4 mr-2'
+									fill='none'
+									stroke='currentColor'
+									viewBox='0 0 24 24'
+								>
+									<path
+										stroke-linecap='round'
+										stroke-linejoin='round'
+										stroke-width='2'
+										d='M15 19l-7-7 7-7'
+									/>
 								</svg>
 								Back to Blog
 							</a>
@@ -110,13 +124,8 @@ export default function BlogPage({ data }: PageProps<Post | null>) {
 						</header>
 
 						{/* Article content */}
-						<article class='bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden'>
-							<div class='p-8'>
-								<div
-									// deno-lint-ignore react-no-danger
-									dangerouslySetInnerHTML={{ __html: render(data.content) }}
-								/>
-							</div>
+						<article class='flex flex-col gap-4 p-4 sm:p-8 rounded-2xl shadow-xl w-full bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600'>
+							<Markdown content={data.content} />
 						</article>
 
 						{/* Footer navigation */}
@@ -126,8 +135,18 @@ export default function BlogPage({ data }: PageProps<Post | null>) {
 									href='/blog'
 									class='inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors'
 								>
-									<svg class='w-4 h-4 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-										<path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M15 19l-7-7 7-7' />
+									<svg
+										class='w-4 h-4 mr-2'
+										fill='none'
+										stroke='currentColor'
+										viewBox='0 0 24 24'
+									>
+										<path
+											stroke-linecap='round'
+											stroke-linejoin='round'
+											stroke-width='2'
+											d='M15 19l-7-7 7-7'
+										/>
 									</svg>
 									More Posts
 								</a>
@@ -137,16 +156,24 @@ export default function BlogPage({ data }: PageProps<Post | null>) {
 									class='inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors'
 								>
 									Home
-									<svg class='w-4 h-4 ml-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-										<path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 5l7 7-7 7' />
+									<svg
+										class='w-4 h-4 ml-2'
+										fill='none'
+										stroke='currentColor'
+										viewBox='0 0 24 24'
+									>
+										<path
+											stroke-linecap='round'
+											stroke-linejoin='round'
+											stroke-width='2'
+											d='M9 5l7 7-7 7'
+										/>
 									</svg>
 								</a>
 							</div>
 						</div>
 					</div>
 				</main>
-
-				<Footer />
 			</div>
 		</>
 	);

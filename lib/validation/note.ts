@@ -27,9 +27,19 @@ export const createNoteSchema = v.object({
 		v.trim(),
 	),
 	password: v.optional(
-		v.pipe(v.string(), v.maxLength(NOTE_PASSWORD_MAX_LENGTH, 'Password is too long (max 256 characters)'), v.trim()),
+		v.pipe(
+			v.string(),
+			v.maxLength(
+				NOTE_PASSWORD_MAX_LENGTH,
+				'Password is too long (max 256 characters)',
+			),
+			v.trim(),
+		),
 	), // Optional password with max length
-	expiresIn: v.enum(EXPIRY_OPTIONS, 'Invalid expiration time. Please select a valid option.'),
+	expiresIn: v.enum(
+		EXPIRY_OPTIONS,
+		'Invalid expiration time. Please select a valid option.',
+	),
 	manualDeletion: v.union(
 		[v.optional(v.enum(MANUAL_DELETION_OPTIONS)), v.boolean()],
 		'Invalid manual deletion setting. Please select a valid option.',
@@ -44,4 +54,6 @@ export type CreateNoteSchema = v.InferOutput<typeof createNoteSchema>;
 export type ViewNoteSchema = v.InferOutput<typeof viewNoteSchema>;
 
 export const expirationOptions: string[] = Object.values(EXPIRY_OPTIONS);
-export const manualDeletionOptions: string[] = Object.values(MANUAL_DELETION_OPTIONS);
+export const manualDeletionOptions: string[] = Object.values(
+	MANUAL_DELETION_OPTIONS,
+);

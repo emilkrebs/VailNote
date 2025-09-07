@@ -1,9 +1,9 @@
 ---
-title: "Welcome to VailNote Blog"
-created_at: "2024-09-07"
-author: "VailNote Team"
+title: 'Welcome to VailNote Blog'
+created_at: '2024-09-07'
+author: 'VailNote Team'
 snippet: "Learn about VailNote's features, security, and how to use our encrypted note-taking platform effectively."
-tags: ["announcement", "features", "security"]
+tags: ['announcement', 'features', 'security']
 ---
 
 # Welcome to VailNote Blog

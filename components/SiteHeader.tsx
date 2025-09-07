@@ -9,7 +9,12 @@ export default function SiteHeader() {
 				{/* Trust indicators */}
 				<div class='flex flex-wrap justify-center gap-6 mt-8 text-sm'>
 					<div class='flex items-center text-blue-300 bg-blue-900/20 px-3 py-2 rounded-full border border-blue-700/30'>
-						<svg class='w-4 h-4 mr-2' fill='currentColor' viewBox='0 0 20 20' aria-hidden='true'>
+						<svg
+							class='w-4 h-4 mr-2'
+							fill='currentColor'
+							viewBox='0 0 20 20'
+							aria-hidden='true'
+						>
 							<path
 								fill-rule='evenodd'
 								d='M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z'

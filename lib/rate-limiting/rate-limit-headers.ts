@@ -69,6 +69,9 @@ export function mergeWithRateLimitHeaders(
 	rateLimitResult: RateLimitResult,
 	maxRequests = 10,
 ): Record<string, string> {
-	const rateLimitHeaders = generateRateLimitHeaders(rateLimitResult, maxRequests);
+	const rateLimitHeaders = generateRateLimitHeaders(
+		rateLimitResult,
+		maxRequests,
+	);
 	return { ...existingHeaders, ...rateLimitHeaders };
 }

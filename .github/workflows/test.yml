@@ -27,14 +27,14 @@ jobs:
 
       - name: Setup Deno
         # uses: denoland/setup-deno@v1
-        uses: denoland/setup-deno@61fe2df320078202e33d7d5ad347e7dcfa0e8f31  # v1.1.2
+        uses: denoland/setup-deno@61fe2df320078202e33d7d5ad347e7dcfa0e8f31 # v1.1.2
         with:
           deno-version: v2.x
 
       # Uncomment this step to verify the use of 'deno fmt' on each commit.
       # - name: Verify formatting
       #   run: deno fmt --check
-      
+
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.12.0
         with:
@@ -45,7 +45,6 @@ jobs:
 
       - name: Run tests
         run: deno test -A
-        env: 
+        env:
           TEST_BASE_URI: mongodb://localhost:27017/vailnote_test
           BASE_URI: mongodb://localhost:27017/vailnote_test
-        

@@ -1,9 +1,9 @@
 ---
-title: "Getting Started with VailNote"
-created_at: "2024-09-05"
-author: "VailNote Team"
-snippet: "A quick start guide to help you begin using VailNote for secure, encrypted note-taking and document sharing."
-tags: ["getting-started", "tutorial", "basics"]
+title: 'Getting Started with VailNote'
+created_at: '2024-09-05'
+author: 'VailNote Team'
+snippet: 'A quick start guide to help you begin using VailNote for secure, encrypted note-taking and document sharing.'
+tags: ['getting-started', 'tutorial', 'basics']
 ---
 
 # Getting Started with VailNote

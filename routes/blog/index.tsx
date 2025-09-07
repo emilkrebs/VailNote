@@ -78,7 +78,7 @@ function PostCard({ post }: { post: Post }) {
 
 	return (
 		<Card>
-			<CardHeader class='flex items-center justify-between mb-4'>
+			<CardHeader>
 				<div class='flex items-center space-x-2'>
 					<time class='text-sm text-gray-500 dark:text-gray-400'>
 						{formattedDate}
@@ -125,8 +125,18 @@ function PostCard({ post }: { post: Post }) {
 					class='inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors'
 				>
 					Read more
-					<svg class='ml-1 w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-						<path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 5l7 7-7 7' />
+					<svg
+						class='ml-1 w-4 h-4'
+						fill='none'
+						stroke='currentColor'
+						viewBox='0 0 24 24'
+					>
+						<path
+							stroke-linecap='round'
+							stroke-linejoin='round'
+							stroke-width='2'
+							d='M9 5l7 7-7 7'
+						/>
 					</svg>
 				</a>
 			</CardContent>
@@ -148,7 +158,7 @@ export default function BlogIndexPage(props: PageProps<Post[]>) {
 				<meta name='viewport' content='width=device-width, initial-scale=1.0' />
 			</Head>
 
-			<div class='min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800'>
+			<div class='min-h-screen'>
 				<Navbar />
 
 				<main class='container mx-auto px-4 py-8'>
@@ -182,13 +192,23 @@ export default function BlogIndexPage(props: PageProps<Post[]>) {
 						{posts.length > 0
 							? (
 								<div class='grid gap-8 md:gap-6'>
-									{posts.map((post) => <PostCard key={post.slug} post={post} />)}
+									{posts.map((post) => (
+										<PostCard
+											key={post.slug}
+											post={post}
+										/>
+									))}
 								</div>
 							)
 							: (
 								<div class='text-center py-12'>
 									<div class='inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4'>
-										<svg class='w-8 h-8 text-gray-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+										<svg
+											class='w-8 h-8 text-gray-400'
+											fill='none'
+											viewBox='0 0 24 24'
+											stroke='currentColor'
+										>
 											<path
 												stroke-linecap='round'
 												stroke-linejoin='round'

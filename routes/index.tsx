@@ -47,7 +47,10 @@ export default function Home({ data }: PageProps) {
 
 function FeaturesSection() {
 	return (
-		<section class='my-16 px-4 text-center max-w-6xl mx-auto' aria-labelledby='features-heading'>
+		<section
+			class='my-16 px-4 text-center max-w-6xl mx-auto'
+			aria-labelledby='features-heading'
+		>
 			<h2
 				id='features-heading'
 				class='mb-20 text-4xl md:text-5xl lg:text-6xl font-black text-center text-white drop-shadow-2xl hover:scale-105 transition-transform duration-300 cursor-default'
@@ -66,13 +69,17 @@ function FeaturesSection() {
 					<div class='relative z-10'>
 						<div class='flex items-center mb-6'>
 							<div class='p-4 bg-blue-500/20 rounded-xl mr-5 group-hover:bg-blue-500/30 group-hover:scale-110 transition-all duration-300'>
-								<span class='text-3xl' role='img' aria-label='Lock icon'>🔒</span>
+								<span class='text-3xl' role='img' aria-label='Lock icon'>
+									🔒
+								</span>
 							</div>
 							<div>
 								<h3 class='text-xl font-bold text-blue-300 group-hover:text-blue-200 transition-colors duration-300 mb-1'>
 									End-to-End Encryption
 								</h3>
-								<p class='text-sm text-blue-400/70 font-medium'>AES-256 Standard</p>
+								<p class='text-sm text-blue-400/70 font-medium'>
+									AES-256 Standard
+								</p>
 							</div>
 						</div>
 						<p class='text-gray-300 leading-relaxed mb-6'>
@@ -81,7 +88,11 @@ function FeaturesSection() {
 						</p>
 						<div class='space-y-2'>
 							<div class='flex items-center text-sm text-blue-400'>
-								<svg class='w-4 h-4 mr-2 text-blue-400' fill='currentColor' viewBox='0 0 20 20'>
+								<svg
+									class='w-4 h-4 mr-2 text-blue-400'
+									fill='currentColor'
+									viewBox='0 0 20 20'
+								>
 									<path
 										fill-rule='evenodd'
 										d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
@@ -92,7 +103,11 @@ function FeaturesSection() {
 								Client-side encryption
 							</div>
 							<div class='flex items-center text-sm text-blue-400'>
-								<svg class='w-4 h-4 mr-2 text-blue-400' fill='currentColor' viewBox='0 0 20 20'>
+								<svg
+									class='w-4 h-4 mr-2 text-blue-400'
+									fill='currentColor'
+									viewBox='0 0 20 20'
+								>
 									<path
 										fill-rule='evenodd'
 										d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
@@ -114,13 +129,17 @@ function FeaturesSection() {
 					<div class='relative z-10'>
 						<div class='flex items-center mb-6'>
 							<div class='p-4 bg-green-500/20 rounded-xl mr-5 group-hover:bg-green-500/30 group-hover:scale-110 transition-all duration-300'>
-								<span class='text-3xl' role='img' aria-label='Rocket icon'>🚀</span>
+								<span class='text-3xl' role='img' aria-label='Rocket icon'>
+									🚀
+								</span>
 							</div>
 							<div>
 								<h3 class='text-xl font-bold text-green-300 group-hover:text-green-200 transition-colors duration-300 mb-1'>
 									Open-Source
 								</h3>
-								<p class='text-sm text-green-400/70 font-medium'>MIT Licensed</p>
+								<p class='text-sm text-green-400/70 font-medium'>
+									MIT Licensed
+								</p>
 							</div>
 						</div>
 						<p class='text-gray-300 leading-relaxed mb-6'>
@@ -129,7 +148,11 @@ function FeaturesSection() {
 						</p>
 						<div class='space-y-2'>
 							<div class='flex items-center text-sm text-green-400'>
-								<svg class='w-4 h-4 mr-2 text-green-400' fill='currentColor' viewBox='0 0 20 20'>
+								<svg
+									class='w-4 h-4 mr-2 text-green-400'
+									fill='currentColor'
+									viewBox='0 0 20 20'
+								>
 									<path
 										fill-rule='evenodd'
 										d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
@@ -140,7 +163,11 @@ function FeaturesSection() {
 								100% transparent code
 							</div>
 							<div class='flex items-center text-sm text-green-400'>
-								<svg class='w-4 h-4 mr-2 text-green-400' fill='currentColor' viewBox='0 0 20 20'>
+								<svg
+									class='w-4 h-4 mr-2 text-green-400'
+									fill='currentColor'
+									viewBox='0 0 20 20'
+								>
 									<path
 										fill-rule='evenodd'
 										d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
@@ -162,13 +189,17 @@ function FeaturesSection() {
 					<div class='relative z-10'>
 						<div class='flex items-center mb-6'>
 							<div class='p-4 bg-purple-500/20 rounded-xl mr-5 group-hover:bg-purple-500/30 group-hover:scale-110 transition-all duration-300'>
-								<span class='text-3xl' role='img' aria-label='Shield icon'>🛡️</span>
+								<span class='text-3xl' role='img' aria-label='Shield icon'>
+									🛡️
+								</span>
 							</div>
 							<div>
 								<h3 class='text-xl font-bold text-purple-300 group-hover:text-purple-200 transition-colors duration-300 mb-1'>
 									Privacy First
 								</h3>
-								<p class='text-sm text-purple-400/70 font-medium'>Zero Tracking</p>
+								<p class='text-sm text-purple-400/70 font-medium'>
+									Zero Tracking
+								</p>
 							</div>
 						</div>
 						<p class='text-gray-300 leading-relaxed mb-6'>
@@ -177,7 +208,11 @@ function FeaturesSection() {
 						</p>
 						<div class='space-y-2'>
 							<div class='flex items-center text-sm text-purple-400'>
-								<svg class='w-4 h-4 mr-2 text-purple-400' fill='currentColor' viewBox='0 0 20 20'>
+								<svg
+									class='w-4 h-4 mr-2 text-purple-400'
+									fill='currentColor'
+									viewBox='0 0 20 20'
+								>
 									<path
 										fill-rule='evenodd'
 										d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
@@ -188,7 +223,11 @@ function FeaturesSection() {
 								No data collection
 							</div>
 							<div class='flex items-center text-sm text-purple-400'>
-								<svg class='w-4 h-4 mr-2 text-purple-400' fill='currentColor' viewBox='0 0 20 20'>
+								<svg
+									class='w-4 h-4 mr-2 text-purple-400'
+									fill='currentColor'
+									viewBox='0 0 20 20'
+								>
 									<path
 										fill-rule='evenodd'
 										d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'

@@ -67,7 +67,10 @@ export default function NotePage(ctx: PageProps<NotePageProps>) {
 	return (
 		<>
 			<Header title='Opening Note' description={message} />
-			<ViewEncryptedNote noteId={note.id} manualDeletion={note.manualDeletion} />
+			<ViewEncryptedNote
+				noteId={note.id}
+				manualDeletion={note.manualDeletion}
+			/>
 		</>
 	);
 }

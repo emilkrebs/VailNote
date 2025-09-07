@@ -1,6 +1,8 @@
 import { JSX } from 'preact/jsx-runtime';
 
-export function FormGroup({ children, ...props }: JSX.HTMLAttributes<HTMLDivElement>) {
+export function FormGroup(
+	{ children, ...props }: JSX.HTMLAttributes<HTMLDivElement>,
+) {
 	return (
 		<div class={`flex flex-col space-y-2 ${props.class || ''}`} {...props}>
 			{children}
@@ -27,7 +29,9 @@ interface FormFieldProps extends JSX.HTMLAttributes<HTMLDivElement> {
 	helpText?: string;
 }
 
-export function FormField({ children, error, helpText, ...props }: FormFieldProps) {
+export function FormField(
+	{ children, error, helpText, ...props }: FormFieldProps,
+) {
 	return (
 		<div class={`space-y-1 ${props.class || ''}`} {...props}>
 			{helpText && <p class='text-gray-400 text-sm -mt-1'>{helpText}</p>}
@@ -43,7 +47,10 @@ interface LabelProps extends JSX.LabelHTMLAttributes {
 
 export function Label({ required, ...props }: LabelProps) {
 	return (
-		<label class={`text-white text-lg font-semibold ${props.class || ''}`} {...props}>
+		<label
+			class={`text-white text-lg font-semibold ${props.class || ''}`}
+			{...props}
+		>
 			{props.children}
 			{required && <span class={`text-red-400 ml-1`}>*</span>}
 		</label>
@@ -115,7 +122,9 @@ interface CollapsibleProps extends JSX.DetailsHTMLAttributes {
 	isOpen?: boolean;
 }
 
-export function Collapsible({ title, isOpen = false, children, ...props }: CollapsibleProps) {
+export function Collapsible(
+	{ title, isOpen = false, children, ...props }: CollapsibleProps,
+) {
 	return (
 		<details
 			open={isOpen}
@@ -133,7 +142,12 @@ export function Collapsible({ title, isOpen = false, children, ...props }: Colla
 						viewBox='0 0 24 24'
 						stroke='currentColor'
 					>
-						<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5l7 7-7 7' />
+						<path
+							strokeLinecap='round'
+							strokeLinejoin='round'
+							strokeWidth={2}
+							d='M9 5l7 7-7 7'
+						/>
 					</svg>
 				</span>
 				{title}

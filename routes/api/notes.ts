@@ -20,12 +20,16 @@ import * as v from '@valibot/valibot';
 	* - No IP address storage: Only hashed, rotated tokens are kept
 	*/
 
-export const handler = async (req: Request, ctx: FreshContext<State>): Promise<Response> => {
+export const handler = async (
+	req: Request,
+	ctx: FreshContext<State>,
+): Promise<Response> => {
 	if (req.method !== 'POST') {
 		return new Response('Method not allowed', { status: 405 });
 	}
 
-	const rateLimitResult = await ctx.state.context.getRateLimiter().checkRateLimit(req);
+	const rateLimitResult = await ctx.state.context.getRateLimiter()
+		.checkRateLimit(req);
 	const noteDatabase = ctx.state.context.getNoteDatabase();
 
 	// check if rate limit is exceeded
@@ -48,11 +52,18 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 	}
 
 	try {
-		const { content, iv, password, expiresIn, manualDeletion } = await req.json();
+		const { content, iv, password, expiresIn, manualDeletion } = await req
+			.json();
 
 		// Validate input using valibot
 		try {
-			v.parse(createNoteSchema, { content, iv, password, expiresIn, manualDeletion });
+			v.parse(createNoteSchema, {
+				content,
+				iv,
+				password,
+				expiresIn,
+				manualDeletion,
+			});
 		} catch (err) {
 			return new Response(
 				JSON.stringify({

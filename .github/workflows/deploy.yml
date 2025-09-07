@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Setup repo
         uses: actions/checkout@v4
-        
+
       - name: Install Deno
         uses: denoland/setup-deno@v2
         with:
@@ -37,15 +37,15 @@ jobs:
 
       - name: Run tests
         run: deno test -A
-        env: 
+        env:
           TEST_BASE_URI: mongodb://localhost:27017/vailnote_test
           BASE_URI: mongodb://localhost:27017/vailnote_test
 
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    needs: test  # Only run after test job succeeds
-    
+    needs: test # Only run after test job succeeds
+
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -56,13 +56,13 @@ jobs:
           deno-version: v2.x
 
       - name: Build step
-        env: 
+        env:
           BASE_URI: ${{ secrets.BASE_URI }}
         run: "deno task build"
 
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
-        env: 
+        env:
           BASE_URI: ${{ secrets.BASE_URI }}
         with:
           project: "vailnote"

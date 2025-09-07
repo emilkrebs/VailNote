@@ -40,14 +40,18 @@ export class Context {
 
 			// Safety check: prevent using production database during tests
 			if (options.testMode && !options.testDatabaseUri.includes('_test')) {
-				throw new Error('Test database URI must contain "_test" to prevent accidentally using production database');
+				throw new Error(
+					'Test database URI must contain "_test" to prevent accidentally using production database',
+				);
 			}
 
 			this.noteDatabase = new NoteDatabase(uri);
 			this.rateLimiter = this.getDefaultArcRateLimiter();
 			await this.noteDatabase.init();
 		} catch (error) {
-			throw new Error(`Failed to initialize context: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			throw new Error(
+				`Failed to initialize context: ${error instanceof Error ? error.message : 'Unknown error'}`,
+			);
 		}
 	}
 
@@ -140,10 +144,12 @@ export async function handler(
 	// Enhanced CSP to allow Google Fonts move to build-in CSP in the future
 	const csp = [
 		"default-src 'self'",
-		"script-src 'self' 'unsafe-inline'", // unsafe-inline needed for fresh
+		"script-src 'self'", // unsafe-inline needed for fresh
 		"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
 		"font-src 'self' https://fonts.gstatic.com",
 		"img-src 'self' data:",
+		"media-src 'self' data: blob:",
+		"worker-src 'self' blob:",
 		"connect-src 'self'",
 		"object-src 'none'",
 		"base-uri 'self'",
@@ -151,10 +157,14 @@ export async function handler(
 		"frame-ancestors 'none'",
 		'upgrade-insecure-requests',
 	].join('; ');
+
 	headers.set('Content-Security-Policy', csp);
 
 	// Transport Security
-	headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+	headers.set(
+		'Strict-Transport-Security',
+		'max-age=63072000; includeSubDomains; preload',
+	);
 
 	return resp;
 }

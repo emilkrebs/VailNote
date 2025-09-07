@@ -51,11 +51,16 @@ function MessageDisplay({ data }: { data: CreateNoteData }) {
 					{isSuccess ? '✓' : '✕'}
 				</div>
 				<div class='flex-1'>
-					<p class={`font-semibold text-lg ${isSuccess ? 'text-green-200' : 'text-red-200'}`}>
+					<p
+						class={`font-semibold text-lg ${isSuccess ? 'text-green-200' : 'text-red-200'}`}
+					>
 						{data.message}
 					</p>
 					{data.noteId && (
-						<p class='text-green-300/80 text-sm mt-1' title={`Note ID: ${data.noteId}`}>
+						<p
+							class='text-green-300/80 text-sm mt-1'
+							title={`Note ID: ${data.noteId}`}
+						>
 							Share the link below to give someone access to your note
 						</p>
 					)}
@@ -91,9 +96,13 @@ export default function CreateNote({ message }: { message?: string }) {
 					</CardTitle>
 					<p class='text-gray-300 text-lg max-w-2xl mx-auto leading-relaxed'>
 						Share your notes securely with a password. Notes are{' '}
-						<span class='font-semibold text-blue-300 bg-blue-500/10 px-2 py-1 rounded'>encrypted</span> and{' '}
-						<span class='font-semibold text-blue-300 bg-blue-500/10 px-2 py-1 rounded text-nowrap'>self-destruct</span>
-						{' '}
+						<span class='font-semibold text-blue-300 bg-blue-500/10 px-2 py-1 rounded'>
+							encrypted
+						</span>{' '}
+						and{' '}
+						<span class='font-semibold text-blue-300 bg-blue-500/10 px-2 py-1 rounded text-nowrap'>
+							self-destruct
+						</span>{' '}
 						after a set time or after being viewed.
 					</p>
 					<MessageDisplay data={formData} />
@@ -138,7 +147,11 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 				throw new Error(result.message || MESSAGES.CREATE_ERROR);
 			}
 
-			onCreate(result.noteId!, MESSAGES.CREATE_SUCCESS, `${globalThis.location.origin}/${result.link}`);
+			onCreate(
+				result.noteId!,
+				MESSAGES.CREATE_SUCCESS,
+				`${globalThis.location.origin}/${result.link}`,
+			);
 			form.reset();
 
 			// Use requestAnimationFrame to prevent blocking the main thread
@@ -152,7 +165,12 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 	};
 
 	return (
-		<form class='space-y-8' method='post' onSubmit={handleSubmit} autoComplete='off'>
+		<form
+			class='space-y-8'
+			method='post'
+			onSubmit={handleSubmit}
+			autoComplete='off'
+		>
 			<div class='grid gap-8'>
 				{/* Note Content Field */}
 				<FormGroup>
@@ -179,7 +197,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 						htmlFor='password'
 						title='Set a password to protect and encrypt your note'
 					>
-						Password
+						Password<span class={`text-gray-400 ml-1 text-sm`}>(Optional)</span>
 					</Label>
 					<PasswordInput
 						name='password'
@@ -239,7 +257,11 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 
 			{/* Submit Button */}
 
-			<Button type='submit' variant='primary' class='w-full flex items-center justify-center gap-2'>
+			<Button
+				type='submit'
+				variant='primary'
+				class='w-full flex items-center justify-center gap-2'
+			>
 				Save Note
 			</Button>
 
@@ -275,8 +297,12 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 						<ul class='space-y-1 text-blue-300/90'>
 							<li>• Notes are encrypted with AES-GCM encryption</li>
 							<li>• Password protection adds an additional security layer</li>
-							<li>• Notes automatically self-destruct after viewing or expiration</li>
-							<li>• All encryption happens in your browser - we never see your data</li>
+							<li>
+								• Notes automatically self-destruct after viewing or expiration
+							</li>
+							<li>
+								• All encryption happens in your browser - we never see your data
+							</li>
 						</ul>
 						<a
 							href='/privacy#javascript-usage'

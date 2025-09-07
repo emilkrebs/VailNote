@@ -52,7 +52,10 @@ export default class RemoteStorage implements StorageProvider {
 		}
 	}
 
-	async get(noteId: string, password?: string): Promise<GetEncryptedNoteResult> {
+	async get(
+		noteId: string,
+		password?: string,
+	): Promise<GetEncryptedNoteResult> {
 		try {
 			const passwordHash = password ? await generateDeterministicClientHash(password) : undefined;
 

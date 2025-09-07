@@ -4,12 +4,16 @@ import { compareHash } from '../../../lib/hashing.ts';
 import { mergeWithRateLimitHeaders } from '../../../lib/rate-limiting/rate-limit-headers.ts';
 import { State } from '../../_middleware.ts';
 
-export const handler = async (req: Request, ctx: FreshContext<State>): Promise<Response> => {
+export const handler = async (
+	req: Request,
+	ctx: FreshContext<State>,
+): Promise<Response> => {
 	if (req.method !== 'POST' && req.method !== 'DELETE') {
 		return new Response('Method not allowed', { status: 405 });
 	}
 
-	const rateLimitResult = await ctx.state.context.getRateLimiter().checkRateLimit(req);
+	const rateLimitResult = await ctx.state.context.getRateLimiter()
+		.checkRateLimit(req);
 	const noteDatabase = ctx.state.context.getNoteDatabase();
 
 	// check if rate limit is exceeded
@@ -41,7 +45,9 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 		const { passwordHash } = await req.json();
 
 		if (!note || !passwordHash) {
-			return new Response('Note not found or password hash missing', { status: 404 });
+			return new Response('Note not found or password hash missing', {
+				status: 404,
+			});
 		}
 
 		if (note.password && !compareHash(passwordHash, note.password)) {

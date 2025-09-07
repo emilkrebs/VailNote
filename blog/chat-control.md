@@ -1,9 +1,9 @@
 ---
-title: "EU Chat Control: Why It’s a Privacy Disaster and How VailNote Protects You"
-created_at: "2024-09-05"
-author: "Emil Krebs"
+title: 'EU Chat Control: Why It’s a Privacy Disaster and How VailNote Protects You'
+created_at: '2024-09-05'
+author: 'Emil Krebs'
 snippet: "The EU's proposed 'Chat Control' law threatens the privacy of every European citizen. Here’s why it matters, what’s at stake, and how VailNote helps you stay in control of your data."
-tags: ["privacy", "encryption", "eu", "chat-control", "vailnote"]
+tags: ['privacy', 'encryption', 'eu', 'chat-control', 'vailnote']
 ---
 
 The European Union is pushing forward with **“Chat Control”** — a legislative proposal that would require messaging

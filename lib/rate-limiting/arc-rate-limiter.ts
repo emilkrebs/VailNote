@@ -189,7 +189,10 @@ export class ArcRateLimiter {
 		const now = Date.now();
 		for (const [token, entry] of this.store.entries()) {
 			// Remove entries that are past reset time and not blocked
-			if (now >= entry.resetTime && (!entry.blocked || (entry.blockUntil && now >= entry.blockUntil))) {
+			if (
+				now >= entry.resetTime &&
+				(!entry.blocked || (entry.blockUntil && now >= entry.blockUntil))
+			) {
 				this.store.delete(token);
 			}
 		}

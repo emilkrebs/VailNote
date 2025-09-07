@@ -18,7 +18,7 @@ body {
 	}
 
 	.button {
-		@apply px-4 py-3 rounded-xl font-semibold text-lg shadow-lg transition-color;
+		@apply px-4 py-3 rounded-xl font-semibold text-lg shadow-lg transition-colors;
 	}
 
 	.button-primary {
@@ -130,7 +130,7 @@ body {
 .markdown-body {
 	font-size: 1rem;
 	line-height: 1.6;
-	color: #e2e8f0;
+	color: #fff;
 }
 
 .markdown-body a {

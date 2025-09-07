@@ -13,13 +13,19 @@ const TEST_CONFIG = {
 } as const;
 
 const CONN_INFO: ServeHandlerInfo = {
-	remoteAddr: { hostname: TEST_CONFIG.hostname, port: TEST_CONFIG.port, transport: 'tcp' },
+	remoteAddr: {
+		hostname: TEST_CONFIG.hostname,
+		port: TEST_CONFIG.port,
+		transport: 'tcp',
+	},
 	completed: Promise.resolve(),
 };
 
 // Test data factory
 class TestDataFactory {
-	static createNoteData(overrides?: Partial<typeof TestDataFactory.defaultNoteData>) {
+	static createNoteData(
+		overrides?: Partial<typeof TestDataFactory.defaultNoteData>,
+	) {
 		return {
 			...TestDataFactory.defaultNoteData,
 			...overrides,
@@ -46,7 +52,9 @@ class TestUtils {
 		});
 
 		if (!Context.instance().isTestMode()) {
-			throw new Error('Test environment is not set up correctly. Exiting test.');
+			throw new Error(
+				'Test environment is not set up correctly. Exiting test.',
+			);
 		}
 	}
 
@@ -105,8 +113,13 @@ Deno.test({
 		let apiNoteId: string;
 
 		await t.step('should create note via API', async () => {
-			const passwordClientHash = await generateDeterministicClientHash(testData.password);
-			const encryptedContent = await encryptNoteContent(testData.content, testData.password);
+			const passwordClientHash = await generateDeterministicClientHash(
+				testData.password,
+			);
+			const encryptedContent = await encryptNoteContent(
+				testData.content,
+				testData.password,
+			);
 
 			const response = await handler(
 				new Request(`http://${TEST_CONFIG.hostname}/api/notes`, {
@@ -131,7 +144,9 @@ Deno.test({
 		});
 
 		await t.step('should retrieve note by ID', async () => {
-			const passwordHash = await generateDeterministicClientHash(testData.password);
+			const passwordHash = await generateDeterministicClientHash(
+				testData.password,
+			);
 			const response = await handler(
 				new Request(`http://${TEST_CONFIG.hostname}/api/notes/${apiNoteId}`, {
 					method: 'POST',
