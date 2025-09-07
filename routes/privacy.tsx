@@ -32,7 +32,7 @@ export default function Privacy({ data }: PageProps<Page | null>) {
 			<style>
 				{CSS}
 			</style>
-			<div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
+			<div class='flex flex-col items-center min-h-screen h-full w-full text-white py-16'>
 				<h1 class='text-4xl text-center font-bold mb-2'>Privacy Policy</h1>
 				<p class='mt-2 text-base sm:text-lg text-center text-gray-200'>
 					Your privacy and security are our top priorities.

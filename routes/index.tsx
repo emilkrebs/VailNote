@@ -1,5 +1,6 @@
 import { Handlers, PageProps } from '$fresh/server.ts';
 import Header from '../components/Header.tsx';
+import Navbar from '../components/Navbar.tsx';
 import SiteHeader from '../components/SiteHeader.tsx';
 import CreateNote from '../islands/CreateNoteForm.tsx';
 import { State } from './_middleware.ts';
@@ -27,6 +28,7 @@ export default function Home({ data }: PageProps) {
 				description='Share encrypted notes securely with VailNote. Open-source note sharing with end-to-end encryption, automatic deletion, and privacy-preserving features. No tracking, maximum security.'
 				canonicalUrl='https://vailnote.com'
 			/>
+			<Navbar />
 			<main class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-8 md:py-16'>
 				<SiteHeader />
 
