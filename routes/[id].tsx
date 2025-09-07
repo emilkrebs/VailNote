@@ -1,4 +1,4 @@
-import { PageProps } from 'fresh';
+import { Context, PageProps } from 'fresh';
 import { Note } from '../types/types.ts';
 import Header from '../components/Header.tsx';
 import HomeButton from '../components/HomeButton.tsx';
@@ -6,6 +6,7 @@ import SiteHeader from '../components/SiteHeader.tsx';
 import ViewEncryptedNote from '../islands/ViewNote.tsx';
 import Card, { CardContent, CardFooter, CardHeader, CardTitle } from '../components/Card.tsx';
 import { HttpError } from 'fresh';
+import { VailnoteContext } from '../middleware.ts';
 
 interface NotePageProps {
 	note?: Note;
@@ -13,13 +14,13 @@ interface NotePageProps {
 }
 
 export const handler = {
-	async GET(ctx) {
+	async GET(ctx: Context<VailnoteContext>) {
 		const { id } = ctx.params;
 		if (!id) {
 			throw new HttpError(404);
 		}
 
-		const noteDatabase = ctx.state.context.getNoteDatabase();
+		const noteDatabase = ctx.state.getNoteDatabase();
 		const note = await noteDatabase.getNoteById(id);
 
 		if (!note) {
@@ -34,14 +35,14 @@ export const handler = {
 		};
 	},
 
-	async POST(ctx) {
+	async POST(ctx: Context<VailnoteContext>) {
 		// For backward compatibility, POST requests should also render the client-side component
 		// All password validation and decryption now happens client-side
 		const { id } = ctx.params;
 		if (!id) {
 			throw new HttpError(404);
 		}
-		const noteDatabase = ctx.state.context.getNoteDatabase();
+		const noteDatabase = ctx.state.getNoteDatabase();
 		const note = await noteDatabase.getNoteById(id);
 
 		if (!note) {
