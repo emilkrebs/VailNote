@@ -1,4 +1,4 @@
-import { asset } from '$fresh/runtime.ts';
+import { asset } from 'fresh/runtime';
 import { useState } from 'preact/hooks';
 import { JSX } from 'preact';
 import { FormField } from '../components/Form.tsx';

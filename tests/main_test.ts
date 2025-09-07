@@ -1,20 +1,15 @@
-import { createHandler, ServeHandlerInfo } from '$fresh/server.ts';
-import manifest from '../fresh.gen.ts';
-import config from '../fresh.config.ts';
 import { assertEquals, assertExists } from '$std/assert/mod.ts';
 import { generateDeterministicClientHash } from '../lib/hashing.ts';
 import { encryptNoteContent } from '../lib/encryption.ts';
-import { Context } from '../routes/_middleware.ts';
 
-// Test configuration constants
-const TEST_CONFIG = {
-	hostname: '127.0.0.1',
-	port: 53496,
-} as const;
-
-const CONN_INFO: ServeHandlerInfo = {
-	remoteAddr: { hostname: TEST_CONFIG.hostname, port: TEST_CONFIG.port, transport: 'tcp' },
-	completed: Promise.resolve(),
+const middleware = async (ctx: any) => {
+	if (!Deno.env.get('BUILD_MODE')) {
+		ctx.state.options = {
+			testMode: true,
+			databaseUri: Deno.env.get('TEST_DATABASE_URI'),
+		};
+	}
+	return await ctx.next();
 };
 
 // Test data factory
@@ -33,59 +28,23 @@ class TestDataFactory {
 	};
 }
 
-// Test utilities
-class TestUtils {
-	static async setupTestEnvironment(): Promise<void> {
-		Deno.env.set('TEST_MODE', 'true');
+const { app } = await import('./../_fresh/server.js');
 
-		// Reinitialize context with test mode
-		await Context.init({
-			testMode: true,
-			databaseUri: Deno.env.get('BASE_URI') || '',
-			testDatabaseUri: Deno.env.get('TEST_BASE_URI') || '',
-		});
-
-		if (!Context.instance().isTestMode()) {
-			throw new Error('Test environment is not set up correctly. Exiting test.');
-		}
-	}
-
-	static async clearTestDatabase(): Promise<void> {
-		try {
-			const context = Context.instance();
-			const db = context.getNoteDatabase();
-			await db.clearAllNotes();
-		} catch (error) {
-			console.warn('Failed to clear test database:', error);
-		}
-	}
-
-	static extractNoteIdFromResponse(response: string): string | null {
-		const match = response.match(/Note ID: (\w+)/);
-		return match ? match[1] : null;
-	}
-}
+app.use(middleware);
 
 // Test suite for basic HTTP functionality
 Deno.test({
 	name: 'HTTP - Basic functionality',
 	fn: async (t) => {
-		await TestUtils.setupTestEnvironment();
-		const handler = await createHandler(manifest, config);
+		const handler = app.handler();
 
 		await t.step('should return 200 for GET /', async () => {
-			const response = await handler(
-				new Request(`http://${TEST_CONFIG.hostname}/`),
-				CONN_INFO,
-			);
+			const response = await handler(new Request(`http://localhost`));
 			assertEquals(response.status, 200);
 		});
 
 		await t.step('should return 404 for non-existent route', async () => {
-			const response = await handler(
-				new Request(`http://${TEST_CONFIG.hostname}/non-existent`),
-				CONN_INFO,
-			);
+			const response = await handler(new Request(`http://localhost/non-existent`));
 			assertEquals(response.status, 404);
 		});
 	},
@@ -97,19 +56,16 @@ Deno.test({
 Deno.test({
 	name: 'Notes - CRUD operations',
 	fn: async (t) => {
-		await TestUtils.setupTestEnvironment();
-		await TestUtils.clearTestDatabase();
-
-		const handler = await createHandler(manifest, config);
-		const testData = TestDataFactory.createNoteData();
+		const handler = app.handler();
 		let apiNoteId: string;
+		const testData = TestDataFactory.createNoteData();
 
 		await t.step('should create note via API', async () => {
 			const passwordClientHash = await generateDeterministicClientHash(testData.password);
 			const encryptedContent = await encryptNoteContent(testData.content, testData.password);
 
 			const response = await handler(
-				new Request(`http://${TEST_CONFIG.hostname}/api/notes`, {
+				new Request(`http://localhost/api/notes`, {
 					method: 'POST',
 					body: JSON.stringify({
 						content: encryptedContent.encrypted,
@@ -119,7 +75,6 @@ Deno.test({
 					}),
 					headers: { 'Content-Type': 'application/json' },
 				}),
-				CONN_INFO,
 			);
 
 			assertEquals(response.status, 201);
@@ -133,12 +88,11 @@ Deno.test({
 		await t.step('should retrieve note by ID', async () => {
 			const passwordHash = await generateDeterministicClientHash(testData.password);
 			const response = await handler(
-				new Request(`http://${TEST_CONFIG.hostname}/api/notes/${apiNoteId}`, {
+				new Request(`http://localhost/api/notes/${apiNoteId}`, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ passwordHash }),
 				}),
-				CONN_INFO,
 			);
 
 			const data = await response.json();
@@ -148,15 +102,11 @@ Deno.test({
 
 		await t.step('should handle non-existent note', async () => {
 			const response = await handler(
-				new Request(`http://${TEST_CONFIG.hostname}/nonexistent123`),
-				CONN_INFO,
+				new Request(`http://localhost/nonexistent123`),
 			);
 
 			assertEquals(response.status, 404);
 		});
-
-		// Cleanup
-		await TestUtils.clearTestDatabase();
 	},
 	sanitizeResources: false,
 	sanitizeOps: false,
@@ -166,14 +116,11 @@ Deno.test({
 Deno.test({
 	name: 'API - Input validation',
 	fn: async (t) => {
-		await TestUtils.setupTestEnvironment();
-		await TestUtils.clearTestDatabase();
-
-		const handler = await createHandler(manifest, config);
+		const handler = app.handler();
 
 		await t.step('should reject API request with missing content', async () => {
 			const response = await handler(
-				new Request(`http://${TEST_CONFIG.hostname}/api/notes`, {
+				new Request(`http://localhost/api/notes`, {
 					method: 'POST',
 					body: JSON.stringify({
 						// Missing content
@@ -182,7 +129,6 @@ Deno.test({
 					}),
 					headers: { 'Content-Type': 'application/json' },
 				}),
-				CONN_INFO,
 			);
 
 			assertEquals(response.status >= 400, true);
@@ -190,19 +136,15 @@ Deno.test({
 
 		await t.step('should reject API request with invalid JSON', async () => {
 			const response = await handler(
-				new Request(`http://${TEST_CONFIG.hostname}/api/notes`, {
+				new Request(`http://localhost/api/notes`, {
 					method: 'POST',
 					body: 'invalid json',
 					headers: { 'Content-Type': 'application/json' },
 				}),
-				CONN_INFO,
 			);
 
 			assertEquals(response.status >= 400, true);
 		});
-
-		// Cleanup
-		await TestUtils.clearTestDatabase();
 	},
 	sanitizeResources: false,
 	sanitizeOps: false,

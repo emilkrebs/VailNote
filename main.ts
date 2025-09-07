@@ -1,10 +1,18 @@
-/// <reference no-default-lib="true" />
-/// <reference lib="dom" />
-/// <reference lib="dom.iterable" />
-/// <reference lib="dom.asynciterable" />
-/// <reference lib="deno.ns" />
-import { start } from '$fresh/server.ts';
-import manifest from './fresh.gen.ts';
-import config from './fresh.config.ts';
+import { App, staticFiles, trailingSlashes } from 'fresh';
+import { VailnoteContext } from './middleware.ts';
 
-await start(manifest, config);
+export const app = new App<VailnoteContext>();
+
+app.use(async (ctx) => {
+	if (!Deno.env.get('BUILD_MODE')) {
+		ctx.state.options = {
+			testMode: false,
+			databaseUri: Deno.env.get('DATABASE_URI'),
+		};
+	}
+	return await ctx.next();
+});
+
+app.use(staticFiles())
+	.use(trailingSlashes('never'))
+	.fsRoutes();

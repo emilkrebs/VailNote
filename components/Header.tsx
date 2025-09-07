@@ -86,10 +86,6 @@ export default function Header({ title, description, canonicalUrl }: HeadProps) 
 			<meta charset='utf-8' />
 			<title>{pageTitle}</title>
 
-			{/* Preload critical resources for better performance */}
-			<link rel='preload' href='/styles.css' as='style' />
-			<link rel='stylesheet' href='/styles.css' />
-
 			{/* Preload Google Fonts for better performance */}
 			<link rel='preconnect' href='https://fonts.googleapis.com' />
 			<link rel='preconnect' href='https://fonts.gstatic.com' />

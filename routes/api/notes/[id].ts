@@ -1,16 +1,16 @@
-import { FreshContext } from '$fresh/server.ts';
 import { Note } from '../../../types/types.ts';
 import { compareHash } from '../../../lib/hashing.ts';
 import { mergeWithRateLimitHeaders } from '../../../lib/rate-limiting/rate-limit-headers.ts';
-import { State } from '../../_middleware.ts';
+import { Context } from 'fresh';
+import { VailnoteContext } from '../../../middleware.ts';
 
-export const handler = async (req: Request, ctx: FreshContext<State>): Promise<Response> => {
-	if (req.method !== 'POST' && req.method !== 'DELETE') {
+export const handler = async (ctx: Context<VailnoteContext>): Promise<Response> => {
+	if (ctx.req.method !== 'POST' && ctx.req.method !== 'DELETE') {
 		return new Response('Method not allowed', { status: 405 });
 	}
 
-	const rateLimitResult = await ctx.state.context.getRateLimiter().checkRateLimit(req);
-	const noteDatabase = ctx.state.context.getNoteDatabase();
+	const rateLimitResult = await ctx.state.getRateLimiter().checkRateLimit(ctx.req);
+	const noteDatabase = ctx.state.getNoteDatabase();
 
 	// check if rate limit is exceeded
 	if (!rateLimitResult.allowed) {
@@ -36,9 +36,9 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 		return new Response('Note ID is required', { status: 400 });
 	}
 
-	if (req.method === 'POST') {
+	if (ctx.req.method === 'POST') {
 		const note = await noteDatabase.getNoteById(id);
-		const { passwordHash } = await req.json();
+		const { passwordHash } = await ctx.req.json();
 
 		if (!note || !passwordHash) {
 			return new Response('Note not found or password hash missing', { status: 404 });
@@ -69,9 +69,9 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 				status: 200,
 			},
 		);
-	} else if (req.method === 'DELETE') {
+	} else if (ctx.req.method === 'DELETE') {
 		const note = await noteDatabase.getNoteById(id);
-		const { passwordHash } = await req.json();
+		const { passwordHash } = await ctx.req.json();
 		if (!note) {
 			return new Response('Note not found', { status: 404 });
 		}

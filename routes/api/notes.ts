@@ -1,10 +1,10 @@
-import { FreshContext } from '$fresh/server.ts';
 import { createNoteSchema } from '../../lib/validation/note.ts';
 import { formatExpiration, Note } from '../../types/types.ts';
 import { generateHash } from '../../lib/hashing.ts';
 import { mergeWithRateLimitHeaders } from '../../lib/rate-limiting/rate-limit-headers.ts';
-import { State } from '../_middleware.ts';
 import * as v from '@valibot/valibot';
+import { Context } from 'fresh';
+import { VailnoteContext } from '../../middleware.ts';
 
 /* used for client side note creation and encryption
 	* This endpoint handles only POST requests.
@@ -20,13 +20,13 @@ import * as v from '@valibot/valibot';
 	* - No IP address storage: Only hashed, rotated tokens are kept
 	*/
 
-export const handler = async (req: Request, ctx: FreshContext<State>): Promise<Response> => {
-	if (req.method !== 'POST') {
+export const handler = async (ctx: Context<VailnoteContext>): Promise<Response> => {
+	if (ctx.req.method !== 'POST') {
 		return new Response('Method not allowed', { status: 405 });
 	}
 
-	const rateLimitResult = await ctx.state.context.getRateLimiter().checkRateLimit(req);
-	const noteDatabase = ctx.state.context.getNoteDatabase();
+	const rateLimitResult = await ctx.state.getRateLimiter().checkRateLimit(ctx.req);
+	const noteDatabase = ctx.state.getNoteDatabase();
 
 	// check if rate limit is exceeded
 	if (!rateLimitResult.allowed) {
@@ -48,7 +48,7 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 	}
 
 	try {
-		const { content, iv, password, expiresIn, manualDeletion } = await req.json();
+		const { content, iv, password, expiresIn, manualDeletion } = await ctx.req.json();
 
 		// Validate input using valibot
 		try {

@@ -1,58 +1,58 @@
-import { Handlers, PageProps } from '$fresh/server.ts';
+import { PageProps } from 'fresh';
 import { Note } from '../types/types.ts';
 import Header from '../components/Header.tsx';
 import HomeButton from '../components/HomeButton.tsx';
-import { State } from './_middleware.ts';
 import SiteHeader from '../components/SiteHeader.tsx';
 import ViewEncryptedNote from '../islands/ViewNote.tsx';
 import Card, { CardContent, CardFooter, CardHeader, CardTitle } from '../components/Card.tsx';
+import { HttpError } from 'fresh';
 
 interface NotePageProps {
 	note?: Note;
 	message?: string;
 }
 
-export const handler: Handlers<NotePageProps, State> = {
-	async GET(_req, ctx) {
+export const handler = {
+	async GET(ctx) {
 		const { id } = ctx.params;
 		if (!id) {
-			return ctx.renderNotFound();
+			throw new HttpError(404);
 		}
 
 		const noteDatabase = ctx.state.context.getNoteDatabase();
 		const note = await noteDatabase.getNoteById(id);
 
 		if (!note) {
-			return ctx.renderNotFound();
+			throw new HttpError(404);
 		}
 
 		// Always render the client-side component for zero-knowledge architecture
 		// The client will handle password input and decryption entirely
-		return ctx.render({
+		return {
 			note,
 			message: 'Note found - the client will handle decryption',
-		});
+		};
 	},
 
-	async POST(_req, ctx) {
+	async POST(ctx) {
 		// For backward compatibility, POST requests should also render the client-side component
 		// All password validation and decryption now happens client-side
 		const { id } = ctx.params;
 		if (!id) {
-			return ctx.renderNotFound();
+			throw new HttpError(404);
 		}
 		const noteDatabase = ctx.state.context.getNoteDatabase();
 		const note = await noteDatabase.getNoteById(id);
 
 		if (!note) {
-			return ctx.renderNotFound();
+			throw new HttpError(404);
 		}
 
 		// Always render the client-side component - password validation is now client-side
-		return ctx.render({
+		return {
 			note,
 			message: 'Note found - decryption will happen in your browser',
-		});
+		};
 	},
 };
 

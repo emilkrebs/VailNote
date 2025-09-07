@@ -1,25 +1,8 @@
-import { Handlers, PageProps } from '$fresh/server.ts';
 import Header from '../components/Header.tsx';
 import SiteHeader from '../components/SiteHeader.tsx';
 import CreateNote from '../islands/CreateNoteForm.tsx';
-import { State } from './_middleware.ts';
 
-interface HomeData {
-	message: string;
-}
-
-export const handler: Handlers<HomeData, State> = {
-	GET(_req, ctx) {
-		return ctx.render({ message: '' });
-	},
-	POST(_req, ctx) {
-		return ctx.render({
-			message: 'Server-side note creation is deprecated. Enable JavaScript to use the client-side form.',
-		});
-	},
-};
-
-export default function Home({ data }: PageProps) {
+export default function Home() {
 	return (
 		<>
 			<Header
@@ -34,7 +17,7 @@ export default function Home({ data }: PageProps) {
 					class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-2 md:px-4 py-4 md:py-8'
 					aria-label='Create Note Form'
 				>
-					<CreateNote message={data.message} />
+					<CreateNote />
 				</section>
 
 				<FeaturesSection />
