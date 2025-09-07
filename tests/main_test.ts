@@ -2,6 +2,7 @@ import { assertEquals, assertExists } from '$std/assert/mod.ts';
 import { generateDeterministicClientHash } from '../lib/hashing.ts';
 import { encryptNoteContent } from '../lib/encryption.ts';
 
+// deno-lint-ignore no-explicit-any
 const middleware = async (ctx: any) => {
 	if (!Deno.env.get('BUILD_MODE')) {
 		ctx.state.options = {
