@@ -4,6 +4,7 @@ import { encryptNoteContent } from '../lib/encryption.ts';
 import { App, staticFiles, trailingSlashes } from 'fresh';
 import { VailnoteContext } from '../middleware.ts';
 
+// deno-lint-ignore no-explicit-any
 const middleware = async (ctx: any) => {
 	if (!Deno.env.get('BUILD_MODE')) {
 		ctx.state.options = {
@@ -30,13 +31,11 @@ class TestDataFactory {
 	};
 }
 
-
 export const app = new App<VailnoteContext>();
 app.use(middleware);
 app.use(staticFiles())
 	.use(trailingSlashes('never'))
 	.fsRoutes();
-
 
 // Test suite for basic HTTP functionality
 Deno.test({
