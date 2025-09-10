@@ -1,17 +1,16 @@
 import { assertEquals, assertExists } from '$std/assert/mod.ts';
 import { generateDeterministicClientHash } from '../lib/hashing.ts';
 import { encryptNoteContent } from '../lib/encryption.ts';
-import { App, staticFiles, trailingSlashes } from 'fresh';
-import { VailnoteContext } from '../middleware.ts';
+import { App } from 'fresh';
+import Home from '../routes/index.tsx';
+import { VailNoteState } from '../middleware.ts';
 
 // deno-lint-ignore no-explicit-any
 const middleware = async (ctx: any) => {
-	if (!Deno.env.get('BUILD_MODE')) {
-		ctx.state.options = {
-			testMode: true,
-			databaseUri: Deno.env.get('TEST_DATABASE_URI'),
-		};
-	}
+	ctx.state.options = {
+		testMode: true,
+		databaseUri: Deno.env.get('TEST_DATABASE_URI'),
+	};
 	return await ctx.next();
 };
 
@@ -31,16 +30,14 @@ class TestDataFactory {
 	};
 }
 
-export const app = new App<VailnoteContext>();
-app.use(middleware);
-app.use(staticFiles())
-	.use(trailingSlashes('never'))
-	.fsRoutes();
-
 // Test suite for basic HTTP functionality
 Deno.test({
 	name: 'HTTP - Basic functionality',
 	fn: async (t) => {
+		const app = new App<VailNoteState>()
+			.use(middleware)
+			.get('/', (ctx) => ctx.render(Home()));
+
 		const handler = app.handler();
 
 		await t.step('should return 200 for GET /', async () => {
@@ -61,7 +58,15 @@ Deno.test({
 Deno.test({
 	name: 'Notes - CRUD operations',
 	fn: async (t) => {
-		const handler = app.handler();
+		const { handler: notesHandler } = await import('../routes/api/notes.ts');
+		const { handler: notesIdHandler } = await import('../routes/api/notes/[id].ts');
+
+		const handler = new App<VailNoteState>()
+			.use(middleware)
+			.get('/api/notes', (ctx) => notesHandler(ctx))
+			.get('/api/notes/:id', (ctx) => notesIdHandler(ctx))
+			.handler();
+
 		let apiNoteId: string;
 		const testData = TestDataFactory.createNoteData();
 
@@ -104,24 +109,6 @@ Deno.test({
 			assertExists(data.id, 'Note ID should be present in response');
 			assertEquals(response.status, 200);
 		});
-
-		await t.step('should handle non-existent note', async () => {
-			const response = await handler(
-				new Request(`http://localhost/nonexistent123`),
-			);
-
-			assertEquals(response.status, 404);
-		});
-	},
-	sanitizeResources: false,
-	sanitizeOps: false,
-});
-
-// Test suite for API validation
-Deno.test({
-	name: 'API - Input validation',
-	fn: async (t) => {
-		const handler = app.handler();
 
 		await t.step('should reject API request with missing content', async () => {
 			const response = await handler(

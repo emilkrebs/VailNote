@@ -1,18 +1,6 @@
-import { App, staticFiles, trailingSlashes } from 'fresh';
-import { VailnoteContext } from './middleware.ts';
+import { App, staticFiles } from 'fresh';
 
-export const app = new App<VailnoteContext>();
-
-app.use(async (ctx) => {
-	if (!Deno.env.get('BUILD_MODE')) {
-		ctx.state.options = {
-			testMode: false,
-			databaseUri: Deno.env.get('DATABASE_URI'),
-		};
-	}
-	return await ctx.next();
-});
+export const app = new App();
 
 app.use(staticFiles())
-	.use(trailingSlashes('never'))
 	.fsRoutes();

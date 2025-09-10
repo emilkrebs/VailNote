@@ -111,7 +111,6 @@ export default function Header({ title, description, canonicalUrl }: HeadProps) 
 
 			<link rel='canonical' href={finalCanonicalUrl} />
 			<link rel='manifest' href='/site.webmanifest' />
-			<script type='module' src='/pwa-update.js' />
 
 			{/* SEO and Social Media Meta Tags */}
 			<OpenGraphMeta title={title} description={description} canonicalUrl={canonicalUrl} />

@@ -2,15 +2,15 @@ import { Note } from '../../../types/types.ts';
 import { compareHash } from '../../../lib/hashing.ts';
 import { mergeWithRateLimitHeaders } from '../../../lib/rate-limiting/rate-limit-headers.ts';
 import { Context } from 'fresh';
-import { VailnoteContext } from '../../../middleware.ts';
+import { getNoteDatabase, getRateLimiter } from '../../../lib/services/database-service.ts';
 
-export const handler = async (ctx: Context<VailnoteContext>): Promise<Response> => {
+export const handler = async (ctx: Context<unknown>): Promise<Response> => {
 	if (ctx.req.method !== 'POST' && ctx.req.method !== 'DELETE') {
 		return new Response('Method not allowed', { status: 405 });
 	}
 
-	const rateLimitResult = await ctx.state.getRateLimiter().checkRateLimit(ctx.req);
-	const noteDatabase = ctx.state.getNoteDatabase();
+	const rateLimitResult = await getRateLimiter().checkRateLimit(ctx.req);
+	const db = await getNoteDatabase();
 
 	// check if rate limit is exceeded
 	if (!rateLimitResult.allowed) {
@@ -37,7 +37,7 @@ export const handler = async (ctx: Context<VailnoteContext>): Promise<Response> 
 	}
 
 	if (ctx.req.method === 'POST') {
-		const note = await noteDatabase.getNoteById(id);
+		const note = await db.getNoteById(id);
 		const { passwordHash } = await ctx.req.json();
 
 		if (!note || !passwordHash) {
@@ -50,7 +50,7 @@ export const handler = async (ctx: Context<VailnoteContext>): Promise<Response> 
 
 		// If the note doesn't require manual deletion, delete it to ensure it has been destroyed
 		if (!note.manualDeletion) {
-			await noteDatabase.deleteNote(id);
+			await db.deleteNote(id);
 		}
 
 		return new Response(
@@ -70,7 +70,7 @@ export const handler = async (ctx: Context<VailnoteContext>): Promise<Response> 
 			},
 		);
 	} else if (ctx.req.method === 'DELETE') {
-		const note = await noteDatabase.getNoteById(id);
+		const note = await db.getNoteById(id);
 		const { passwordHash } = await ctx.req.json();
 		if (!note) {
 			return new Response('Note not found', { status: 404 });
@@ -79,7 +79,7 @@ export const handler = async (ctx: Context<VailnoteContext>): Promise<Response> 
 		if (note.password && !compareHash(passwordHash, note.password)) {
 			return new Response('Invalid password or auth key', { status: 403 });
 		}
-		await noteDatabase.deleteNote(id);
+		await db.deleteNote(id);
 		return new Response(
 			JSON.stringify({
 				message: 'Note deleted successfully',

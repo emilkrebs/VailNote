@@ -11,9 +11,10 @@ import LoadingPage from '../components/LoadingPage.tsx';
 import NoteService from '../lib/services/note-service.ts';
 import Card, { CardContent, CardFooter, CardHeader, CardTitle } from '../components/Card.tsx';
 import { FormGroup, Label } from '../components/Form.tsx';
-import { NoteErrorPage } from '../routes/[id].tsx';
 import { ViewNoteSchema, viewNoteSchema } from '../lib/validation/note.ts';
 import * as v from '@valibot/valibot';
+import { HttpError } from 'fresh';
+import ErrorPage from '../components/ErrorPage.tsx';
 
 // Constants for messages
 const MESSAGES = {
@@ -191,7 +192,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 
 	// Render logic
 	if (error) {
-		return <NoteErrorPage message={error} />;
+		return <ErrorPage message={error} />;
 	}
 
 	if (needsPassword) {
@@ -218,7 +219,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 	}
 
 	if (!note) {
-		return <NoteErrorPage message={MESSAGES.NOTE_NOT_AVAILABLE} />;
+		return <ErrorPage message={MESSAGES.NOTE_NOT_AVAILABLE} />;
 	}
 
 	return (

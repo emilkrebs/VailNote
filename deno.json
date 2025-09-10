@@ -5,9 +5,9 @@
 		"cli": "echo \"import '\\$fresh/src/dev/cli.ts'\" | deno run --unstable -A -",
 		"manifest": "deno task cli manifest $(pwd)",
 		"start": "deno serve -A _fresh/server.js",
-		"dev": "vite",
+		"dev": "deno run -A --unstable-kv --node-modules-dir npm:vite",
 		"build": "BUILD_MODE=true vite build",
-		"test": "TEST_MODE=true deno test tests/arc-rate-limiter_test.ts --allow-read --allow-env --allow-net --allow-sys --allow-ffi",
+		"test": "TEST_MODE=true deno test --allow-read --allow-env --allow-net --allow-sys --unstable-kv",
 		"update": "deno run -A -r jsr:@fresh/update ."
 	},
 	"lint": {
@@ -33,7 +33,6 @@
 		"@deno/gfm": "jsr:@deno/gfm@^0.11.0",
 		"@valibot/valibot": "jsr:@valibot/valibot@^1.1.0",
 		"$std/": "https://deno.land/std@0.216.0/",
-		"mongodb": "npm:mongodb",
 		"bcrypt": "https://deno.land/x/bcrypt@v0.4.1/mod.ts"
 	},
 	"compilerOptions": {
