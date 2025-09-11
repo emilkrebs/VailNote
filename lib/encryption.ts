@@ -29,7 +29,7 @@ export class AESEncryption {
 		const encryptedData = await crypto.subtle.encrypt(
 			{
 				name: 'AES-GCM',
-				iv: getAESEncryptionIV(iv),
+				iv: new Uint8Array(base64ToUint8Array(iv)).buffer,
 			},
 			this._cryptoKey!,
 			dataBytes,
@@ -45,10 +45,10 @@ export class AESEncryption {
 		const decryptedData = await crypto.subtle.decrypt(
 			{
 				name: 'AES-GCM',
-				iv: getAESEncryptionIV(iv),
+				iv: new Uint8Array(base64ToUint8Array(iv)).buffer,
 			},
 			this._cryptoKey!,
-			base64ToUint8Array(data),
+			new Uint8Array(base64ToUint8Array(data)),
 		);
 		return this._decoder.decode(new Uint8Array(decryptedData));
 	}
@@ -66,7 +66,7 @@ export function uint8ArrayToBase64(uint8Array: Uint8Array): string {
 }
 
 // Convert a Base64-encoded string back to a Uint8Array
-export function base64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
+export function base64ToUint8Array(base64: string): Uint8Array {
 	const binaryString = atob(base64);
 	const uint8Array = new Uint8Array(binaryString.length);
 	for (let i = 0; i < binaryString.length; i++) {
@@ -96,16 +96,18 @@ export function generateEncryptionIv(): Uint8Array {
 }
 
 export function getAESEncryptionKey(key: string): Promise<CryptoKey> {
+	const keyBytes = base64ToUint8Array(key);
+	const keyBuffer = new Uint8Array(keyBytes).buffer; // ensure concrete ArrayBuffer
 	return crypto.subtle.importKey(
 		'raw',
-		base64ToUint8Array(key),
+		keyBuffer,
 		'AES-GCM',
 		true,
 		['encrypt', 'decrypt'],
 	);
 }
 
-export function getAESEncryptionIV(iv: string): Uint8Array<ArrayBuffer> {
+export function getAESEncryptionIV(iv: string): Uint8Array {
 	return base64ToUint8Array(iv);
 }
 
