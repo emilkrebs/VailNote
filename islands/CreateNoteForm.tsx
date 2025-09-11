@@ -1,7 +1,7 @@
 import { Button } from '../components/Button.tsx';
 import { useState } from 'preact/hooks';
 import CopyContent from './CopyContent.tsx';
-import PasswordInput from './PasswordInput.tsx';
+import PasswordToggle from './PasswordToggle.tsx';
 import PenIcon from '../components/PenIcon.tsx';
 import Message from '../components/Message.tsx';
 import NoteService from '../lib/services/note-service.ts';
@@ -115,6 +115,7 @@ export default function CreateNote({ message }: { message?: string }) {
 
 function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 	const handleSubmit = async (event: Event) => {
+		console.log('Submitting create note form');
 		event.preventDefault();
 
 		const form = event.target as HTMLFormElement;
@@ -181,7 +182,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 					>
 						Password
 					</Label>
-					<PasswordInput
+					<PasswordToggle
 						name='password'
 						id='password'
 						placeholder='Enter to set a password'

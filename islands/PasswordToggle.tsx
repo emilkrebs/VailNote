@@ -1,15 +1,15 @@
-import { asset } from 'fresh/runtime';
 import { useState } from 'preact/hooks';
 import { JSX } from 'preact';
 import { FormField } from '../components/Form.tsx';
+import { asset } from 'fresh/runtime';
 
-interface PasswordInputProps extends JSX.InputHTMLAttributes {
+interface PasswordToggleProps extends JSX.InputHTMLAttributes {
 	error?: string;
 	helpText?: string;
 }
 
-export default function PasswordInput(
-	props: PasswordInputProps,
+export default function PasswordToggle(
+	props: PasswordToggleProps,
 ) {
 	const [isHidden, setIsHidden] = useState(true);
 

@@ -1,47 +1,30 @@
 {
-	"lock": false,
 	"tasks": {
-		"check": "deno fmt --check && deno lint && deno check **/*.ts && deno check **/*.tsx",
-		"cli": "echo \"import '\\$fresh/src/dev/cli.ts'\" | deno run --unstable -A -",
-		"manifest": "deno task cli manifest $(pwd)",
+		"check": "deno fmt --check && deno lint && deno check",
 		"start": "deno serve -A _fresh/server.js",
 		"dev": "deno run -A --unstable-kv --node-modules-dir npm:vite",
 		"build": "BUILD_MODE=true vite build",
-		"test": "TEST_MODE=true deno test --allow-read --allow-env --allow-net --allow-sys --unstable-kv",
-		"update": "deno run -A -r jsr:@fresh/update ."
+		"test": "TEST_MODE=true deno test --unstable-kv --allow-read --allow-env --allow-net --allow-sys",
+		"update": "deno run -A -r jsr:@fresh/update .",
+		"clean": "rm -rf ./dist && rm -rf ./_fresh && rm -rf ./node_modules && rm -f ./deno.lock && rm -f ./package-lock.json"
 	},
-	"lint": {
-		"rules": {
-			"tags": [
-				"fresh",
-				"recommended"
-			]
-		}
-	},
-	"exclude": [
-		"**/_fresh/*",
-		"**/node_modules/**"
-	],
+	"lint": { "rules": { "tags": ["fresh", "recommended"] } },
+	"exclude": ["**/_fresh/*", "**/node_modules/**"],
 	"imports": {
-		"fresh": "jsr:@fresh/core@^2.0.0-beta.4",
+		"fresh": "jsr:@fresh/core@^2.0.0",
 		"preact": "npm:preact@^10.27.1",
 		"@preact/signals": "npm:@preact/signals@^2.3.1",
-		"@fresh/plugin-vite": "jsr:@fresh/plugin-vite@^0.9.13",
-		"vite": "npm:vite@^7.1.3",
-		"tailwindcss": "npm:tailwindcss@^4.1.10",
-		"@tailwindcss/vite": "npm:@tailwindcss/vite@^4.1.12",
+		"@fresh/plugin-vite": "jsr:@fresh/plugin-vite@^1.0.0",
+		"vite": "npm:vite@^7.1.5",
+		"tailwindcss": "npm:tailwindcss@^4.1.13",
+		"@tailwindcss/vite": "npm:@tailwindcss/vite@^4.1.13",
 		"@deno/gfm": "jsr:@deno/gfm@^0.11.0",
 		"@valibot/valibot": "jsr:@valibot/valibot@^1.1.0",
 		"$std/": "https://deno.land/std@0.216.0/",
-		"bcrypt": "https://deno.land/x/bcrypt@v0.4.1/mod.ts"
+		"bcrypt": "https://deno.land/x/bcrypt/mod.ts"
 	},
 	"compilerOptions": {
-		"lib": [
-			"dom",
-			"dom.asynciterable",
-			"dom.iterable",
-			"deno.ns"
-		],
+		"lib": ["dom", "dom.asynciterable", "dom.iterable", "deno.ns", "deno.unstable"],
 		"jsx": "precompile",
 		"jsxImportSource": "preact",
 		"jsxPrecompileSkipElements": [
@@ -60,9 +43,7 @@
 			"noscript",
 			"template"
 		],
-		"types": [
-			"vite/client"
-		]
+		"types": ["vite/client"]
 	},
 	"fmt": {
 		"useTabs": true,
@@ -70,12 +51,7 @@
 		"indentWidth": 2,
 		"singleQuote": true,
 		"proseWrap": "always",
-		"exclude": [
-			"**/node_modules/**",
-			"**/.git/**",
-			"**/.vscode/**",
-			"**/.github/**"
-		]
+		"exclude": ["**/node_modules/**", "**/.git/**", "**/.vscode/**", "**/.github/**"]
 	},
 	"nodeModulesDir": "auto"
 }

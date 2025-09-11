@@ -3,7 +3,7 @@ import HomeButton from '../components/HomeButton.tsx';
 import Message from '../components/Message.tsx';
 import PenIcon from '../components/PenIcon.tsx';
 import SiteHeader from '../components/SiteHeader.tsx';
-import PasswordInput from './PasswordInput.tsx';
+import PasswordToggle from './PasswordToggle.tsx';
 import { Button } from '../components/Button.tsx';
 import { formatExpirationMessage, Note } from '../types/types.ts';
 import { decryptNoteContent } from '../lib/encryption.ts';
@@ -336,7 +336,7 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
 								<Label htmlFor='password'>
 									Enter Password
 								</Label>
-								<PasswordInput
+								<PasswordToggle
 									type='password'
 									name='password'
 									id='password'

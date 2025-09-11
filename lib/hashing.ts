@@ -1,11 +1,3 @@
-import * as bcrypt from 'bcrypt';
-
-// Server-side bcrypt functions
-export function generateHash(password: string): string {
-	const salt = bcrypt.genSaltSync(12);
-	return bcrypt.hashSync(password, salt);
-}
-
 export async function generateSHA256Hash(input: string): Promise<string> {
 	const encoder = new TextEncoder();
 	const data = encoder.encode(input);
@@ -79,15 +71,6 @@ export async function verifyClientHash(password: string, hash: string): Promise<
 		return computedHashBase64 === storedHashBase64;
 	} catch (error) {
 		console.error('Error verifying client hash:', error);
-		return false;
-	}
-}
-
-export function compareHash(plainText: string, hash: string): boolean {
-	try {
-		return bcrypt.compareSync(plainText, hash);
-	} catch (error) {
-		console.error('Error comparing hash:', error);
 		return false;
 	}
 }

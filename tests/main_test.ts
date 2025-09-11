@@ -3,7 +3,6 @@ import { generateDeterministicClientHash } from '../lib/hashing.ts';
 import { encryptNoteContent } from '../lib/encryption.ts';
 import { App } from 'fresh';
 import Home from '../routes/index.tsx';
-import { VailNoteState } from '../middleware.ts';
 
 // deno-lint-ignore no-explicit-any
 const middleware = async (ctx: any) => {
@@ -34,7 +33,7 @@ class TestDataFactory {
 Deno.test({
 	name: 'HTTP - Basic functionality',
 	fn: async (t) => {
-		const app = new App<VailNoteState>()
+		const app = new App<unknown>()
 			.use(middleware)
 			.get('/', (ctx) => ctx.render(Home()));
 
@@ -61,9 +60,9 @@ Deno.test({
 		const { handler: notesHandler } = await import('../routes/api/notes.ts');
 		const { handler: notesIdHandler } = await import('../routes/api/notes/[id].ts');
 
-		const handler = new App<VailNoteState>()
+		const handler = new App<unknown>()
 			.use(middleware)
-			.get('/api/notes', (ctx) => notesHandler(ctx))
+			.get('/api/notes', (ctx) => notesHandler.POST(ctx))
 			.get('/api/notes/:id', (ctx) => notesIdHandler(ctx))
 			.handler();
 

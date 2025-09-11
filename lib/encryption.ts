@@ -66,7 +66,7 @@ export function uint8ArrayToBase64(uint8Array: Uint8Array): string {
 }
 
 // Convert a Base64-encoded string back to a Uint8Array
-export function base64ToUint8Array(base64: string): Uint8Array {
+export function base64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
 	const binaryString = atob(base64);
 	const uint8Array = new Uint8Array(binaryString.length);
 	for (let i = 0; i < binaryString.length; i++) {
@@ -105,7 +105,7 @@ export function getAESEncryptionKey(key: string): Promise<CryptoKey> {
 	);
 }
 
-export function getAESEncryptionIV(iv: string): Uint8Array {
+export function getAESEncryptionIV(iv: string): Uint8Array<ArrayBuffer> {
 	return base64ToUint8Array(iv);
 }
 

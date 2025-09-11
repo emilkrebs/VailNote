@@ -21,15 +21,15 @@ export class NoteDatabase {
 	constructor(uri: string) {
 		this.uri = uri;
 		this.logger = new DatabaseLogger();
-		this.logger.log(
-			TerminalColors.format(`Opening Deno KV database... `),
-		);
 	}
 
 	/**
 	 * Initialize Deno KV
 	 */
 	async init(): Promise<NoteDatabase> {
+		this.logger.log(
+			TerminalColors.format(`Opening Deno KV database...`),
+		);
 		this.kv = await Deno.openKv(this.uri);
 		this.logger.log(
 			TerminalColors.format(`Successfully opened Deno KV database.`),

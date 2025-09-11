@@ -1,8 +1,8 @@
 import { Note } from '../../../types/types.ts';
-import { compareHash } from '../../../lib/hashing.ts';
 import { mergeWithRateLimitHeaders } from '../../../lib/rate-limiting/rate-limit-headers.ts';
 import { Context } from 'fresh';
 import { getNoteDatabase, getRateLimiter } from '../../../lib/services/database-service.ts';
+import * as bcrypt from 'bcrypt';
 
 export const handler = async (ctx: Context<unknown>): Promise<Response> => {
 	if (ctx.req.method !== 'POST' && ctx.req.method !== 'DELETE') {
@@ -96,3 +96,12 @@ export const handler = async (ctx: Context<unknown>): Promise<Response> => {
 		return new Response('Method not allowed', { status: 405 });
 	}
 };
+
+function compareHash(plainText: string, hash: string): boolean {
+	try {
+		return bcrypt.compareSync(plainText, hash);
+	} catch (error) {
+		console.error('Error comparing hash:', error);
+		return false;
+	}
+}

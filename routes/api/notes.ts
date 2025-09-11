@@ -1,10 +1,10 @@
 import { createNoteSchema } from '../../lib/validation/note.ts';
 import { formatExpiration, Note } from '../../types/types.ts';
-import { generateHash } from '../../lib/hashing.ts';
 import { mergeWithRateLimitHeaders } from '../../lib/rate-limiting/rate-limit-headers.ts';
 import * as v from '@valibot/valibot';
 import { Context } from 'fresh';
 import { getNoteDatabase, getRateLimiter } from '../../lib/services/database-service.ts';
+import * as bcrypt from 'bcrypt';
 
 /* used for client side note creation and encryption
 	* This endpoint handles only POST requests.
@@ -131,3 +131,8 @@ export const handler = {
 		}
 	},
 };
+
+function generateHash(password: string): string {
+	const salt = bcrypt.genSaltSync(12);
+	return bcrypt.hashSync(password, salt);
+}
