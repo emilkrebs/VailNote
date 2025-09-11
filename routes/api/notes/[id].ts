@@ -3,8 +3,9 @@ import { mergeWithRateLimitHeaders } from '../../../lib/rate-limiting/rate-limit
 import { Context } from 'fresh';
 import { getNoteDatabase, getRateLimiter } from '../../../lib/services/database-service.ts';
 import * as bcrypt from 'bcrypt';
+import { State } from '../../../main.ts';
 
-export const handler = async (ctx: Context<unknown>): Promise<Response> => {
+export const handler = async (ctx: Context<State>): Promise<Response> => {
 	if (ctx.req.method !== 'POST' && ctx.req.method !== 'DELETE') {
 		return new Response('Method not allowed', { status: 405 });
 	}

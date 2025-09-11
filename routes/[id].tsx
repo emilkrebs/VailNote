@@ -4,6 +4,7 @@ import Header from '../components/Header.tsx';
 import ViewEncryptedNote from '../islands/ViewNote.tsx';
 import { HttpError } from 'fresh';
 import { getNoteDatabase } from '../lib/services/database-service.ts';
+import { State } from '../main.ts';
 
 interface NotePageProps {
 	note: Note;
@@ -11,7 +12,7 @@ interface NotePageProps {
 }
 
 export const handler = {
-	async GET(ctx: Context<unknown>) {
+	async GET(ctx: Context<State>) {
 		const { id } = ctx.params;
 		if (!id) {
 			throw new HttpError(404);
@@ -29,7 +30,7 @@ export const handler = {
 		return { data: { note, message: 'Note found - the client will handle decryption' } };
 	},
 
-	async POST(ctx: Context<unknown>) {
+	async POST(ctx: Context<State>) {
 		// For backward compatibility, POST requests should also render the client-side component
 		// All password validation and decryption now happens client-side
 		const { id } = ctx.params;

@@ -13,7 +13,6 @@ import Card, { CardContent, CardFooter, CardHeader, CardTitle } from '../compone
 import { FormGroup, Label } from '../components/Form.tsx';
 import { ViewNoteSchema, viewNoteSchema } from '../lib/validation/note.ts';
 import * as v from '@valibot/valibot';
-import { HttpError } from 'fresh';
 import ErrorPage from '../components/ErrorPage.tsx';
 
 // Constants for messages

@@ -5,6 +5,7 @@ import * as v from '@valibot/valibot';
 import { Context } from 'fresh';
 import { getNoteDatabase, getRateLimiter } from '../../lib/services/database-service.ts';
 import * as bcrypt from 'bcrypt';
+import { State } from '../../main.ts';
 
 /* used for client side note creation and encryption
 	* This endpoint handles only POST requests.
@@ -21,7 +22,7 @@ import * as bcrypt from 'bcrypt';
 	*/
 
 export const handler = {
-	async POST(ctx: Context<unknown>) {
+	async POST(ctx: Context<State>) {
 		const rateLimitResult = await getRateLimiter().checkRateLimit(ctx.req);
 		const db = await getNoteDatabase();
 

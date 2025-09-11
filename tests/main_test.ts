@@ -3,15 +3,7 @@ import { generateDeterministicClientHash } from '../lib/hashing.ts';
 import { encryptNoteContent } from '../lib/encryption.ts';
 import { App } from 'fresh';
 import Home from '../routes/index.tsx';
-
-// deno-lint-ignore no-explicit-any
-const middleware = async (ctx: any) => {
-	ctx.state.options = {
-		testMode: true,
-		databaseUri: Deno.env.get('TEST_DATABASE_URI'),
-	};
-	return await ctx.next();
-};
+import { State } from '../main.ts';
 
 // Test data factory
 class TestDataFactory {
@@ -33,8 +25,7 @@ class TestDataFactory {
 Deno.test({
 	name: 'HTTP - Basic functionality',
 	fn: async (t) => {
-		const app = new App<unknown>()
-			.use(middleware)
+		const app = new App<State>()
 			.get('/', (ctx) => ctx.render(Home()));
 
 		const handler = app.handler();
@@ -60,10 +51,9 @@ Deno.test({
 		const { handler: notesHandler } = await import('../routes/api/notes.ts');
 		const { handler: notesIdHandler } = await import('../routes/api/notes/[id].ts');
 
-		const handler = new App<unknown>()
-			.use(middleware)
-			.get('/api/notes', (ctx) => notesHandler.POST(ctx))
-			.get('/api/notes/:id', (ctx) => notesIdHandler(ctx))
+		const handler = new App<State>()
+			.post('/api/notes', async (ctx) => await notesHandler.POST(ctx))
+			.post('/api/notes/:id', async (ctx) => await notesIdHandler(ctx))
 			.handler();
 
 		let apiNoteId: string;
