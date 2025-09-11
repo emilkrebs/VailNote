@@ -1,6 +1,5 @@
 import { useState } from 'preact/hooks';
 import { JSX } from 'preact';
-import { FormField } from '../components/Form.tsx';
 import { asset } from 'fresh/runtime';
 
 interface PasswordToggleProps extends JSX.InputHTMLAttributes {
@@ -14,7 +13,7 @@ export default function PasswordToggle(
 	const [isHidden, setIsHidden] = useState(true);
 
 	return (
-		<FormField class='relative w-full'>
+		<div class='relative w-full'>
 			<input
 				{...props}
 				class={`input ${props.class || ''}`}
@@ -22,7 +21,7 @@ export default function PasswordToggle(
 			/>
 			<button
 				type='button'
-				class='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors'
+				class='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors cursor-pointer'
 				onClick={() => setIsHidden(!isHidden)}
 			>
 				<span title={isHidden ? 'Show' : 'Hide'}>
@@ -33,6 +32,6 @@ export default function PasswordToggle(
 					/>
 				</span>
 			</button>
-		</FormField>
+		</div>
 	);
 }

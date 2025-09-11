@@ -1,5 +1,4 @@
 import { useState } from 'preact/hooks';
-import { JSX } from 'preact';
 
 type CopyContentProps = {
 	content: string;
@@ -8,7 +7,7 @@ type CopyContentProps = {
 
 export default function CopyContent(
 	{ content, label }: CopyContentProps,
-): JSX.Element {
+) {
 	const [copied, setCopied] = useState(false);
 
 	const handleCopy = async () => {

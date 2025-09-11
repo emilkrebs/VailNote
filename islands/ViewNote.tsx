@@ -3,7 +3,6 @@ import HomeButton from '../components/HomeButton.tsx';
 import Message from '../components/Message.tsx';
 import PenIcon from '../components/PenIcon.tsx';
 import SiteHeader from '../components/SiteHeader.tsx';
-import PasswordToggle from './PasswordToggle.tsx';
 import { Button } from '../components/Button.tsx';
 import { formatExpirationMessage, Note } from '../types/types.ts';
 import { decryptNoteContent } from '../lib/encryption.ts';
@@ -14,6 +13,7 @@ import { FormGroup, Label } from '../components/Form.tsx';
 import { ViewNoteSchema, viewNoteSchema } from '../lib/validation/note.ts';
 import * as v from '@valibot/valibot';
 import ErrorPage from '../components/ErrorPage.tsx';
+import PasswordToggle from '../components/PasswordToggle.tsx';
 
 // Constants for messages
 const MESSAGES = {

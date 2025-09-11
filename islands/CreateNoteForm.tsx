@@ -1,7 +1,6 @@
 import { Button } from '../components/Button.tsx';
 import { useState } from 'preact/hooks';
-import CopyContent from './CopyContent.tsx';
-import PasswordToggle from './PasswordToggle.tsx';
+import CopyContent from '../components/CopyContent.tsx';
 import PenIcon from '../components/PenIcon.tsx';
 import Message from '../components/Message.tsx';
 import NoteService from '../lib/services/note-service.ts';
@@ -15,6 +14,7 @@ import {
 	MANUAL_DELETION_OPTIONS,
 	manualDeletionOptions,
 } from '../lib/validation/note.ts';
+import PasswordToggle from '../components/PasswordToggle.tsx';
 
 // Constants
 const MESSAGES = {
