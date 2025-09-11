@@ -4,7 +4,7 @@ import HomeButton from '../components/HomeButton.tsx';
 import { CSS, render } from '@deno/gfm';
 
 export default async function Privacy() {
-	const rawMarkdown = await Deno.readTextFile('./TERMS.md');
+	const rawMarkdown = await Deno.readTextFile('./PRIVACY.md');
 	if (!rawMarkdown) {
 		throw new HttpError(404);
 	}

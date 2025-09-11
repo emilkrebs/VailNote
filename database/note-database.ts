@@ -67,8 +67,8 @@ export class NoteDatabase {
 			return { success: false, error: validationResult.message };
 		}
 
-		// convert expiresIn from seconds to milliseconds
-		const expiresInMs = new Date().getTime() + note.expiresIn.getTime() * 1000;
+		// calculate duration in milliseconds until expiration
+		const expiresInMs = note.expiresIn.getTime() - Date.now();
 		await this.kv.set(['note', note.id], note, { expireIn: expiresInMs });
 		return { success: true };
 	}
