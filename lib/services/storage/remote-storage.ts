@@ -16,6 +16,10 @@ export interface ApiNoteRequest {
 	manualDeletion?: boolean;
 }
 
+/**
+ * RemoteStorage implements the StorageProvider interface to interact with a backend API for note storage.
+ * It handles creating, retrieving, and deleting notes by making HTTP requests to the appropriate endpoints.
+ */
 export default class RemoteStorage implements StorageProvider {
 	async create(data: CreateNoteData): Promise<CreateNoteResult> {
 		const { content, password, expiresIn, manualDeletion } = data;

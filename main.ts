@@ -5,6 +5,5 @@ export interface State {
 }
 
 export const app = new App<State>();
-
-app.use(staticFiles())
-	.fsRoutes();
+app.use(staticFiles());
+app.fsRoutes();

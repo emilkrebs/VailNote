@@ -8,15 +8,4 @@ export default defineConfig({
 		fresh(),
 		tailwindcss(),
 	],
-	build: {
-		rollupOptions: {
-			external: (id: string) => {
-				// Externalize file:// URLs that Rollup can't resolve
-				if (id.startsWith('file:///')) {
-					return true;
-				}
-				return false;
-			},
-		},
-	},
 });

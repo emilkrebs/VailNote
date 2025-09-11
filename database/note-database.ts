@@ -28,7 +28,7 @@ export class NoteDatabase {
 	 */
 	async init(): Promise<NoteDatabase> {
 		this.logger.log(
-			TerminalColors.format(`Opening Deno KV database...`),
+			TerminalColors.format(`Opening Deno KV database with URI-Source: ${this.uri ? 'env' : 'default'}`),
 		);
 		this.kv = await Deno.openKv(this.uri);
 		this.logger.log(

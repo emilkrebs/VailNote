@@ -51,7 +51,6 @@ export const handler = {
 
 export default function NotePage({ data }: { data: NotePageProps }) {
 	const { note, message } = data;
-	// Always render the client-side component for zero-knowledge architecture
 	return (
 		<>
 			<Header title='Opening Note' description={message} />

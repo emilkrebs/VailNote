@@ -8,8 +8,18 @@
 		"update": "deno run -A -r jsr:@fresh/update .",
 		"clean": "rm -rf ./dist && rm -rf ./_fresh && rm -rf ./node_modules && rm -f ./deno.lock && rm -f ./package-lock.json"
 	},
-	"lint": { "rules": { "tags": ["fresh", "recommended"] } },
-	"exclude": ["**/_fresh/*", "**/node_modules/**"],
+	"lint": {
+		"rules": {
+			"tags": [
+				"fresh",
+				"recommended"
+			]
+		}
+	},
+	"exclude": [
+		"**/_fresh/*",
+		"**/node_modules/**"
+	],
 	"imports": {
 		"fresh": "jsr:@fresh/core@^2.0.0",
 		"preact": "npm:preact@^10.27.1",
@@ -24,7 +34,13 @@
 		"bcrypt": "https://deno.land/x/bcrypt/mod.ts"
 	},
 	"compilerOptions": {
-		"lib": ["dom", "dom.asynciterable", "dom.iterable", "deno.ns", "deno.unstable"],
+		"lib": [
+			"dom",
+			"dom.asynciterable",
+			"dom.iterable",
+			"deno.ns",
+			"deno.unstable"
+		],
 		"jsx": "precompile",
 		"jsxImportSource": "preact",
 		"jsxPrecompileSkipElements": [
@@ -43,7 +59,9 @@
 			"noscript",
 			"template"
 		],
-		"types": ["vite/client"]
+		"types": [
+			"vite/client"
+		]
 	},
 	"fmt": {
 		"useTabs": true,
@@ -51,7 +69,12 @@
 		"indentWidth": 2,
 		"singleQuote": true,
 		"proseWrap": "always",
-		"exclude": ["**/node_modules/**", "**/.git/**", "**/.vscode/**", "**/.github/**"]
+		"exclude": [
+			"**/node_modules/**",
+			"**/.git/**",
+			"**/.vscode/**",
+			"**/.github/**"
+		]
 	},
 	"nodeModulesDir": "auto"
 }
