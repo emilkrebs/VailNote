@@ -22,7 +22,7 @@ export function FormError({ error }: FormErrorProps) {
 	);
 }
 
-export interface FormFieldProps extends JSX.HTMLAttributes<HTMLDivElement> {
+interface FormFieldProps extends JSX.HTMLAttributes<HTMLDivElement> {
 	error?: string;
 	helpText?: string;
 }
