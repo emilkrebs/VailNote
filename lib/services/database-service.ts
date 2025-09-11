@@ -2,12 +2,12 @@ import { NoteDatabase } from '../../database/note-database.ts';
 import { ArcRateLimiter } from '../rate-limiting/arc-rate-limiter.ts';
 
 // Use DATABASE_URI from environment variables in production, otherwise undefined for local development
-const isProd = import.meta.env.PROD;
+const isProd = import.meta.env ? import.meta.env.PROD : false;
 
 console.log(`Environment: ${isProd ? 'production' : 'development'}`);
 const databaseUri = isProd ? Deno.env.get('DATABASE_URI') : undefined;
 
-if(isProd && !databaseUri) {
+if (isProd && !databaseUri) {
 	throw new Error('DATABASE_URI environment variable is required in production.');
 }
 let _noteDatabase: NoteDatabase | null = null;
@@ -15,7 +15,6 @@ let _rateLimiter: ArcRateLimiter | null = null;
 
 export async function getNoteDatabase() {
 	if (!_noteDatabase) {
-
 		console.log(`Database URI Source: ${databaseUri ? 'env' : 'default'}`);
 		_noteDatabase = await new NoteDatabase(databaseUri).init();
 	}
