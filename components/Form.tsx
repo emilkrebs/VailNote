@@ -22,7 +22,7 @@ export function FormError({ error }: FormErrorProps) {
 	);
 }
 
-interface FormFieldProps extends JSX.HTMLAttributes<HTMLDivElement> {
+export interface FormFieldProps extends JSX.HTMLAttributes<HTMLDivElement> {
 	error?: string;
 	helpText?: string;
 }
@@ -45,7 +45,7 @@ export function Label({ required, ...props }: LabelProps) {
 	return (
 		<label class={`text-white text-lg font-semibold ${props.class || ''}`} {...props}>
 			{props.children}
-			{required && <span class={`text-red-400 ml-1`}>*</span>}
+			{required && <span class={`text-red-400 ml-1`} title="Required">*</span>}
 		</label>
 	);
 }
@@ -66,7 +66,7 @@ export function Input(props: InputProps) {
 	);
 }
 
-export interface TextareaProps extends JSX.TextareaHTMLAttributes {
+interface TextareaProps extends JSX.TextareaHTMLAttributes {
 	error?: string;
 	helpText?: string;
 }

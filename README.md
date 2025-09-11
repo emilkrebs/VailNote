@@ -28,7 +28,7 @@ focus on user-friendliness and security.
 
 - **Framework**: [Fresh](https://fresh.deno.dev) (Deno)
 - **Runtime**: Deno
-- **Database**: MongoDB
+- **Database**: FoundationDB (Deno KV)
 - **Encryption**: AES-GCM with PBKDF2 key derivation for content encryption, bcrypt for password storage
 - **Frontend**: Tailwind CSS & Preact
 
@@ -76,8 +76,7 @@ The system has been compromised and is marked with (!).
 
 ### Prerequisites
 
-- [Deno](https://deno.land/) v1.34 or later
-- MongoDB instance
+- [Deno](https://deno.land/) v2.3 or later
 
 ### Local Development
 
@@ -98,8 +97,7 @@ The system has been compromised and is marked with (!).
 
 ### Environment Variables
 
-- `BASE_URI` - MongoDB connection string
-- `TEST_BASE_URI` - MongoDB test database connection string
+- `DATABASE_URI` - Deno KV connection string
 
 ## License
 

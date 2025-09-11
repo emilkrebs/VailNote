@@ -15,6 +15,7 @@ import {
 	manualDeletionOptions,
 } from '../lib/validation/note.ts';
 import PasswordToggle from '../components/PasswordToggle.tsx';
+import CopyButton from '../components/CopyContent.tsx';
 
 // Constants
 const MESSAGES = {
@@ -63,11 +64,8 @@ function MessageDisplay({ data }: { data: CreateNoteData }) {
 			</div>
 
 			{data.noteId && data.noteLink && (
-				<div class='mt-4 pt-4 border-t border-green-400/20 w-72 sm:w-max'>
-					<CopyContent
-						content={data.noteLink}
-						label={data.noteLink}
-					/>
+				<div class='mt-4 pt-4 border-t border-green-400/20 w-full max-w-full'>
+					<CopyContent content={data.noteLink} label={data.noteLink} />
 				</div>
 			)}
 		</Message>
@@ -180,13 +178,13 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 						htmlFor='password'
 						title='Set a password to protect and encrypt your note'
 					>
-						Password
+						Password (Optional)
 					</Label>
 					<PasswordToggle
 						name='password'
 						id='password'
 						placeholder='Enter to set a password'
-						helpText='Optional: Add password protection for enhanced security'
+						helpText='Add password protection for enhanced security, leave blank for no password'
 					/>
 				</FormGroup>
 
@@ -206,7 +204,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 							<SelectOption
 								key={option}
 								value={option}
-								selected={option === '24h'}
+								selected={option === '24 hours'}
 							>
 								{option}
 							</SelectOption>

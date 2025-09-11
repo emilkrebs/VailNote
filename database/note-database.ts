@@ -15,10 +15,10 @@ export interface InsertNoteResult {
 
 export class NoteDatabase {
 	logger: DatabaseLogger;
-	uri: string;
+	uri?: string;
 	private kv?: Deno.Kv;
 
-	constructor(uri: string) {
+	constructor(uri?: string) {
 		this.uri = uri;
 		this.logger = new DatabaseLogger();
 	}
@@ -28,7 +28,7 @@ export class NoteDatabase {
 	 */
 	async init(): Promise<NoteDatabase> {
 		this.logger.log(
-			TerminalColors.format(`Opening Deno KV database with URI-Source: ${this.uri ? 'env' : 'default'}`),
+			TerminalColors.format('Opening Deno KV database...'),
 		);
 		this.kv = await Deno.openKv(this.uri);
 		this.logger.log(
