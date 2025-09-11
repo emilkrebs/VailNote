@@ -1,16 +1,17 @@
-import { FreshContext } from '$fresh/server.ts';
 import { Note } from '../../../types/types.ts';
-import { compareHash } from '../../../lib/hashing.ts';
 import { mergeWithRateLimitHeaders } from '../../../lib/rate-limiting/rate-limit-headers.ts';
-import { State } from '../../_middleware.ts';
+import { Context } from 'fresh';
+import { getNoteDatabase, getRateLimiter } from '../../../lib/services/database-service.ts';
+import * as bcrypt from 'bcrypt';
+import { State } from '../../../main.ts';
 
-export const handler = async (req: Request, ctx: FreshContext<State>): Promise<Response> => {
-	if (req.method !== 'POST' && req.method !== 'DELETE') {
+export const handler = async (ctx: Context<State>): Promise<Response> => {
+	if (ctx.req.method !== 'POST' && ctx.req.method !== 'DELETE') {
 		return new Response('Method not allowed', { status: 405 });
 	}
 
-	const rateLimitResult = await ctx.state.context.getRateLimiter().checkRateLimit(req);
-	const noteDatabase = ctx.state.context.getNoteDatabase();
+	const rateLimitResult = await getRateLimiter().checkRateLimit(ctx.req);
+	const db = await getNoteDatabase();
 
 	// check if rate limit is exceeded
 	if (!rateLimitResult.allowed) {
@@ -36,9 +37,9 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 		return new Response('Note ID is required', { status: 400 });
 	}
 
-	if (req.method === 'POST') {
-		const note = await noteDatabase.getNoteById(id);
-		const { passwordHash } = await req.json();
+	if (ctx.req.method === 'POST') {
+		const note = await db.getNoteById(id);
+		const { passwordHash } = await ctx.req.json();
 
 		if (!note || !passwordHash) {
 			return new Response('Note not found or password hash missing', { status: 404 });
@@ -50,7 +51,7 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 
 		// If the note doesn't require manual deletion, delete it to ensure it has been destroyed
 		if (!note.manualDeletion) {
-			await noteDatabase.deleteNote(id);
+			await db.deleteNote(id);
 		}
 
 		return new Response(
@@ -69,9 +70,9 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 				status: 200,
 			},
 		);
-	} else if (req.method === 'DELETE') {
-		const note = await noteDatabase.getNoteById(id);
-		const { passwordHash } = await req.json();
+	} else if (ctx.req.method === 'DELETE') {
+		const note = await db.getNoteById(id);
+		const { passwordHash } = await ctx.req.json();
 		if (!note) {
 			return new Response('Note not found', { status: 404 });
 		}
@@ -79,7 +80,7 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 		if (note.password && !compareHash(passwordHash, note.password)) {
 			return new Response('Invalid password or auth key', { status: 403 });
 		}
-		await noteDatabase.deleteNote(id);
+		await db.deleteNote(id);
 		return new Response(
 			JSON.stringify({
 				message: 'Note deleted successfully',
@@ -96,3 +97,12 @@ export const handler = async (req: Request, ctx: FreshContext<State>): Promise<R
 		return new Response('Method not allowed', { status: 405 });
 	}
 };
+
+function compareHash(plainText: string, hash: string): boolean {
+	try {
+		return bcrypt.compareSync(plainText, hash);
+	} catch (error) {
+		console.error('Error comparing hash:', error);
+		return false;
+	}
+}

@@ -1,5 +1,4 @@
 import { useState } from 'preact/hooks';
-import { JSX } from 'preact';
 
 type CopyContentProps = {
 	content: string;
@@ -8,7 +7,7 @@ type CopyContentProps = {
 
 export default function CopyContent(
 	{ content, label }: CopyContentProps,
-): JSX.Element {
+) {
 	const [copied, setCopied] = useState(false);
 
 	const handleCopy = async () => {
@@ -22,12 +21,22 @@ export default function CopyContent(
 	};
 
 	return (
-		<span
+		<div
 			onClick={handleCopy}
-			class='cursor-pointer mt-2 flex items-center gap-3 border-2 border-blue-500 rounded-lg p-3 bg-blue-600/20 text-blue-300'
+			role='button'
+			tabIndex={0}
+			onKeyDown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					handleCopy();
+				}
+			}}
+			aria-label={label}
+			class='relative cursor-pointer border p-4 rounded bg-green-500/10 hover:bg-green-500/20 transition-colors overflow-hidden min-w-0 w-full max-w-full flex items-center'
 		>
+			{/* single-line truncation with reserved icon space */}
 			<span
-				class='min-w-0 whitespace-nowrap overflow-scroll w-full scrollbar-hidden'
+				class='flex-1 min-w-0 truncate text-sm pr-8'
 				title={label}
 			>
 				{copied ? 'Copied!' : label}
@@ -44,7 +53,7 @@ export default function CopyContent(
 						strokeWidth='1.5'
 						strokeLinecap='round'
 						strokeLinejoin='round'
-						class='text-green-300'
+						class='text-green-300 absolute top-2 right-2 pointer-events-none'
 					>
 						<path d='M5 12l5 5L20 7' />
 					</svg>
@@ -60,12 +69,12 @@ export default function CopyContent(
 						strokeWidth='1.5'
 						strokeLinecap='round'
 						strokeLinejoin='round'
-						class='text-blue-300'
+						class='text-blue-300 absolute top-2 right-2 pointer-events-none'
 					>
 						<rect x='9' y='9' width='13' height='13' rx='2' />
 						<path d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1' />
 					</svg>
 				)}
-		</span>
+		</div>
 	);
 }

@@ -24,11 +24,6 @@ jobs:
         with:
           deno-version: v2.x
 
-      - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.12.0
-        with:
-          mongodb-version: 8.0
-
       - name: Run linter
         run: deno lint
 
@@ -36,10 +31,7 @@ jobs:
         run: deno check
 
       - name: Run tests
-        run: deno test -A
-        env: 
-          TEST_BASE_URI: mongodb://localhost:27017/vailnote_test
-          BASE_URI: mongodb://localhost:27017/vailnote_test
+        run: deno task test
 
   deploy:
     name: Deploy
@@ -57,13 +49,13 @@ jobs:
 
       - name: Build step
         env: 
-          BASE_URI: ${{ secrets.BASE_URI }}
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
         run: "deno task build"
 
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
         env: 
-          BASE_URI: ${{ secrets.BASE_URI }}
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
         with:
           project: "vailnote"
           entrypoint: "main.ts"

@@ -1,27 +1,14 @@
-import { Handlers, PageProps } from '$fresh/server.ts';
+import { HttpError } from 'fresh';
 import Header from '../components/Header.tsx';
 import HomeButton from '../components/HomeButton.tsx';
 import { CSS, render } from '@deno/gfm';
 
-interface Page {
-	markdown: string;
-}
-
-// Read TERMS.md file and render it as HTML
-export const handler: Handlers<Page> = {
-	async GET(_req, ctx) {
-		const rawMarkdown = await Deno.readTextFile('./TERMS.md');
-		if (!rawMarkdown) {
-			return ctx.render(undefined);
-		}
-		return ctx.render({ markdown: rawMarkdown });
-	},
-};
-
-export default function Terms({ data }: PageProps<Page | null>) {
-	if (!data) {
-		return <h1>File not found.</h1>;
+export default async function Terms() {
+	const rawMarkdown = await Deno.readTextFile('./TERMS.md');
+	if (!rawMarkdown) {
+		throw new HttpError(404);
 	}
+
 	return (
 		<>
 			<Header title='Terms of Service' />
@@ -38,7 +25,7 @@ export default function Terms({ data }: PageProps<Page | null>) {
 						<div
 							class='markdown-body'
 							// deno-lint-ignore react-no-danger
-							dangerouslySetInnerHTML={{ __html: render(data?.markdown) }}
+							dangerouslySetInnerHTML={{ __html: render(rawMarkdown) }}
 						/>
 
 						<HomeButton />

@@ -29,7 +29,7 @@ export class AESEncryption {
 		const encryptedData = await crypto.subtle.encrypt(
 			{
 				name: 'AES-GCM',
-				iv: getAESEncryptionIV(iv),
+				iv: new Uint8Array(base64ToUint8Array(iv)).buffer,
 			},
 			this._cryptoKey!,
 			dataBytes,
@@ -45,10 +45,10 @@ export class AESEncryption {
 		const decryptedData = await crypto.subtle.decrypt(
 			{
 				name: 'AES-GCM',
-				iv: getAESEncryptionIV(iv),
+				iv: new Uint8Array(base64ToUint8Array(iv)).buffer,
 			},
 			this._cryptoKey!,
-			base64ToUint8Array(data),
+			new Uint8Array(base64ToUint8Array(data)),
 		);
 		return this._decoder.decode(new Uint8Array(decryptedData));
 	}
@@ -96,9 +96,11 @@ export function generateEncryptionIv(): Uint8Array {
 }
 
 export function getAESEncryptionKey(key: string): Promise<CryptoKey> {
+	const keyBytes = base64ToUint8Array(key);
+	const keyBuffer = new Uint8Array(keyBytes).buffer; // ensure concrete ArrayBuffer
 	return crypto.subtle.importKey(
 		'raw',
-		base64ToUint8Array(key),
+		keyBuffer,
 		'AES-GCM',
 		true,
 		['encrypt', 'decrypt'],

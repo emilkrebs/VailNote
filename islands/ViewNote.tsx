@@ -3,7 +3,6 @@ import HomeButton from '../components/HomeButton.tsx';
 import Message from '../components/Message.tsx';
 import PenIcon from '../components/PenIcon.tsx';
 import SiteHeader from '../components/SiteHeader.tsx';
-import PasswordInput from './PasswordInput.tsx';
 import { Button } from '../components/Button.tsx';
 import { formatExpirationMessage, Note } from '../types/types.ts';
 import { decryptNoteContent } from '../lib/encryption.ts';
@@ -11,9 +10,10 @@ import LoadingPage from '../components/LoadingPage.tsx';
 import NoteService from '../lib/services/note-service.ts';
 import Card, { CardContent, CardFooter, CardHeader, CardTitle } from '../components/Card.tsx';
 import { FormGroup, Label } from '../components/Form.tsx';
-import { NoteErrorPage } from '../routes/[id].tsx';
 import { ViewNoteSchema, viewNoteSchema } from '../lib/validation/note.ts';
 import * as v from '@valibot/valibot';
+import ErrorPage from '../components/ErrorPage.tsx';
+import PasswordToggle from '../components/PasswordToggle.tsx';
 
 // Constants for messages
 const MESSAGES = {
@@ -191,7 +191,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 
 	// Render logic
 	if (error) {
-		return <NoteErrorPage message={error} />;
+		return <ErrorPage message={error} />;
 	}
 
 	if (needsPassword) {
@@ -218,7 +218,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 	}
 
 	if (!note) {
-		return <NoteErrorPage message={MESSAGES.NOTE_NOT_AVAILABLE} />;
+		return <ErrorPage message={MESSAGES.NOTE_NOT_AVAILABLE} />;
 	}
 
 	return (
@@ -335,7 +335,7 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
 								<Label htmlFor='password'>
 									Enter Password
 								</Label>
-								<PasswordInput
+								<PasswordToggle
 									type='password'
 									name='password'
 									id='password'
