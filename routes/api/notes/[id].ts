@@ -1,4 +1,4 @@
-import { Note } from '../../../types/types.ts';
+import { Note } from '../../../lib/types.ts';
 import { mergeWithRateLimitHeaders } from '../../../lib/rate-limiting/rate-limit-headers.ts';
 import { Context } from 'fresh';
 import { getNoteDatabase, getRateLimiter } from '../../../lib/services/database-service.ts';

@@ -1,4 +1,4 @@
-import { Note } from '../../../types/types.ts';
+import { Note } from '../../types.ts';
 
 export interface DeleteNoteResult {
     success: boolean;

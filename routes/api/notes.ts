@@ -1,5 +1,5 @@
 import { createNoteSchema } from '../../lib/validation/note.ts';
-import { formatExpiration, Note } from '../../types/types.ts';
+import { formatExpiration, Note } from '../../lib/types.ts';
 import { mergeWithRateLimitHeaders } from '../../lib/rate-limiting/rate-limit-headers.ts';
 import * as v from '@valibot/valibot';
 import { Context } from 'fresh';

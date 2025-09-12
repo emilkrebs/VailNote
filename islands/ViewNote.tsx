@@ -4,7 +4,7 @@ import Message from '../components/Message.tsx';
 import PenIcon from '../components/PenIcon.tsx';
 import SiteHeader from '../components/SiteHeader.tsx';
 import { Button } from '../components/Button.tsx';
-import { formatExpirationMessage, Note } from '../types/types.ts';
+import { formatExpirationMessage, Note } from '../lib/types.ts';
 import { decryptNoteContent } from '../lib/encryption.ts';
 import LoadingPage from '../components/LoadingPage.tsx';
 import NoteService from '../lib/services/note-service.ts';

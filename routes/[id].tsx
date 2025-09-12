@@ -1,5 +1,5 @@
 import { Context } from 'fresh';
-import { Note } from '../types/types.ts';
+import { Note } from '../lib/types.ts';
 import Header from '../components/Header.tsx';
 import ViewEncryptedNote from '../islands/ViewNote.tsx';
 import { HttpError } from 'fresh';

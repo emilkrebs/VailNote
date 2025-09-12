@@ -1,4 +1,4 @@
-import { generateRandomId } from '../../types/types.ts';
+import { generateRandomId } from '../types.ts';
 import { encryptNoteContent } from '../encryption.ts';
 import { generateDeterministicClientHash } from '../hashing.ts';
 
