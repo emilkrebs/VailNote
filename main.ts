@@ -1,7 +1,7 @@
 import { App, staticFiles } from 'fresh';
 
 export interface State {
-	shared: string;
+    shared: string;
 }
 
 export const app = new App<State>();

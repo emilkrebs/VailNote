@@ -22,118 +22,118 @@ import { State } from '../../main.ts';
 	*/
 
 export const handler = {
-	async POST(ctx: Context<State>) {
-		const rateLimitResult = await getRateLimiter().checkRateLimit(ctx.req);
-		const db = await getNoteDatabase();
+    async POST(ctx: Context<State>) {
+        const rateLimitResult = await getRateLimiter().checkRateLimit(ctx.req);
+        const db = await getNoteDatabase();
 
-		// check if rate limit is exceeded
-		if (!rateLimitResult.allowed) {
-			const resetTime = new Date(rateLimitResult.resetTime);
-			return new Response(
-				JSON.stringify({
-					message: 'Rate limit exceeded. Please try again later.',
-					resetTime: resetTime.toISOString(),
-					retryAfter: rateLimitResult.retryAfter,
-				}),
-				{
-					headers: mergeWithRateLimitHeaders(
-						{ 'Content-Type': 'application/json' },
-						rateLimitResult,
-					),
-					status: 429,
-				},
-			);
-		}
+        // check if rate limit is exceeded
+        if (!rateLimitResult.allowed) {
+            const resetTime = new Date(rateLimitResult.resetTime);
+            return new Response(
+                JSON.stringify({
+                    message: 'Rate limit exceeded. Please try again later.',
+                    resetTime: resetTime.toISOString(),
+                    retryAfter: rateLimitResult.retryAfter,
+                }),
+                {
+                    headers: mergeWithRateLimitHeaders(
+                        { 'Content-Type': 'application/json' },
+                        rateLimitResult,
+                    ),
+                    status: 429,
+                },
+            );
+        }
 
-		try {
-			const { content, iv, password, expiresIn, manualDeletion } = await ctx.req.json();
+        try {
+            const { content, iv, password, expiresIn, manualDeletion } = await ctx.req.json();
 
-			// Validate input using valibot
-			try {
-				v.parse(createNoteSchema, { content, iv, password, expiresIn, manualDeletion });
-			} catch (err) {
-				return new Response(
-					JSON.stringify({
-						message: 'Invalid request data',
-						error: err instanceof Error ? err.message : 'Unknown error',
-					}),
-					{
-						headers: mergeWithRateLimitHeaders(
-							{ 'Content-Type': 'application/json' },
-							rateLimitResult,
-						),
-						status: 400,
-					},
-				);
-			}
+            // Validate input using valibot
+            try {
+                v.parse(createNoteSchema, { content, iv, password, expiresIn, manualDeletion });
+            } catch (err) {
+                return new Response(
+                    JSON.stringify({
+                        message: 'Invalid request data',
+                        error: err instanceof Error ? err.message : 'Unknown error',
+                    }),
+                    {
+                        headers: mergeWithRateLimitHeaders(
+                            { 'Content-Type': 'application/json' },
+                            rateLimitResult,
+                        ),
+                        status: 400,
+                    },
+                );
+            }
 
-			const noteId = await db.generateNoteId();
-			const hasPassword = password && password.trim() !== '';
+            const noteId = await db.generateNoteId();
+            const hasPassword = password && password.trim() !== '';
 
-			// if password is provided, hash it with bcrypt (password should be PBKDF2 hashed on client before sending)
-			const passwordHash = hasPassword ? generateHash(password) : undefined;
+            // if password is provided, hash it with bcrypt (password should be PBKDF2 hashed on client before sending)
+            const passwordHash = hasPassword ? generateHash(password) : undefined;
 
-			// check if content is encrypted
-			const result: Note = {
-				id: noteId,
-				content, // content should be encrypted before sending to this endpoint
-				password: passwordHash, // password is PBKDF2 non-deterministic hashed on client, then bcrypt hashed on server for secure storage
-				iv: iv,
-				expiresIn: formatExpiration(expiresIn),
-				manualDeletion: manualDeletion,
-			};
+            // check if content is encrypted
+            const result: Note = {
+                id: noteId,
+                content, // content should be encrypted before sending to this endpoint
+                password: passwordHash, // password is PBKDF2 non-deterministic hashed on client, then bcrypt hashed on server for secure storage
+                iv: iv,
+                expiresIn: formatExpiration(expiresIn),
+                manualDeletion: manualDeletion,
+            };
 
-			const insertResult = await db.insertNote(result);
+            const insertResult = await db.insertNote(result);
 
-			if (!insertResult.success) {
-				return new Response(
-					JSON.stringify({
-						message: 'Failed to save note',
-						error: insertResult.error,
-					}),
-					{
-						headers: mergeWithRateLimitHeaders(
-							{ 'Content-Type': 'application/json' },
-							rateLimitResult,
-						),
-						status: 500,
-					},
-				);
-			}
+            if (!insertResult.success) {
+                return new Response(
+                    JSON.stringify({
+                        message: 'Failed to save note',
+                        error: insertResult.error,
+                    }),
+                    {
+                        headers: mergeWithRateLimitHeaders(
+                            { 'Content-Type': 'application/json' },
+                            rateLimitResult,
+                        ),
+                        status: 500,
+                    },
+                );
+            }
 
-			return new Response(
-				JSON.stringify({
-					message: 'Note saved successfully!',
-					noteId: noteId,
-				}),
-				{
-					headers: mergeWithRateLimitHeaders(
-						{ 'Content-Type': 'application/json' },
-						rateLimitResult,
-					),
-					status: 201,
-				},
-			);
-		} catch (error) {
-			// Unexpected error handling
-			return new Response(
-				JSON.stringify({
-					message: 'Failed to process request',
-					error: error instanceof Error ? error.message : 'Unknown error',
-				}),
-				{
-					headers: mergeWithRateLimitHeaders(
-						{ 'Content-Type': 'application/json' },
-						rateLimitResult,
-					),
-					status: 500,
-				},
-			);
-		}
-	},
+            return new Response(
+                JSON.stringify({
+                    message: 'Note saved successfully!',
+                    noteId: noteId,
+                }),
+                {
+                    headers: mergeWithRateLimitHeaders(
+                        { 'Content-Type': 'application/json' },
+                        rateLimitResult,
+                    ),
+                    status: 201,
+                },
+            );
+        } catch (error) {
+            // Unexpected error handling
+            return new Response(
+                JSON.stringify({
+                    message: 'Failed to process request',
+                    error: error instanceof Error ? error.message : 'Unknown error',
+                }),
+                {
+                    headers: mergeWithRateLimitHeaders(
+                        { 'Content-Type': 'application/json' },
+                        rateLimitResult,
+                    ),
+                    status: 500,
+                },
+            );
+        }
+    },
 };
 
 function generateHash(password: string): string {
-	const salt = bcrypt.genSaltSync(12);
-	return bcrypt.hashSync(password, salt);
+    const salt = bcrypt.genSaltSync(12);
+    return bcrypt.hashSync(password, salt);
 }

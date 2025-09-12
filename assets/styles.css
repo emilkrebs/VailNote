@@ -1,125 +1,125 @@
 @import 'tailwindcss';
 
 :root {
-	--animation-time: 360s;
+    --animation-time: 360s;
 }
 
 body {
-	font-family: 'Inter', sans-serif;
-	background-color: #1e293b;
+    font-family: 'Inter', sans-serif;
+    background-color: #1e293b;
 }
 
 @utility input {
-	@apply w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-600 text-white placeholder-gray-400
-		focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors;
+    @apply w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-600 text-white placeholder-gray-400
+        focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors;
 }
 
 /* Animation Utilities */
 
 @utility animate-fade-in {
-	animation: fadeInBio 0.5s ease forwards;
+    animation: fadeInBio 0.5s ease forwards;
 }
 
 @utility animate-slide-up {
-	animation: slideUpBio 0.4s ease-out;
+    animation: slideUpBio 0.4s ease-out;
 }
 
 @utility animation-delay-sm {
-	animation-delay: 10ms;
+    animation-delay: 10ms;
 }
 
 @utility animation-delay-md {
-	animation-delay: 20ms;
+    animation-delay: 20ms;
 }
 
 @utility animation-delay-lg {
-	animation-delay: 30ms;
+    animation-delay: 30ms;
 }
 
 @utility background-animate {
-	background-size: 300%;
+    background-size: 300%;
 
-	-webkit-animation: animateBackground var(--animation-time) ease alternate infinite;
-	-moz-animation: animateBackground var(--animation-time) ease alternate infinite;
-	animation: animateBackground var(--animation-time) ease alternate infinite;
+    -webkit-animation: animateBackground var(--animation-time) ease alternate infinite;
+    -moz-animation: animateBackground var(--animation-time) ease alternate infinite;
+    animation: animateBackground var(--animation-time) ease alternate infinite;
 
-	background-image: linear-gradient(
-		45deg,
-		#2563eb 0%,
-		#10b981 46%,
-		#2563eb 62%,
-		#1e293b 100%
-	);
+    background-image: linear-gradient(
+        45deg,
+        #2563eb 0%,
+        #10b981 46%,
+        #2563eb 62%,
+        #1e293b 100%
+    );
 }
 
 @keyframes animateBackground {
-	0%, 100% {
-		background-position: 0% 50%;
-	}
+    0%, 100% {
+        background-position: 0% 50%;
+    }
 
-	50% {
-		background-position: 100% 50%;
-	}
+    50% {
+        background-position: 100% 50%;
+    }
 }
 
 @keyframes fadeInBio {
-	from {
-		opacity: 0;
-		filter: blur(10px);
-	}
-	to {
-		opacity: 1;
-		filter: blur(0);
-	}
+    from {
+        opacity: 0;
+        filter: blur(10px);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+    }
 }
 
 @keyframes slideUpBio {
-	from {
-		opacity: 0;
-		transform: translateY(30px) scale(0.95);
-		filter: blur(5px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0) scale(1);
-		filter: blur(0);
-	}
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+        filter: blur(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
 }
 
 /* Loading Spinner Animations */
 .animate-reverse {
-	animation-direction: reverse;
+    animation-direction: reverse;
 }
 
 .scrollbar-hidden::-webkit-scrollbar {
-	display: none;
+    display: none;
 }
 
 .scrollbar-hidden {
-	-ms-overflow-style: none;
-	scrollbar-width: none;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 /* Markdown Styles */
 .markdown-body {
-	font-size: 1rem;
-	line-height: 1.6;
-	color: #e2e8f0;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #e2e8f0;
 }
 
 .markdown-body a {
-	color: #60a5fa;
-	text-decoration: underline;
+    color: #60a5fa;
+    text-decoration: underline;
 }
 
 .markdown-body ul {
-	list-style-type: disc;
+    list-style-type: disc;
 }
 
 .markdown-body ol {
-	list-style-type: decimal;
+    list-style-type: decimal;
 }
 
 .markdown-body svg {
-	filter: invert(1);
+    filter: invert(1);
 }

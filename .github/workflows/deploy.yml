@@ -58,5 +58,5 @@ jobs:
           DATABASE_URI: ${{ secrets.DATABASE_URI }}
         with:
           project: "vailnote"
-          entrypoint: "main.ts"
+          entrypoint: "./_fresh/server.js"
           root: "."

@@ -4,10 +4,10 @@
  */
 
 interface RateLimitResult {
-	allowed: boolean;
-	remaining: number;
-	resetTime: number;
-	retryAfter?: number;
+    allowed: boolean;
+    remaining: number;
+    resetTime: number;
+    retryAfter?: number;
 }
 
 /**
@@ -17,23 +17,23 @@ interface RateLimitResult {
  * @returns Headers object with rate limit information
  */
 export function generateRateLimitHeaders(
-	rateLimitResult: RateLimitResult,
-	maxRequests = 10,
+    rateLimitResult: RateLimitResult,
+    maxRequests = 10,
 ): Record<string, string> {
-	const resetTime = new Date(rateLimitResult.resetTime);
+    const resetTime = new Date(rateLimitResult.resetTime);
 
-	const headers: Record<string, string> = {
-		'X-RateLimit-Limit': maxRequests.toString(),
-		'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-		'X-RateLimit-Reset': resetTime.toISOString(),
-	};
+    const headers: Record<string, string> = {
+        'X-RateLimit-Limit': maxRequests.toString(),
+        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+        'X-RateLimit-Reset': resetTime.toISOString(),
+    };
 
-	// Add Retry-After header for blocked requests
-	if (!rateLimitResult.allowed && rateLimitResult.retryAfter) {
-		headers['Retry-After'] = rateLimitResult.retryAfter.toString();
-	}
+    // Add Retry-After header for blocked requests
+    if (!rateLimitResult.allowed && rateLimitResult.retryAfter) {
+        headers['Retry-After'] = rateLimitResult.retryAfter.toString();
+    }
 
-	return headers;
+    return headers;
 }
 
 /**
@@ -43,18 +43,18 @@ export function generateRateLimitHeaders(
  * @returns Headers object for 429 responses
  */
 export function generateRateLimitBlockedHeaders(
-	rateLimitResult: RateLimitResult,
-	maxRequests = 10,
+    rateLimitResult: RateLimitResult,
+    maxRequests = 10,
 ): Record<string, string> {
-	const resetTime = new Date(rateLimitResult.resetTime);
+    const resetTime = new Date(rateLimitResult.resetTime);
 
-	return {
-		'X-RateLimit-Limit': maxRequests.toString(),
-		'X-RateLimit-Remaining': '0',
-		'X-RateLimit-Reset': resetTime.toISOString(),
-		'Retry-After': rateLimitResult.retryAfter?.toString() ||
-			Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000).toString(),
-	};
+    return {
+        'X-RateLimit-Limit': maxRequests.toString(),
+        'X-RateLimit-Remaining': '0',
+        'X-RateLimit-Reset': resetTime.toISOString(),
+        'Retry-After': rateLimitResult.retryAfter?.toString() ||
+            Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000).toString(),
+    };
 }
 
 /**
@@ -65,10 +65,10 @@ export function generateRateLimitBlockedHeaders(
  * @returns Merged headers object
  */
 export function mergeWithRateLimitHeaders(
-	existingHeaders: Record<string, string>,
-	rateLimitResult: RateLimitResult,
-	maxRequests = 10,
+    existingHeaders: Record<string, string>,
+    rateLimitResult: RateLimitResult,
+    maxRequests = 10,
 ): Record<string, string> {
-	const rateLimitHeaders = generateRateLimitHeaders(rateLimitResult, maxRequests);
-	return { ...existingHeaders, ...rateLimitHeaders };
+    const rateLimitHeaders = generateRateLimitHeaders(rateLimitResult, maxRequests);
+    return { ...existingHeaders, ...rateLimitHeaders };
 }
