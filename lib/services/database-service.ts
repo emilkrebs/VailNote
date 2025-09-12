@@ -1,4 +1,4 @@
-import { NoteDatabase } from '../../database/note-database.ts';
+import { NoteDatabase } from '../database/note-database.ts';
 import { ArcRateLimiter } from '../rate-limiting/arc-rate-limiter.ts';
 
 const databasePath = Deno.env.get('DATABASE_PATH');

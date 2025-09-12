@@ -1,7 +1,7 @@
-import { TerminalColors } from '../lib/logging.ts';
-import { Note } from '../types/types.ts';
+import { Note } from '../../types/types.ts';
+import { TerminalColors } from '../logging.ts';
+import { NOTE_CONTENT_MAX_LENGTH, NOTE_PASSWORD_MAX_LENGTH } from '../validation/note.ts';
 import { DatabaseLogger } from './database-logger.ts';
-import { NOTE_CONTENT_MAX_LENGTH, NOTE_PASSWORD_MAX_LENGTH } from '../lib/validation/note.ts';
 
 export interface ValidateNoteResult {
     success: boolean;
