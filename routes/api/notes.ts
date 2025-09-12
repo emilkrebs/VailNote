@@ -46,11 +46,11 @@ export const handler = {
         }
 
         try {
-            const { content, iv, password, expiresIn, manualDeletion } = await ctx.req.json();
+            const { content, iv, password, authKey, expiresIn, manualDeletion } = await ctx.req.json();
 
             // Validate input using valibot
             try {
-                v.parse(createNoteSchema, { content, iv, password, expiresIn, manualDeletion });
+                v.parse(createNoteSchema, { content, iv, password, authKey, expiresIn, manualDeletion });
             } catch (err) {
                 return new Response(
                     JSON.stringify({
@@ -69,15 +69,18 @@ export const handler = {
 
             const noteId = await db.generateNoteId();
             const hasPassword = password && password.trim() !== '';
+            const hasAuthKey = authKey && authKey.trim() !== '';
 
-            // if password is provided, hash it with bcrypt (password should be PBKDF2 hashed on client before sending)
+            // Hash password and auth key with bcrypt for server storage
             const passwordHash = hasPassword ? generateHash(password) : undefined;
+            const authKeyHash = hasAuthKey ? generateHash(authKey) : undefined;
 
             // check if content is encrypted
             const result: Note = {
                 id: noteId,
                 content, // content should be encrypted before sending to this endpoint
-                password: passwordHash, // password is PBKDF2 non-deterministic hashed on client, then bcrypt hashed on server for secure storage
+                password: passwordHash, // password is PBKDF2 deterministic hashed on client, then bcrypt hashed on server for secure storage
+                authKey: authKeyHash, // auth key is PBKDF2 deterministic hashed on client, then bcrypt hashed on server for secure storage
                 iv: iv,
                 expiresIn: formatExpiration(expiresIn),
                 manualDeletion: manualDeletion,

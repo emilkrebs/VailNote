@@ -7,6 +7,7 @@ export interface Note {
 
     // Optional fields for additional functionality
     password?: string; // password hash for private notes
+    authKey?: string; // auth key hash for URL-based access
     manualDeletion?: boolean; // Flag for manual deletion
 }
 

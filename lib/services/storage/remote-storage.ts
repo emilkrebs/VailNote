@@ -12,6 +12,7 @@ export interface ApiNoteRequest {
     content: string;
     iv: string;
     password?: string;
+    authKey?: string;
     expiresIn?: string;
     manualDeletion?: boolean;
 }
@@ -29,7 +30,7 @@ export default class RemoteStorage implements StorageProvider {
         }
 
         try {
-            const { encryptedContent, passwordHash, authKey } = await prepareEncryption(content, password);
+            const { encryptedContent, passwordHash, authKey, authKeyHash } = await prepareEncryption(content, password);
 
             const response = await fetch('/api/notes', {
                 method: 'POST',
@@ -37,6 +38,7 @@ export default class RemoteStorage implements StorageProvider {
                 body: JSON.stringify({
                     content: encryptedContent.encrypted,
                     password: passwordHash,
+                    authKey: authKeyHash,
                     expiresIn,
                     manualDeletion,
                     iv: encryptedContent.iv,
@@ -48,7 +50,8 @@ export default class RemoteStorage implements StorageProvider {
             }
 
             const { noteId, ...res } = await response.json();
-            const link = password ? noteId : `${noteId}#auth=${authKey}`;
+            // Always include auth key in URL for enhanced security
+            const link = `${noteId}#auth=${authKey}`;
 
             return { success: true, noteId, authKey, message: res.message, link };
         } catch (_err) {
@@ -56,14 +59,15 @@ export default class RemoteStorage implements StorageProvider {
         }
     }
 
-    async get(noteId: string, password?: string): Promise<GetEncryptedNoteResult> {
+    async get(noteId: string, authKey?: string, password?: string): Promise<GetEncryptedNoteResult> {
         try {
             const passwordHash = password ? await generateDeterministicClientHash(password) : undefined;
+            const authKeyHash = authKey ? await generateDeterministicClientHash(authKey) : undefined;
 
             const response = await fetch(`/api/notes/${noteId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ passwordHash }),
+                body: JSON.stringify({ passwordHash, authKeyHash }),
             });
 
             if (!response.ok) {
@@ -77,13 +81,15 @@ export default class RemoteStorage implements StorageProvider {
         }
     }
 
-    async delete(noteId: string, password: string): Promise<DeleteNoteResult> {
+    async delete(noteId: string, authKey?: string, password?: string): Promise<DeleteNoteResult> {
         try {
-            const passwordHash = await generateDeterministicClientHash(password);
+            const passwordHash = password ? await generateDeterministicClientHash(password) : undefined;
+            const authKeyHash = authKey ? await generateDeterministicClientHash(authKey) : undefined;
+            
             const response = await fetch(`/api/notes/${noteId}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ passwordHash }),
+                body: JSON.stringify({ passwordHash, authKeyHash }),
             });
 
             return response.ok ? { success: true } : { success: false, message: await response.text() };

@@ -6,6 +6,7 @@ import SiteHeader from '../components/SiteHeader.tsx';
 import { Button } from '../components/Button.tsx';
 import { formatExpirationMessage, Note } from '../lib/types.ts';
 import { decryptNoteContent } from '../lib/encryption.ts';
+import { createDecryptionKey } from '../lib/services/crypto-service.ts';
 import LoadingPage from '../components/LoadingPage.tsx';
 import NoteService from '../lib/services/note-service.ts';
 import Card, { CardContent, CardFooter, CardHeader, CardTitle } from '../components/Card.tsx';
@@ -77,15 +78,19 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
         setLoading(false);
     };
 
-    const handleAuthKey = async (authKey: string) => {
+    const handleAuthKey = async (authKey: string, providedPassword?: string) => {
         try {
-            const result = await NoteService.getNote(noteId, authKey);
+            const result = await NoteService.getNote(noteId, authKey, providedPassword);
             if (!result.success || !result.note) {
                 throw new Error(result.message);
             }
 
-            password.current = manualDeletion ? authKey : undefined;
-            const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, authKey);
+            // Create the decryption key using the same logic as encryption
+            const decryptionKey = createDecryptionKey(authKey, providedPassword);
+            
+            // Store credentials for manual deletion
+            password.current = providedPassword;
+            const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, decryptionKey);
 
             setNote({ ...result.note, content: decryptedContent });
             setMessage(
@@ -93,7 +98,13 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
             );
         } catch (err) {
             console.error(MESSAGES.DECRYPTION_FAILED, err);
-            setError(MESSAGES.DECRYPTION_FAILED);
+            // If auth key alone fails and no password was provided, ask for password
+            if (!providedPassword) {
+                setError(undefined);
+                showPasswordPrompt();
+            } else {
+                setError(MESSAGES.DECRYPTION_FAILED);
+            }
         }
     };
 
@@ -141,9 +152,9 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
         const data = Object.fromEntries(new FormData(form));
         const formData = v.parse(viewNoteSchema, data) as ViewNoteSchema;
 
-        const password = formData.password;
+        const userPassword = formData.password;
 
-        if (!password.trim()) {
+        if (!userPassword.trim()) {
             setDecryptionError(MESSAGES.ENTER_PASSWORD);
             setLoading(false);
             return;
@@ -151,20 +162,32 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 
         try {
             setDecryptionError(undefined);
-            const result = await NoteService.getNote(noteId, password);
+            
+            // Get auth key from URL if available
+            const authKey = getAuthKey();
+            
+            if (authKey) {
+                // Use both auth key and password
+                await handleAuthKey(authKey, userPassword);
+                setNeedsPassword(false);
+                setConfirmed(true);
+            } else {
+                // Fallback for legacy notes without auth key (shouldn't happen with new system)
+                const result = await NoteService.getNote(noteId, undefined, userPassword);
 
-            if (!result.success || !result.note) {
-                setDecryptionError(MESSAGES.INVALID_PASSWORD);
-                setLoading(false);
-                return;
+                if (!result.success || !result.note) {
+                    setDecryptionError(MESSAGES.INVALID_PASSWORD);
+                    setLoading(false);
+                    return;
+                }
+
+                const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, userPassword);
+
+                setNote({ ...result.note, content: decryptedContent });
+                setNeedsPassword(false);
+                setConfirmed(true);
+                setMessage(manualDeletion ? MESSAGES.MANUAL_DELETION_PROMPT : MESSAGES.AUTO_DELETION_COMPLETE);
             }
-
-            const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, password);
-
-            setNote({ ...result.note, content: decryptedContent });
-            setNeedsPassword(false);
-            setConfirmed(true);
-            setMessage(manualDeletion ? MESSAGES.MANUAL_DELETION_PROMPT : MESSAGES.AUTO_DELETION_COMPLETE);
         } catch (error) {
             setDecryptionError(MESSAGES.INVALID_PASSWORD);
             console.error('Decryption failed:', error);
@@ -174,13 +197,22 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
     };
 
     const handleDeleteNote = async () => {
-        if (!password.current) {
+        const authKey = getAuthKey();
+        
+        if (!authKey && !password.current) {
             setMessage(MESSAGES.NO_PASSWORD);
             return;
         }
 
         try {
-            await NoteService.deleteNote(noteId, password.current);
+            // For manual deletion, we need to provide both auth key and password if both were used
+            if (authKey) {
+                await NoteService.deleteNote(noteId, authKey, password.current);
+            } else {
+                // Fallback for legacy notes
+                await NoteService.deleteNote(noteId, undefined, password.current);
+            }
+            
             setMessage(MESSAGES.DELETE_SUCCESS);
             globalThis.location.href = '/';
         } catch (error) {
@@ -316,7 +348,7 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
                             Enter Password
                         </div>
                         <p class='text-yellow-300 text-sm font-medium'>
-                            This note is encrypted and requires a password
+                            This note is password protected and requires both the URL auth key and password
                         </p>
                     </CardHeader>
 
