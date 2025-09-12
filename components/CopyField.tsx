@@ -20,7 +20,7 @@ export default function CopyField({ label, value, title }: CopyFieldProps) {
     };
 
     return (
-        <div class='bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 overflow-hidden'>
+        <div class='bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 overflow-hidden min-h-12'>
             <div class='flex items-start gap-3 min-w-0'>
                 <div class='flex-1 min-w-0'>
                     <p class='text-xs font-medium text-green-300 mb-1'>{label}</p>

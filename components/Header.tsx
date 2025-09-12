@@ -7,6 +7,21 @@ interface HeadProps {
     canonicalUrl?: string;
 }
 
+// read the font files from static/fonts and return preload links
+function FontPreloadLinks() {
+    const files = [
+        '../fonts/inter-v19-latin_latin-ext-500.woff2',
+        '../fonts/inter-v19-latin_latin-ext-600.woff2',
+        '../fonts/inter-v19-latin_latin-ext-700.woff2',
+        '../fonts/inter-v19-latin_latin-ext-italic.woff2',
+        '../fonts/inter-v19-latin_latin-ext-regular.woff2',
+    ];
+
+    return files.map((file) => (
+        <link key={file} rel='preload' href={file} as='font' type='font/woff2' crossOrigin='anonymous' />
+    ));
+}
+
 function OpenGraphMeta({ title, description, canonicalUrl }: HeadProps) {
     const ogTitle = title || 'VailNote';
     const ogDescription = description || defaultDescription;
@@ -92,6 +107,8 @@ export default function Header({ title, description, canonicalUrl }: HeadProps) 
             <link rel='icon' href='/favicon.ico' />
             <link rel='icon' type='image/png' sizes='32x32' href='/favicon-32x32.png' />
             <link rel='icon' type='image/png' sizes='16x16' href='/favicon-16x16.png' />
+
+            <FontPreloadLinks />
 
             {/* Apple Touch Icons */}
             <link rel='apple-touch-icon' href='/apple-touch-icon.png' />

@@ -1,6 +1,5 @@
 import { useState } from 'preact/hooks';
 import { JSX } from 'preact';
-import { asset } from 'fresh/runtime';
 import { FormField } from './Form.tsx';
 
 interface PasswordToggleProps extends JSX.InputHTMLAttributes {
@@ -28,7 +27,7 @@ export default function PasswordToggle(
                 >
                     <span title={isHidden ? 'Show' : 'Hide'}>
                         <img
-                            src={isHidden ? asset('/icons/visibility.svg') : asset('/icons/visibility_off.svg')}
+                            src={isHidden ? '/icons/visibility.svg' : '/icons/visibility_off.svg'}
                             alt={isHidden ? 'Show' : 'Hide'}
                             class='fill-white'
                         />
