@@ -1,3 +1,5 @@
+import { ORIGIN } from '../main.ts';
+
 const defaultDescription =
     'VailNote - Open-source, encrypted note sharing with end-to-end encryption, self-destructing notes, and privacy-preserving rate limiting. Share secure notes that automatically delete after viewing.';
 
@@ -11,7 +13,7 @@ function OpenGraphMeta({ title, description, canonicalUrl }: HeadProps) {
     const ogTitle = title || 'VailNote';
     const ogDescription = description || defaultDescription;
     const ogImage = '/logo.png';
-    const ogUrl = canonicalUrl || 'https://vailnote.com';
+    const ogUrl = canonicalUrl || ORIGIN;
 
     return (
         <>
@@ -82,7 +84,7 @@ function OpenGraphMeta({ title, description, canonicalUrl }: HeadProps) {
 
 export default function Header({ title, description, canonicalUrl }: HeadProps) {
     const pageTitle = title ? `VailNote - ${title}` : 'VailNote - Secure Encrypted Note Sharing';
-    const finalCanonicalUrl = canonicalUrl || 'https://vailnote.com';
+    const finalCanonicalUrl = canonicalUrl || ORIGIN;
 
     return (
         <head>

@@ -1,6 +1,7 @@
 import Header from '../components/Header.tsx';
 import SiteHeader from '../components/SiteHeader.tsx';
 import CreateNote from '../islands/CreateNoteForm.tsx';
+import { ORIGIN } from '../main.ts';
 
 export default function Home() {
     return (
@@ -8,7 +9,7 @@ export default function Home() {
             <Header
                 title='Secure Encrypted Note Sharing'
                 description='Share encrypted notes securely with VailNote. Open-source note sharing with end-to-end encryption, automatic deletion, and privacy-preserving features. No tracking, maximum security.'
-                canonicalUrl='https://vailnote.com'
+                canonicalUrl={ORIGIN}
             />
             <main class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-8 md:py-16'>
                 <SiteHeader />
