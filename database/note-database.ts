@@ -15,11 +15,11 @@ export interface InsertNoteResult {
 
 export class NoteDatabase {
     logger: DatabaseLogger;
-    uri?: string;
+    path?: string;
     private kv?: Deno.Kv;
 
-    constructor(uri?: string) {
-        this.uri = uri;
+    constructor(path?: string) {
+        this.path = path;
         this.logger = new DatabaseLogger();
     }
 
@@ -30,7 +30,7 @@ export class NoteDatabase {
         this.logger.log(
             TerminalColors.format('Opening Deno KV database...'),
         );
-        this.kv = await Deno.openKv(this.uri);
+        this.kv = await Deno.openKv(this.path || undefined);
         this.logger.log(
             TerminalColors.format(`Successfully opened Deno KV database.`),
         );

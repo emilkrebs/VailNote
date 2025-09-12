@@ -156,7 +156,6 @@ export default function CreateNote({ message }: { message?: string }) {
 
 function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
     const handleSubmit = async (event: Event) => {
-        console.log('Submitting create note form');
         event.preventDefault();
 
         const form = event.target as HTMLFormElement;
