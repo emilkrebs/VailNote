@@ -22,15 +22,13 @@ export const NOTE_PASSWORD_MAX_LENGTH = 256; // 256 characters
 export const createNoteSchema = v.object({
     content: v.pipe(
         v.string(),
-        v.minLength(1, 'Note content is required'),
+        v.nonEmpty('Note content is required'),
         v.maxLength(NOTE_CONTENT_MAX_LENGTH, 'Note content is too long (max 1MB)'),
-        v.trim(),
     ),
     password: v.optional(
         v.pipe(
             v.string(),
             v.maxLength(NOTE_PASSWORD_MAX_LENGTH, 'Password is too long (max 256 characters)'),
-            v.trim(),
         ),
     ), // Optional password with max length
     expiresIn: v.enum(EXPIRY_OPTIONS, 'Invalid expiration time. Please select a valid option.'),
@@ -41,7 +39,11 @@ export const createNoteSchema = v.object({
 });
 
 export const viewNoteSchema = v.object({
-    password: v.string(),
+    password: v.pipe(
+        v.string(),
+        v.nonEmpty('Password is required'),
+        v.maxLength(NOTE_PASSWORD_MAX_LENGTH, 'Password is too long (max 256 characters)'),
+    ),
 });
 
 export type CreateNoteSchema = v.InferOutput<typeof createNoteSchema>;
