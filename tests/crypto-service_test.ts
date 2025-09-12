@@ -1,5 +1,5 @@
 import { assertEquals, assertExists } from '$std/assert/mod.ts';
-import { prepareEncryption, createDecryptionKey } from '../lib/services/crypto-service.ts';
+import { createDecryptionKey, prepareEncryption } from '../lib/services/crypto-service.ts';
 import { decryptNoteContent } from '../lib/encryption.ts';
 
 Deno.test({
@@ -13,7 +13,11 @@ Deno.test({
             const resultNoPassword = await prepareEncryption(testContent);
             assertExists(resultNoPassword.authKey, 'Auth key should be generated even without password');
             assertExists(resultNoPassword.authKeyHash, 'Auth key hash should be generated');
-            assertEquals(resultNoPassword.passwordHash, undefined, 'Password hash should be undefined when no password');
+            assertEquals(
+                resultNoPassword.passwordHash,
+                undefined,
+                'Password hash should be undefined when no password',
+            );
 
             // Test with password
             const resultWithPassword = await prepareEncryption(testContent, testPassword);
@@ -24,14 +28,18 @@ Deno.test({
 
         await t.step('should create correct decryption key', () => {
             const authKey = 'testAuthKey123';
-            
+
             // Without password
             const keyNoPassword = createDecryptionKey(authKey);
             assertEquals(keyNoPassword, authKey, 'Decryption key should be just auth key when no password');
 
             // With password
             const keyWithPassword = createDecryptionKey(authKey, testPassword);
-            assertEquals(keyWithPassword, `${authKey}:${testPassword}`, 'Decryption key should combine auth key and password');
+            assertEquals(
+                keyWithPassword,
+                `${authKey}:${testPassword}`,
+                'Decryption key should combine auth key and password',
+            );
         });
 
         await t.step('should encrypt and decrypt correctly with combined key', async () => {
@@ -43,7 +51,7 @@ Deno.test({
             const decryptedContent = await decryptNoteContent(
                 encryptedContent.encrypted,
                 encryptedContent.iv,
-                decryptionKey
+                decryptionKey,
             );
 
             assertEquals(decryptedContent, testContent, 'Decrypted content should match original');
@@ -58,7 +66,7 @@ Deno.test({
             const decryptedContent = await decryptNoteContent(
                 encryptedContent.encrypted,
                 encryptedContent.iv,
-                decryptionKey
+                decryptionKey,
             );
 
             assertEquals(decryptedContent, testContent, 'Decrypted content should match original');

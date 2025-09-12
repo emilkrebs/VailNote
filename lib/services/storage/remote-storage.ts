@@ -85,7 +85,7 @@ export default class RemoteStorage implements StorageProvider {
         try {
             const passwordHash = password ? await generateDeterministicClientHash(password) : undefined;
             const authKeyHash = authKey ? await generateDeterministicClientHash(authKey) : undefined;
-            
+
             const response = await fetch(`/api/notes/${noteId}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },

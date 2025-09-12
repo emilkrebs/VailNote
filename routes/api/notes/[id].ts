@@ -47,7 +47,7 @@ export const handler = async (ctx: Context<State>): Promise<Response> => {
 
         // Check authentication - need either password+authKey combo or just authKey (for legacy notes)
         let isAuthenticated = false;
-        
+
         if (note.password && note.authKey) {
             // Note requires both password and auth key
             if (passwordHash && authKeyHash) {
@@ -99,7 +99,7 @@ export const handler = async (ctx: Context<State>): Promise<Response> => {
 
         // Check authentication for deletion - same logic as retrieval
         let isAuthenticated = false;
-        
+
         if (note.password && note.authKey) {
             // Note requires both password and auth key
             if (passwordHash && authKeyHash) {

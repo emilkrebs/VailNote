@@ -13,9 +13,9 @@ import { generateDeterministicClientHash } from '../hashing.ts';
 export async function prepareEncryption(content: string, password?: string) {
     // Always generate an auth key for URL-based access
     const authKey = generateRandomId(8);
-    
+
     const hasPassword = password && password.trim() !== '';
-    
+
     // Create encryption key: combine auth key and password if both present
     let encryptionKey: string;
     if (hasPassword) {

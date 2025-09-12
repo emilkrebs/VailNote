@@ -87,7 +87,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 
             // Create the decryption key using the same logic as encryption
             const decryptionKey = createDecryptionKey(authKey, providedPassword);
-            
+
             // Store credentials for manual deletion
             password.current = providedPassword;
             const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, decryptionKey);
@@ -162,10 +162,10 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 
         try {
             setDecryptionError(undefined);
-            
+
             // Get auth key from URL if available
             const authKey = getAuthKey();
-            
+
             if (authKey) {
                 // Use both auth key and password
                 await handleAuthKey(authKey, userPassword);
@@ -198,7 +198,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 
     const handleDeleteNote = async () => {
         const authKey = getAuthKey();
-        
+
         if (!authKey && !password.current) {
             setMessage(MESSAGES.NO_PASSWORD);
             return;
@@ -212,7 +212,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
                 // Fallback for legacy notes
                 await NoteService.deleteNote(noteId, undefined, password.current);
             }
-            
+
             setMessage(MESSAGES.DELETE_SUCCESS);
             globalThis.location.href = '/';
         } catch (error) {
