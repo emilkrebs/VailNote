@@ -1,4 +1,4 @@
-import { generateRandomId } from '../../types/types.ts';
+import { generateRandomId } from '../types.ts';
 import { encryptNoteContent } from '../encryption.ts';
 import { generateDeterministicClientHash } from '../hashing.ts';
 
@@ -9,17 +9,17 @@ import { generateDeterministicClientHash } from '../hashing.ts';
  * @returns An object containing the encrypted content, password hash, and auth key.
  */
 export async function prepareEncryption(content: string, password?: string) {
-	const hasPassword = password && password.trim() !== '';
-	const authKey = !hasPassword ? generateRandomId(8) : undefined;
-	const encryptionKey = password || authKey;
+    const hasPassword = password && password.trim() !== '';
+    const authKey = !hasPassword ? generateRandomId(8) : undefined;
+    const encryptionKey = password || authKey;
 
-	if (!encryptionKey) {
-		throw new Error('No password or auth token provided');
-	}
+    if (!encryptionKey) {
+        throw new Error('No password or auth token provided');
+    }
 
-	const passwordHash = hasPassword ? await generateDeterministicClientHash(password) : undefined;
+    const passwordHash = hasPassword ? await generateDeterministicClientHash(password) : undefined;
 
-	const encryptedContent = await encryptNoteContent(content, encryptionKey);
+    const encryptedContent = await encryptNoteContent(content, encryptionKey);
 
-	return { encryptedContent, passwordHash, authKey };
+    return { encryptedContent, passwordHash, authKey };
 }
