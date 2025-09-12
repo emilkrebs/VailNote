@@ -1,4 +1,3 @@
-import { asset } from 'fresh/runtime';
 export default function Footer() {
     const links = [
         {
@@ -40,7 +39,7 @@ export default function Footer() {
                             rel='noopener noreferrer'
                         >
                             <img
-                                src={asset('/icons/github_logo.svg')}
+                                src='/icons/github_logo.svg'
                                 class='w-6 h-6 object-contain'
                                 alt='GitHub'
                             />

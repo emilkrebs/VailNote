@@ -59,7 +59,7 @@ function OpenGraphMeta({ title, description, canonicalUrl }: HeadProps) {
             <meta name='twitter:site' content='@emilkrebs' />
 
             {/* Apple Meta Tags */}
-            <meta name='apple-mobile-web-app-capable' content='yes' />
+            <meta name='mobile-web-app-capable' content='yes' />
             <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent' />
             <meta name='apple-mobile-web-app-title' content='VailNote' />
 
@@ -88,20 +88,6 @@ export default function Header({ title, description, canonicalUrl }: HeadProps) 
         <head>
             <meta charset='utf-8' />
             <title>{pageTitle}</title>
-
-            {/* Preload Google Fonts for better performance */}
-            <link rel='preconnect' href='https://fonts.googleapis.com' />
-            <link rel='preconnect' href='https://fonts.gstatic.com' />
-
-            <link
-                rel='preload'
-                href='https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap'
-                as='style'
-            />
-            <link
-                href='https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap'
-                rel='stylesheet'
-            />
 
             <link rel='icon' href='/favicon.ico' />
             <link rel='icon' type='image/png' sizes='32x32' href='/favicon-32x32.png' />

@@ -117,8 +117,11 @@ export default function CreateNote({ message }: { message?: string }) {
 }
 
 function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
     const handleSubmit = async (event: Event) => {
         event.preventDefault();
+        setErrors({});
 
         const form = event.target as HTMLFormElement;
         try {
@@ -149,6 +152,18 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
                 globalThis.scrollTo({ top: 64, behavior: 'smooth' });
             });
         } catch (error) {
+            if (error instanceof v.ValiError) {
+                const errors: Record<string, string> = {};
+                for (const issue of error.issues) {
+                    if (issue.path && issue.path.length > 0) {
+                        const fieldName = issue.path[0].key as string;
+                        errors[fieldName] = issue.message;
+                    }
+                }
+                setErrors(errors);
+                return;
+            }
+
             const errorMessage = error instanceof Error ? error.message : MESSAGES.UNEXPECTED_ERROR;
             onError(errorMessage);
         }
@@ -171,6 +186,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
                         placeholder='Type your note here...'
                         name='content'
                         id='content'
+                        error={errors.content}
                         required
                     >
                     </Textarea>
@@ -189,6 +205,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
                         id='password'
                         placeholder='Enter to set a password'
                         helpText='Add password protection for enhanced security, leave blank for no password'
+                        error={errors.password}
                     />
                 </FormGroup>
 
@@ -203,6 +220,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
                         id='expiresIn'
                         defaultValue='24h'
                         helpText='Note will automatically self-destruct after this time period'
+                        error={errors.expiresIn}
                     >
                         {expirationOptions.map((option) => (
                             <SelectOption
@@ -225,7 +243,8 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
                         name='manualDeletion'
                         id='manualDeletion'
                         defaultValue='disabled'
-                        helpText={`Let anybody with access to the note delete it manually at any time. This will turn off self-destruction after viewing - use with caution.`}
+                        helpText='Let anybody with access to the note delete it manually at any time. This will turn off self-destruction after viewing - use with caution.'
+                        error={errors.manualDeletion}
                     >
                         {manualDeletionOptions.map((option) => (
                             <SelectOption
