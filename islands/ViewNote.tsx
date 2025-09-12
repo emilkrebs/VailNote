@@ -319,11 +319,7 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
                             This note is encrypted and requires a password
                         </p>
 
-                        {error && (
-                            <div class='mb-6 p-4 rounded-lg border bg-red-600/20 border-red-400 text-red-200'>
-                                <span class='font-medium'>{error}</span>
-                            </div>
-                        )}
+
                     </CardHeader>
 
                     <CardContent>
@@ -342,6 +338,7 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
                                     name='password'
                                     id='password'
                                     placeholder='Enter password to decrypt note'
+                                    error={error}
                                     required
                                 />
                             </FormGroup>
