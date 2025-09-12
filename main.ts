@@ -44,7 +44,7 @@ function headers<State>(): Middleware<State> {
         // Enhanced CSP to allow Google Fonts move to build-in CSP in the future
         const csp = [
             "default-src 'self'",
-            "script-src 'self'", // unsafe-inline needed for fresh
+            "script-src 'self' 'unsafe-inline'", // unsafe-inline needed for fresh
             "style-src 'self' 'unsafe-inline'",
             "font-src 'self'",
             "img-src 'self' data:",
