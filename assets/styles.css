@@ -4,9 +4,23 @@
     --animation-time: 360s;
 }
 
+/* Font loading optimization */
+@font-face {
+    font-family: 'Inter-fallback';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: local('Arial');
+    ascent-override: 90.20%;
+    descent-override: 22.48%;
+    line-gap-override: 0.00%;
+    size-adjust: 107.40%;
+}
+
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', 'Inter-fallback', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Helvetica Neue', sans-serif;
     background-color: #1e293b;
+    font-display: swap;
 }
 
 @utility input {

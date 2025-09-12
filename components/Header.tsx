@@ -89,19 +89,31 @@ export default function Header({ title, description, canonicalUrl }: HeadProps) 
             <meta charset='utf-8' />
             <title>{pageTitle}</title>
 
-            {/* Preload Google Fonts for better performance */}
-            <link rel='preconnect' href='https://fonts.googleapis.com' />
-            <link rel='preconnect' href='https://fonts.gstatic.com' />
+            {/* Optimized Google Fonts loading for better performance */}
+            <link rel='preconnect' href='https://fonts.googleapis.com' crossorigin />
+            <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin />
 
-            <link
-                rel='preload'
-                href='https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap'
-                as='style'
+            {/* Inline critical font loading script */}
+            <script
+                dangerouslySetInnerHTML={{
+                    __html: `
+                        (function() {
+                            var link = document.createElement('link');
+                            link.href = 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap';
+                            link.rel = 'stylesheet';
+                            link.media = 'print';
+                            link.onload = function() { this.media = 'all'; };
+                            document.head.appendChild(link);
+                        })();
+                    `,
+                }}
             />
-            <link
-                href='https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap'
-                rel='stylesheet'
-            />
+            <noscript>
+                <link
+                    href='https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap'
+                    rel='stylesheet'
+                />
+            </noscript>
 
             <link rel='icon' href='/favicon.ico' />
             <link rel='icon' type='image/png' sizes='32x32' href='/favicon-32x32.png' />
