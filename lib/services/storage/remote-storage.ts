@@ -50,7 +50,9 @@ export default class RemoteStorage implements StorageProvider {
             }
 
             const { noteId, ...res } = await response.json();
-            // Always include auth key in URL for enhanced security
+            // Always include auth key in URL to ensure all notes have URL-based access control,
+            // regardless of password protection. The auth key acts as a unique, unguessable token
+            // required to access the note, enhancing security.
             const link = `${noteId}#auth=${authKey}`;
 
             return { success: true, noteId, authKey, message: res.message, link };
