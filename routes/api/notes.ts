@@ -48,9 +48,26 @@ export const handler = {
         try {
             const { content, iv, password, authKey, expiresIn, manualDeletion } = await ctx.req.json();
 
-            // Validate input using valibot
+            // Validate IV directly (not through schema as it's system-generated data)
+            if (!iv || typeof iv !== 'string' || iv.trim() === '') {
+                return new Response(
+                    JSON.stringify({
+                        message: 'Invalid request data',
+                        error: 'IV is required for encryption',
+                    }),
+                    {
+                        headers: mergeWithRateLimitHeaders(
+                            { 'Content-Type': 'application/json' },
+                            rateLimitResult,
+                        ),
+                        status: 400,
+                    },
+                );
+            }
+
+            // Validate other input using valibot
             try {
-                v.parse(createNoteServerSchema, { content, iv, password, authKey, expiresIn, manualDeletion });
+                v.parse(createNoteServerSchema, { content, password, authKey, expiresIn, manualDeletion });
             } catch (err) {
                 return new Response(
                     JSON.stringify({

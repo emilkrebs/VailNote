@@ -45,10 +45,6 @@ export const createNoteServerSchema = v.object({
         v.nonEmpty('Note content is required'),
         v.maxLength(NOTE_CONTENT_MAX_LENGTH, 'Note content is too long (max 1MB)'),
     ),
-    iv: v.pipe(
-        v.string(),
-        v.nonEmpty('IV is required for encryption'),
-    ), // Initialization vector for encryption
     password: v.optional(
         v.pipe(
             v.string(),
