@@ -1,4 +1,4 @@
-import { createNoteSchema } from '../../lib/validation/note.ts';
+import { createNoteServerSchema } from '../../lib/validation/note.ts';
 import { formatExpiration, Note } from '../../lib/types.ts';
 import { mergeWithRateLimitHeaders } from '../../lib/rate-limiting/rate-limit-headers.ts';
 import * as v from '@valibot/valibot';
@@ -50,7 +50,7 @@ export const handler = {
 
             // Validate input using valibot
             try {
-                v.parse(createNoteSchema, { content, iv, password, authKey, expiresIn, manualDeletion });
+                v.parse(createNoteServerSchema, { content, iv, password, authKey, expiresIn, manualDeletion });
             } catch (err) {
                 return new Response(
                     JSON.stringify({
