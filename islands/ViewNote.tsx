@@ -58,6 +58,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
     const [confirmed, setConfirmed] = useState(manualDeletion ? true : false);
     const [decryptionError, setDecryptionError] = useState<string | undefined>(undefined);
     const [message, setMessage] = useState<string | undefined>(undefined);
+    const [passwordRequired, setPasswordRequired] = useState(false);
 
     const password = useRef<string | undefined>(undefined);
 
@@ -76,6 +77,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
         setNote(null);
         setNeedsPassword(true);
         setLoading(false);
+        setPasswordRequired(true);
     };
 
     const handleAuthKey = async (authKey: string, providedPassword?: string) => {
@@ -137,11 +139,11 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
             return;
         }
 
-        // Fetch note only when confirmed and auth key is available
-        if (confirmed) {
+        // Fetch note when confirmed or when we need to check if password is required
+        if (confirmed || !passwordRequired) {
             fetchAndDecryptNote();
         }
-    }, [confirmed, noteId, manualDeletion]);
+    }, [confirmed, noteId, manualDeletion, passwordRequired]);
 
     // Event handlers
     const handlePasswordSubmit = async (event: Event) => {
@@ -245,7 +247,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
         );
     }
 
-    if (!confirmed) {
+    if (!confirmed && !passwordRequired) {
         return <ConfirmViewNote onSubmit={() => setConfirmed(true)} />;
     }
 
