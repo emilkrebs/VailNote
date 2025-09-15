@@ -211,6 +211,28 @@ export class ArcRateLimiter {
         };
     }
 
+    middleware<State>(): Middleware<State> {
+        return async (ctx) => {
+            const rateLimitResult = await this.checkRateLimit(ctx.req);
+            if (!rateLimitResult.allowed) {
+                throw new HttpError(429, 'Too Many Requests', {
+                    cause: {
+                        allowed: rateLimitResult.allowed,
+                        remaining: rateLimitResult.remaining,
+                        retryAfter: rateLimitResult.retryAfter,
+                        resetTime: rateLimitResult.resetTime,
+                    } as RateLimitResult,
+                });
+            }
+            const res = await ctx.next();
+            const rateLimitHeaders = generateRateLimitHeaders(rateLimitResult, this.maxRequests);
+            for (const [key, value] of Object.entries(rateLimitHeaders)) {
+                res.headers.set(key, value);
+            }
+            return res;
+        };
+    }
+
     /**
      * Cleanup resources
      */
@@ -220,26 +242,4 @@ export class ArcRateLimiter {
         }
         this.store.clear();
     }
-}
-
-export function rateLimiter<State>(rateLimiter: ArcRateLimiter): Middleware<State> {
-    return async (ctx) => {
-        const rateLimitResult = await rateLimiter.checkRateLimit(ctx.req);
-        const res = await ctx.next();
-        if (!rateLimitResult.allowed) {
-            throw new HttpError(429, 'Too Many Requests', {
-                cause: {
-                    allowed: rateLimitResult.allowed,
-                    remaining: rateLimitResult.remaining,
-                    retryAfter: rateLimitResult.retryAfter,
-                    resetTime: rateLimitResult.resetTime,
-                } as RateLimitResult,
-            });
-        }
-        const rateLimitHeaders = generateRateLimitHeaders(rateLimitResult, rateLimiter.maxRequests);
-        for (const [key, value] of Object.entries(rateLimitHeaders)) {
-            res.headers.set(key, value);
-        }
-        return res;
-    };
 }

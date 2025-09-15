@@ -1,6 +1,6 @@
 import { assertEquals } from '$std/assert/assert_equals.ts';
 import { App } from 'fresh';
-import { ArcRateLimiter, rateLimiter } from '../lib/rate-limiting/arc-rate-limiter.ts';
+import { ArcRateLimiter } from '../lib/rate-limiting/arc-rate-limiter.ts';
 import { State } from '../main.ts';
 import Home from '../routes/index.tsx';
 import { TestDataFactory } from './main_test.ts';
@@ -9,8 +9,9 @@ import { encryptNoteContent } from '../lib/encryption.ts';
 import { generateDeterministicClientHash } from '../lib/hashing.ts';
 
 Deno.test('ARC Rate Limiter - basic functionality', async () => {
+    const rateLimiter = new ArcRateLimiter(3, 1000, 2000, false);
     const app = new App<State>()
-        .use(rateLimiter(new ArcRateLimiter(3, 1000, 2000, false))) // 3 requests per second, 2s block
+        .use(rateLimiter.middleware()) // 3 requests per second, 2s block
         .get('/', (ctx) => ctx.render(Home()));
 
     const handler = app.handler();
@@ -60,8 +61,9 @@ Deno.test('ARC Rate Limiter - different clients handled separately', async () =>
 });
 
 Deno.test('ARC Rate Limiter - privacy protection', async () => {
+    const rateLimiter = new ArcRateLimiter(2, 1000, 2000, false);
     const app = new App<State>()
-        .use(rateLimiter(new ArcRateLimiter(2, 1000, 2000, false))) // 2 requests per second, 2s block
+        .use(rateLimiter.middleware()) // 2 requests per second, 2s block
         .get('/', (ctx) => ctx.render(Home()));
 
     const handler = app.handler();
@@ -82,22 +84,21 @@ Deno.test('ARC Rate Limiter - privacy protection', async () => {
     assertEquals(result2.headers.get('X-RateLimit-Remaining'), '0');
 
     // Verify ARC tokens are not raw IP addresses
-    const testRateLimiter = new ArcRateLimiter(2, 1000, 2000, false);
-    const rateLimitCheck = await testRateLimiter.checkRateLimit(request);
+    const rateLimitCheck = await rateLimiter.checkRateLimit(request);
 
     assertEquals(typeof rateLimitCheck.arcToken, 'string');
     assertEquals(rateLimitCheck.arcToken.includes('192.168.1.100'), false);
 
-    testRateLimiter.destroy();
+    rateLimiter.destroy();
 });
 
 Deno.test({
     name: 'ARC Rate Limiter - Check API integration',
     fn: async (t) => {
         const { handler: notesHandler } = await import('../routes/api/notes.ts');
-
+        const rateLimiter = new ArcRateLimiter(2, 1000, 2000);
         const handler = new App<State>()
-            .use(rateLimiter(new ArcRateLimiter(2, 1000, 2000)))
+            .use(rateLimiter.middleware())
             .post('/api/notes', async (ctx) => await notesHandler.POST(ctx))
             .handler();
 
