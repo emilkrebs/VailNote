@@ -1,9 +1,8 @@
 import { createNoteSchema } from '../../lib/validation/note.ts';
 import { formatExpiration, Note } from '../../lib/types.ts';
-import { mergeWithRateLimitHeaders } from '../../lib/rate-limiting/rate-limit-headers.ts';
 import * as v from '@valibot/valibot';
 import { Context } from 'fresh';
-import { getNoteDatabase, getRateLimiter } from '../../lib/services/database-service.ts';
+import { getNoteDatabase } from '../../lib/services/database-service.ts';
 import * as bcrypt from 'bcrypt';
 import { State } from '../../main.ts';
 
@@ -23,27 +22,7 @@ import { State } from '../../main.ts';
 
 export const handler = {
     async POST(ctx: Context<State>) {
-        const rateLimitResult = await getRateLimiter().checkRateLimit(ctx.req);
         const db = await getNoteDatabase();
-
-        // check if rate limit is exceeded
-        if (!rateLimitResult.allowed) {
-            const resetTime = new Date(rateLimitResult.resetTime);
-            return new Response(
-                JSON.stringify({
-                    message: 'Rate limit exceeded. Please try again later.',
-                    resetTime: resetTime.toISOString(),
-                    retryAfter: rateLimitResult.retryAfter,
-                }),
-                {
-                    headers: mergeWithRateLimitHeaders(
-                        { 'Content-Type': 'application/json' },
-                        rateLimitResult,
-                    ),
-                    status: 429,
-                },
-            );
-        }
 
         try {
             const { content, iv, password, expiresIn, manualDeletion } = await ctx.req.json();
@@ -58,10 +37,6 @@ export const handler = {
                         error: err instanceof Error ? err.message : 'Unknown error',
                     }),
                     {
-                        headers: mergeWithRateLimitHeaders(
-                            { 'Content-Type': 'application/json' },
-                            rateLimitResult,
-                        ),
                         status: 400,
                     },
                 );
@@ -92,10 +67,6 @@ export const handler = {
                         error: insertResult.error,
                     }),
                     {
-                        headers: mergeWithRateLimitHeaders(
-                            { 'Content-Type': 'application/json' },
-                            rateLimitResult,
-                        ),
                         status: 500,
                     },
                 );
@@ -107,10 +78,6 @@ export const handler = {
                     noteId: noteId,
                 }),
                 {
-                    headers: mergeWithRateLimitHeaders(
-                        { 'Content-Type': 'application/json' },
-                        rateLimitResult,
-                    ),
                     status: 201,
                 },
             );
@@ -122,10 +89,6 @@ export const handler = {
                     error: error instanceof Error ? error.message : 'Unknown error',
                 }),
                 {
-                    headers: mergeWithRateLimitHeaders(
-                        { 'Content-Type': 'application/json' },
-                        rateLimitResult,
-                    ),
                     status: 500,
                 },
             );

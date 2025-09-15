@@ -1,44 +1,156 @@
-import { Head } from 'fresh/runtime';
-import HomeButton from '../components/HomeButton.tsx';
+import ErrorActions from '../islands/ErrorActions.tsx';
 import { HttpError, PageProps } from 'fresh';
+import Header from '../components/Header.tsx';
+import { defaultLogger } from '../lib/logging.ts';
 
-export default function ErrorPage(props: PageProps) {
-    const error = props.error; // Contains the thrown Error or HTTPError
+interface ErrorContent {
+    title: string;
+    subtitle: string;
+    description: string;
+    icon: string;
+}
 
-    if (error instanceof HttpError) {
-        const status = error.status;
+const httpErrorMessages: Record<number, ErrorContent> = {
+    400: {
+        title: 'Bad Request',
+        subtitle: 'The request was invalid or cannot be served',
+        description:
+            'The request could not be understood by the server due to malformed syntax. Please check your request and try again.',
+        icon: '🚫',
+    },
+    401: {
+        title: 'Unauthorized',
+        subtitle: 'Authentication is required and has failed or has not yet been provided',
+        description: 'The request requires user authentication. Please provide valid credentials and try again.',
+        icon: '🚫',
+    },
+    403: {
+        title: 'Forbidden',
+        subtitle: 'You do not have permission to access this resource',
+        description:
+            'You do not have the necessary permissions to access this resource. Please check your credentials and try again.',
+        icon: '⛔',
+    },
+    404: {
+        title: 'Not Found',
+        subtitle: 'The requested resource could not be found',
+        description:
+            'The resource you are looking for might have been removed, had its name changed, or is temporarily unavailable.',
+        icon: '🔍',
+    },
+    500: {
+        title: 'Internal Server Error',
+        subtitle: 'The server encountered an unexpected condition',
+        description:
+            'The server encountered an internal error and was unable to complete your request. Please try again later.',
+        icon: '💥',
+    },
+    502: {
+        title: 'Bad Gateway',
+        subtitle: 'The server received an invalid response from the upstream server',
+        description:
+            'The server was acting as a gateway or proxy and received an invalid response from the upstream server.',
+        icon: '🌐',
+    },
+    429: {
+        title: 'Too Many Requests',
+        subtitle: 'You have sent too many requests in a given amount of time',
+        description: 'You have exceeded the rate limit for requests. Please wait a moment before trying again.',
+        icon: '⏳',
+    },
+};
 
-        if (status === 404) {
-            return (
-                <>
-                    <Head>
-                        <title>404 - Page not found</title>
-                    </Head>
-                    <div class='flex flex-col items-center justify-center min-h-screen h-full w-full background-animate text-white py-16'>
-                        <h1 class='text-6xl font-bold mb-4'>404</h1>
-                        <h2 class='text-3xl font-bold mb-2'>Page Not Found</h2>
-                        <p class='text-lg text-center text-gray-300 mb-8'>
-                            Sorry, the page you are looking for does not exist or has been removed.
-                        </p>
-                        <HomeButton />
-                    </div>
-                </>
-            );
-        }
+export default function Error(props: PageProps) {
+    const error = props.error as HttpError;
+    const status = error.status || 500;
+    const errorContent = httpErrorMessages[status] || {
+        title: 'Something went wrong',
+        subtitle: 'An unexpected error occurred',
+        description:
+            "We're experiencing technical difficulties. Our team has been notified and is working to fix the issue.",
+        icon: '⚠️',
+    };
+
+    // log critical errors (500 and above)
+    if (status >= 500) {
+        defaultLogger.error(`Critical error occurred: ${status} - ${error.message}`);
     }
+
     return (
         <>
-            <Head>
-                <title>Error</title>
-            </Head>
-            <div class='flex flex-col items-center justify-center min-h-screen h-full w-full background-animate text-white py-16'>
-                <h1 class='text-6xl font-bold mb-4'>Error</h1>
-                <h2 class='text-3xl font-bold mb-2'>Something went wrong</h2>
-                <p class='text-lg text-center text-gray-300 mb-8'>
-                    {error instanceof Error ? error.message : 'An unexpected error occurred.'}
-                </p>
-                <HomeButton />
-            </div>
+            <Header title='Error' description={`An error occurred: ${error.message || 'Unknown error'}`} />
+
+            <main class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-8 md:py-16'>
+                {/* Animated background elements */}
+                <div class='absolute inset-0 overflow-hidden pointer-events-none'>
+                    <div class='absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-gray-700/10 to-gray-900/10 rounded-full blur-3xl animate-pulse'>
+                    </div>
+                    <div
+                        class='absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-gray-600/10 to-gray-800/10 rounded-full blur-3xl animate-pulse'
+                        style='animation-delay: 2s'
+                    >
+                    </div>
+                    <div
+                        class='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-gray-700/5 to-gray-900/5 rounded-full blur-3xl animate-pulse'
+                        style='animation-delay: 4s'
+                    >
+                    </div>
+                </div>
+
+                <div class='relative z-10 max-w-2xl w-full'>
+                    {/* Main error card */}
+                    <div class='bg-gray-900/90 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 md:p-12 shadow-2xl'>
+                        {/* Header with icon and status */}
+                        <div class='text-center mb-8'>
+                            <div class='text-6xl md:text-8xl mb-4 animate-bounce'>
+                                {errorContent.icon}
+                            </div>
+
+                            <div class='mb-4'>
+                                <div class='inline-block text-sm font-mono text-gray-400 bg-gray-800/50 px-3 py-1 rounded-lg border border-gray-700/30'>
+                                    Error {status}
+                                </div>
+                            </div>
+
+                            <h1 class='text-3xl md:text-4xl font-bold text-white mb-3 leading-tight'>
+                                {errorContent.title}
+                            </h1>
+
+                            <p class='text-xl text-gray-300 mb-6 leading-relaxed'>
+                                {errorContent.subtitle}
+                            </p>
+
+                            <p class='text-gray-400 leading-relaxed max-w-lg mx-auto'>
+                                {errorContent.description}
+                            </p>
+                        </div>
+
+                        {/* Action buttons */}
+                        <div class='flex justify-center'>
+                            <ErrorActions
+                                status={status}
+                                showRetryCountdown={false}
+                                retryDelay={5000}
+                            />
+                        </div>
+
+                        {/* Additional help text */}
+                        <div class='mt-8 pt-8 border-t border-gray-700/50'>
+                            <div class='text-center text-gray-400'>
+                                <p class='mb-2'>Our team has been automatically notified</p>
+                                <p class='text-sm'>We're working to resolve this issue as quickly as possible.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div class='text-center mt-8'>
+                        <p class='text-gray-200 text-sm'>
+                            Powered by <span class='text-white font-medium'>VailNote</span>
+                        </p>
+                    </div>
+                </div>
+            </main>
         </>
     );
 }
