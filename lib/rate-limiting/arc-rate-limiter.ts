@@ -236,7 +236,7 @@ export function rateLimiter<State>(rateLimiter: ArcRateLimiter): Middleware<Stat
                 } as RateLimitResult,
             });
         }
-        const rateLimitHeaders = generateRateLimitHeaders(rateLimitResult);
+        const rateLimitHeaders = generateRateLimitHeaders(rateLimitResult, rateLimiter.maxRequests);
         for (const [key, value] of Object.entries(rateLimitHeaders)) {
             res.headers.set(key, value);
         }
