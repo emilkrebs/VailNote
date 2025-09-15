@@ -2,6 +2,7 @@ import ErrorActions from '../islands/ErrorActions.tsx';
 import { HttpError, PageProps } from 'fresh';
 import Header from '../components/Header.tsx';
 import { defaultLogger } from '../lib/logging.ts';
+import { RateLimitResult } from '../lib/rate-limiting/rate-limit-headers.ts';
 
 interface ErrorContent {
     title: string;
@@ -71,6 +72,14 @@ export default function Error(props: PageProps) {
         icon: '⚠️',
     };
 
+    // Extract rate limit information for 429 errors
+    let rateLimitResetTime: number | undefined;
+
+    if (status === 429 && error.cause) {
+        const rateLimitInfo = error.cause as RateLimitResult;
+        rateLimitResetTime = rateLimitInfo.resetTime;
+    }
+
     // log critical errors (500 and above)
     if (status >= 500) {
         defaultLogger.error(`Critical error occurred: ${status} - ${error.message}`);
@@ -129,17 +138,9 @@ export default function Error(props: PageProps) {
                         <div class='flex justify-center'>
                             <ErrorActions
                                 status={status}
-                                showRetryCountdown={false}
-                                retryDelay={5000}
+                                showRetryCountdown={status === 429 && rateLimitResetTime !== undefined}
+                                resetTime={rateLimitResetTime}
                             />
-                        </div>
-
-                        {/* Additional help text */}
-                        <div class='mt-8 pt-8 border-t border-gray-700/50'>
-                            <div class='text-center text-gray-400'>
-                                <p class='mb-2'>Our team has been automatically notified</p>
-                                <p class='text-sm'>We're working to resolve this issue as quickly as possible.</p>
-                            </div>
                         </div>
                     </div>
 
