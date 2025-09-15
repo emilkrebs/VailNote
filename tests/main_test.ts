@@ -6,7 +6,7 @@ import Home from '../routes/index.tsx';
 import { State } from '../main.ts';
 
 // Test data factory
-class TestDataFactory {
+export class TestDataFactory {
     static createNoteData(overrides?: Partial<typeof TestDataFactory.defaultNoteData>) {
         return {
             ...TestDataFactory.defaultNoteData,

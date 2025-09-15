@@ -1,5 +1,6 @@
 import { App, cors, csrf, staticFiles } from 'fresh';
 import { csp, headers } from './middleware.ts';
+import { ArcRateLimiter, rateLimiter } from './lib/rate-limiting/arc-rate-limiter.ts';
 
 export interface State {
     shared: string;
@@ -18,6 +19,7 @@ export const app = new App<State>()
         origin: ORIGIN,
     }))
     .use(csp())
+    .use(rateLimiter(new ArcRateLimiter(15, 60000, 300000))) // 15 requests per minute, 5 min block
     .use(headers({
         'Cross-Origin-Resource-Policy': 'same-site',
         'Cross-Origin-Embedder-Policy': 'require-corp',

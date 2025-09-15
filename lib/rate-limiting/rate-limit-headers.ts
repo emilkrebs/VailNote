@@ -3,7 +3,7 @@
  * Used across different endpoints to maintain consistency
  */
 
-interface RateLimitResult {
+export interface RateLimitResult {
     allowed: boolean;
     remaining: number;
     resetTime: number;
@@ -34,27 +34,6 @@ export function generateRateLimitHeaders(
     }
 
     return headers;
-}
-
-/**
- * Generate headers specifically for 429 (Too Many Requests) responses
- * @param rateLimitResult - Result from ARC rate limiter
- * @param maxRequests - Maximum requests allowed (default: 10)
- * @returns Headers object for 429 responses
- */
-export function generateRateLimitBlockedHeaders(
-    rateLimitResult: RateLimitResult,
-    maxRequests = 10,
-): Record<string, string> {
-    const resetTime = new Date(rateLimitResult.resetTime);
-
-    return {
-        'X-RateLimit-Limit': maxRequests.toString(),
-        'X-RateLimit-Remaining': '0',
-        'X-RateLimit-Reset': resetTime.toISOString(),
-        'Retry-After': rateLimitResult.retryAfter?.toString() ||
-            Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000).toString(),
-    };
 }
 
 /**

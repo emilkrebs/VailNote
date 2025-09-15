@@ -1,4 +1,6 @@
+import { HttpError, Middleware } from 'fresh';
 import { generateSHA256Hash } from '../hashing.ts';
+import { generateRateLimitHeaders, RateLimitResult } from './rate-limit-headers.ts';
 
 interface ArcEntry {
     count: number;
@@ -218,4 +220,26 @@ export class ArcRateLimiter {
         }
         this.store.clear();
     }
+}
+
+export function rateLimiter<State>(rateLimiter: ArcRateLimiter): Middleware<State> {
+    return async (ctx) => {
+        const rateLimitResult = await rateLimiter.checkRateLimit(ctx.req);
+        const res = await ctx.next();
+        if (!rateLimitResult.allowed) {
+            throw new HttpError(429, 'Too Many Requests', {
+                cause: {
+                    allowed: rateLimitResult.allowed,
+                    remaining: rateLimitResult.remaining,
+                    retryAfter: rateLimitResult.retryAfter,
+                    resetTime: rateLimitResult.resetTime,
+                } as RateLimitResult,
+            });
+        }
+        const rateLimitHeaders = generateRateLimitHeaders(rateLimitResult);
+        for (const [key, value] of Object.entries(rateLimitHeaders)) {
+            res.headers.set(key, value);
+        }
+        return res;
+    };
 }
