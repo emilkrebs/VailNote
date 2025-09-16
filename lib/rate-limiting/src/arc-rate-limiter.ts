@@ -148,7 +148,7 @@ export class ArcRateLimiter {
         if (entry.count > this.maxRequests) {
             entry.blocked = true;
             entry.blockUntil = now + this.blockDurationMs;
-            this.store.set(arcToken, entry);
+            await this.store.set(arcToken, entry);
 
             return {
                 allowed: false,
@@ -160,7 +160,7 @@ export class ArcRateLimiter {
         }
 
         // Store the updated entry
-        this.store.set(arcToken, entry);
+        await this.store.set(arcToken, entry);
 
         return {
             allowed: true,
@@ -284,7 +284,7 @@ export class ArcRateLimiter {
                 now >= entry.resetTime &&
                 (!entry.blocked || (entry.blockUntil && now >= entry.blockUntil))
             ) {
-                this.store.delete(token);
+                await this.store.delete(token);
             }
         }
     }
