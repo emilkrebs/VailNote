@@ -3,7 +3,7 @@ import { generateDeterministicClientHash } from '../lib/hashing.ts';
 import { encryptNoteContent } from '../lib/encryption.ts';
 import { App } from 'fresh';
 import Home from '../routes/index.tsx';
-import { State } from '../main.ts';
+import { State } from '../lib/types/common.ts';
 
 // Test data factory
 export class TestDataFactory {

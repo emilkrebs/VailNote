@@ -2,7 +2,7 @@ import { Note } from '../../../lib/types.ts';
 import { Context } from 'fresh';
 import { getNoteDatabase } from '../../../lib/services/database-service.ts';
 import * as bcrypt from 'bcrypt';
-import { State } from '../../../main.ts';
+import { State } from '../../../lib/types/common.ts';
 
 export const handler = async (ctx: Context<State>): Promise<Response> => {
     if (ctx.req.method !== 'POST' && ctx.req.method !== 'DELETE') {

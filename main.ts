@@ -1,15 +1,10 @@
 import { App, cors, csp, csrf, staticFiles } from 'fresh';
 import { headers } from './middleware.ts';
 import { ArcRateLimiter } from './lib/rate-limiting/src/arc-rate-limiter.ts';
-import { DenoKVArcStore } from './lib/rate-limiting/src/arc-store.ts';
-
-export interface State {
-    shared: string;
-}
-
-export const ORIGIN = 'https://vailnote.com';
+import { ORIGIN, State } from './lib/types/common.ts';
 
 const serverSecret = Deno.env.get('ARC_SECRET');
+
 if (!serverSecret) {
     throw new Error('ARC_SECRET environment variable is not set');
 }
@@ -21,8 +16,6 @@ const rateLimiter = new ArcRateLimiter({
     blockDurationMs: 5 * 60 * 1000,
     identifier: 'vailnote-rate-limiter',
     serverSecret,
-    enablePeriodicCleanup: true,
-    store: await (new DenoKVArcStore()).init(),
 });
 
 export const app = new App<State>()

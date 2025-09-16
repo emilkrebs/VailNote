@@ -40,3 +40,5 @@ jobs:
 
       - name: Run tests
         run: deno task test
+        env:
+          ARC_SECRET: test_secret_key

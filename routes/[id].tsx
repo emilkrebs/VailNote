@@ -4,7 +4,7 @@ import Header from '../components/Header.tsx';
 import ViewEncryptedNote from '../islands/ViewNote.tsx';
 import { HttpError } from 'fresh';
 import { getNoteDatabase } from '../lib/services/database-service.ts';
-import { State } from '../main.ts';
+import { State } from '../lib/types/common.ts';
 
 interface NotePageProps {
     note: Note;

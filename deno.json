@@ -4,7 +4,7 @@
         "start": "deno serve -A --unstable-kv --env-file _fresh/server.js",
         "dev": "deno run -A --unstable-kv --node-modules-dir npm:vite",
         "build": "deno run -A --unstable-kv --node-modules-dir npm:vite build",
-        "test": "TEST_MODE=true deno test --unstable-kv --allow-read --allow-env --env-file --allow-net --allow-write --allow-sys",
+        "test": "deno test --unstable-kv --allow-read --allow-env --allow-net --allow-write --allow-sys",
         "update": "deno run -A -r jsr:@fresh/update .",
         "preview": "deno task build && deno task start",
         "clean": "rm -rf ./dist && rm -rf ./_fresh && rm -rf ./node_modules && rm -f ./deno.lock && rm -f ./package-lock.json"

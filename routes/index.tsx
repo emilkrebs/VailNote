@@ -1,7 +1,7 @@
 import Header from '../components/Header.tsx';
-import SiteHeader from '../components/SiteHeader.tsx';
 import CreateNote from '../islands/CreateNoteForm.tsx';
-import { ORIGIN } from '../main.ts';
+import { ORIGIN } from '../lib/types/common.ts';
+import SiteHeader from '../components/SiteHeader.tsx';
 
 export default function Home() {
     return (

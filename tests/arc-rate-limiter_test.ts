@@ -1,7 +1,7 @@
 import { assertEquals } from '$std/assert/assert_equals.ts';
 import { App } from 'fresh';
 import { ArcRateLimiter } from '../lib/rate-limiting/src/arc-rate-limiter.ts';
-import { State } from '../main.ts';
+import { State } from '../lib/types/common.ts';
 import Home from '../routes/index.tsx';
 import { TestDataFactory } from './main_test.ts';
 import { assertExists } from '$std/assert/assert_exists.ts';
