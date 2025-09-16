@@ -102,6 +102,9 @@ export class DenoKVArcStore implements ArcStore {
         const iter = this.kv.list<ArcEntry>({ prefix: ['arc-rate-limiter'] });
         for await (const res of iter) {
             if (res.value) {
+                if (!res.key[1] || typeof res.key[1] !== 'string') {
+                    throw new Error('Invalid key format in Deno KV store');
+                }
                 const token = res.key[1] as string;
                 yield [token, res.value];
             }
