@@ -60,7 +60,11 @@ Deno.test('ARC Rate Limiter - Deno KV store integration', async () => {
     await arcStore.close();
     rateLimiter.destroy();
 
-    Deno.removeSync(dataDir);
+    try {
+        Deno.removeSync(dataDir);
+    } catch {
+        // ignore errors during cleanup
+    }
 });
 
 Deno.test('ARC Rate Limiter - different clients handled separately', async () => {
