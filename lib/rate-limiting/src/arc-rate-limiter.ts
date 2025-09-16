@@ -309,22 +309,17 @@ export class ArcRateLimiter {
         const now = Date.now();
         const iterator = this.store.entries();
 
-        return {
-            activeTokens: await (async () => {
-                for await (const [, entry] of iterator) {
-                    if (
-                        !entry.blocked ||
-                        (entry.blockUntil && now >= entry.blockUntil)
-                    ) {
-                        totalCount++;
-                    } else if (entry.blocked) {
-                        blockedCount++;
-                    }
+        for await (const [, entry] of iterator) {
+            // Only count entries that are still active (not expired)
+            if (now < entry.resetTime || (entry.blocked && entry.blockUntil && now < entry.blockUntil)) {
+                totalCount++;
+                if (entry.blocked) {
+                    blockedCount++;
                 }
-                return totalCount;
-            })(),
-            blockedTokens: blockedCount,
-        };
+            }
+        }
+
+        return { activeTokens: totalCount, blockedTokens: blockedCount };
     }
 
     /**
@@ -376,6 +371,5 @@ export class ArcRateLimiter {
         if (this.cleanupTimer) {
             clearInterval(this.cleanupTimer);
         }
-        this.store.entries = undefined;
     }
 }
