@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { type Context, HttpError, type Middleware } from 'fresh';
 
 import { generateRateLimitHeaders, type RateLimitResult } from './rate-limit-headers.ts';
