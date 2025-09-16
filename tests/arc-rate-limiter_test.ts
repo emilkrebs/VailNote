@@ -1,38 +1,70 @@
 import { assertEquals } from '$std/assert/assert_equals.ts';
 import { App } from 'fresh';
-import { ArcRateLimiter } from '../lib/rate-limiting/arc-rate-limiter.ts';
+import { ArcRateLimiter } from '../lib/rate-limiting/src/arc-rate-limiter.ts';
 import { State } from '../main.ts';
 import Home from '../routes/index.tsx';
 import { TestDataFactory } from './main_test.ts';
 import { assertExists } from '$std/assert/assert_exists.ts';
 import { encryptNoteContent } from '../lib/encryption.ts';
 import { generateDeterministicClientHash } from '../lib/hashing.ts';
+import { DenoKVArcStore } from '../lib/rate-limiting/src/arc-store.ts';
+
+const defaultRateLimitOptions = {
+    maxRequests: 2,
+    windowMs: 1000,
+    blockDurationMs: 2000,
+    identifier: 'test-arc-rate-limiter',
+    serverSecret: 'super-secret',
+    enablePeriodicCleanup: false,
+};
 
 Deno.test('ARC Rate Limiter - basic functionality', async () => {
-    const rateLimiter = new ArcRateLimiter(3, 1000, 2000, false);
+    const rateLimiter = new ArcRateLimiter(defaultRateLimitOptions);
     const app = new App<State>()
         .use(rateLimiter.middleware()) // 3 requests per second, 2s block
         .get('/', (ctx) => ctx.render(Home()));
 
     const handler = app.handler();
 
-    // First 3 requests should be allowed
-    for (let i = 0; i < 3; i++) {
+    // First 2 requests should be allowed
+    for (let i = 0; i < 2; i++) {
         const response = await handler(new Request(`http://localhost`));
         assertEquals(response.status, 200);
     }
 
-    // 4th request should be blocked
+    // 3rd request should be blocked
     const blockedResult = await (async () => {
         const response = await handler(new Request(`http://localhost`));
         return response.status;
     })();
 
     assertEquals(blockedResult, 429);
+    rateLimiter.destroy();
+});
+
+Deno.test('ARC Rate Limiter - Deno KV store integration', async () => {
+    const dataDir = './deno-kv-test.db';
+    const arcStore = await (new DenoKVArcStore()).init(dataDir);
+    const rateLimiter = new ArcRateLimiter({ ...defaultRateLimitOptions, store: arcStore });
+
+    const request = new Request('http://localhost:8000/api/notes', {
+        method: 'POST',
+        headers: { 'x-forwarded-for': '192.168.1.100' },
+    });
+
+    const response = await rateLimiter.checkRateLimit(request);
+    assertEquals(response.allowed, true);
+    assertEquals(response.remaining, 1);
+
+    await arcStore.clear();
+    await arcStore.close();
+    rateLimiter.destroy();
+
+    Deno.removeSync(dataDir);
 });
 
 Deno.test('ARC Rate Limiter - different clients handled separately', async () => {
-    const rateLimiter = new ArcRateLimiter(2, 1000, 2000);
+    const rateLimiter = new ArcRateLimiter(defaultRateLimitOptions);
 
     const request1 = new Request('http://localhost:8000/api/notes', {
         method: 'POST',
@@ -61,7 +93,7 @@ Deno.test('ARC Rate Limiter - different clients handled separately', async () =>
 });
 
 Deno.test('ARC Rate Limiter - privacy protection', async () => {
-    const rateLimiter = new ArcRateLimiter(2, 1000, 2000, false);
+    const rateLimiter = new ArcRateLimiter(defaultRateLimitOptions);
     const app = new App<State>()
         .use(rateLimiter.middleware()) // 2 requests per second, 2s block
         .get('/', (ctx) => ctx.render(Home()));
@@ -96,7 +128,7 @@ Deno.test({
     name: 'ARC Rate Limiter - Check API integration',
     fn: async (t) => {
         const { handler: notesHandler } = await import('../routes/api/notes.ts');
-        const rateLimiter = new ArcRateLimiter(2, 1000, 2000);
+        const rateLimiter = new ArcRateLimiter(defaultRateLimitOptions);
         const handler = new App<State>()
             .use(rateLimiter.middleware())
             .post('/api/notes', async (ctx) => await notesHandler.POST(ctx))

@@ -2,7 +2,7 @@ import ErrorActions from '../islands/ErrorActions.tsx';
 import { HttpError, PageProps } from 'fresh';
 import Header from '../components/Header.tsx';
 import { defaultLogger } from '../lib/logging.ts';
-import { RateLimitResult } from '../lib/rate-limiting/rate-limit-headers.ts';
+import { RateLimitResult } from '../lib/rate-limiting/src/rate-limit-headers.ts';
 
 interface ErrorContent {
     title: string;

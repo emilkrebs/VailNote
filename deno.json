@@ -4,7 +4,7 @@
         "start": "deno serve -A --unstable-kv --env-file _fresh/server.js",
         "dev": "deno run -A --unstable-kv --node-modules-dir npm:vite",
         "build": "deno run -A --unstable-kv --node-modules-dir npm:vite build",
-        "test": "TEST_MODE=true deno test --unstable-kv --allow-read --allow-env --allow-net --allow-sys",
+        "test": "TEST_MODE=true deno test --unstable-kv --allow-read --allow-env --env-file --allow-net --allow-write --allow-sys",
         "update": "deno run -A -r jsr:@fresh/update .",
         "preview": "deno task build && deno task start",
         "clean": "rm -rf ./dist && rm -rf ./_fresh && rm -rf ./node_modules && rm -f ./deno.lock && rm -f ./package-lock.json"
@@ -22,10 +22,10 @@
         "**/node_modules/**"
     ],
     "imports": {
-        "fresh": "jsr:@fresh/core@^2.0.2",
-        "preact": "npm:preact@^10.27.1",
+        "fresh": "jsr:@fresh/core@^2.1.0",
+        "preact": "npm:preact@^10.27.2",
         "@preact/signals": "npm:@preact/signals@^2.3.1",
-        "@fresh/plugin-vite": "jsr:@fresh/plugin-vite@^1.0.2",
+        "@fresh/plugin-vite": "jsr:@fresh/plugin-vite@^1.0.3",
         "vite": "npm:vite@^7.1.5",
         "tailwindcss": "npm:tailwindcss@^4.1.13",
         "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.1.13",
