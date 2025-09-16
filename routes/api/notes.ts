@@ -4,7 +4,7 @@ import * as v from '@valibot/valibot';
 import { Context } from 'fresh';
 import { getNoteDatabase } from '../../lib/services/database-service.ts';
 import * as bcrypt from 'bcrypt';
-import { State } from '../../main.ts';
+import { State } from '../../lib/types/common.ts';
 
 /* used for client side note creation and encryption
 	* This endpoint handles only POST requests.

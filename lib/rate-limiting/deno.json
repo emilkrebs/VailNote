@@ -1,0 +1,8 @@
+{
+    "name": "@vailnote/rate-limiter",
+    "version": "1.0.0",
+    "description": "A simple and efficient rate limiting library for Deno Fresh applications.",
+    "exports": {
+        ".": "./mod.ts"
+    }
+}

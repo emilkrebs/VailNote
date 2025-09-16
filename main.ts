@@ -1,13 +1,22 @@
-import { App, cors, csrf, staticFiles } from 'fresh';
-import { csp, headers } from './middleware.ts';
-import { ArcRateLimiter } from './lib/rate-limiting/arc-rate-limiter.ts';
+import { App, cors, csp, csrf, staticFiles } from 'fresh';
+import { headers } from './middleware.ts';
+import { ArcRateLimiter } from './lib/rate-limiting/src/arc-rate-limiter.ts';
+import { ORIGIN, State } from './lib/types/common.ts';
 
-export interface State {
-    shared: string;
+const serverSecret = Deno.env.get('ARC_SECRET');
+
+if (!serverSecret) {
+    throw new Error('ARC_SECRET environment variable is not set');
 }
 
-export const ORIGIN = 'https://vailnote.com';
-const rateLimiter = new ArcRateLimiter(15, 60000, 300000);
+// Configure rate limiter: 15 requests per minute, 5 min block duration
+const rateLimiter = new ArcRateLimiter({
+    maxRequests: 15,
+    windowMs: 60 * 1000,
+    blockDurationMs: 5 * 60 * 1000,
+    identifier: 'vailnote-rate-limiter',
+    serverSecret,
+});
 
 export const app = new App<State>()
     .use(staticFiles())
