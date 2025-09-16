@@ -278,13 +278,23 @@ export class ArcRateLimiter {
         if (!this.store.entries) {
             return;
         }
+        const tokensToDelete: string[] = [];
         for await (const [token, entry] of this.store.entries()) {
             // Remove entries that are past reset time and not blocked
             if (
                 now >= entry.resetTime &&
                 (!entry.blocked || (entry.blockUntil && now >= entry.blockUntil))
             ) {
-                await this.store.delete(token);
+                tokensToDelete.push(token);
+            }
+        }
+        if (tokensToDelete.length > 0) {
+            if (typeof (this.store as any).deleteMany === 'function') {
+                await (this.store as any).deleteMany(tokensToDelete);
+            } else {
+                for (const token of tokensToDelete) {
+                    await this.store.delete(token);
+                }
             }
         }
     }
