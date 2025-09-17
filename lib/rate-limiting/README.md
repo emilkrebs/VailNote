@@ -1,7 +1,8 @@
-# Fresh Rate Limit 🚦
+# Fresh ARC Rate Limiter
 
-A privacy-preserving rate limiting middleware for [Fresh](https://fresh.deno.dev) applications using Anonymous
-Rate-Limited Credentials (ARC).
+The privacy-preserving rate-limiting middleware for [Fresh](https://fresh.deno.dev) applications using Anonymous
+Rate-Limited Credentials (ARC), used at [VailNote](https://vailnote.com/) to protect against abuse while respecting user
+privacy.
 
 ## Features
 
@@ -40,11 +41,11 @@ await app.listen({ port: 8000 });
 
 ## How ARC (Anonymous Rate-Limited Credentials) Works
 
-Traditional rate limiting stores client IP addresses, which raises privacy concerns. This library implements ARC tokens
-that provide rate limiting while preserving user privacy:
+Traditional rate-limiting stores client IP addresses, which raises concerns about privacy. This library implements ARC
+tokens that provide rate-limiting while preserving user privacy:
 
 1. **Client Identification**: Extracts client identifier from request headers (IP address when available)
-2. **Daily Salt Generation**: Creates a daily rotating salt based on current date
+2. **Daily Salt Generation**: Creates a daily rotating salt based on the current date
 3. **Token Generation**: `HMAC-SHA256(client_identifier + daily_salt + service_identifier, serverSecret)`
 4. **Privacy Protection**: Raw IP addresses are never stored, only hashed tokens
 
@@ -68,30 +69,30 @@ The main rate limiter class.
 new ArcRateLimiter(options: ArcRateLimiterOptions)
 ```
 
-| Option                  | Type       | Default         | Description                                 |
-| ----------------------- | ---------- | --------------- | ------------------------------------------- |
-| `maxRequests`           | `number`   | `10`            | Maximum requests allowed per window         |
-| `windowMs`              | `number`   | `60000`         | Time window in milliseconds (1 minute)      |
-| `blockDurationMs`       | `number`   | `300000`        | Block duration in milliseconds (5 minutes)  |
-| `identifier`            | `string`   | `"default-arc"` | Service identifier for token generation     |
-| `serverSecret`          | `string`   | **required**    | Secret key for HMAC token generation        |
-| `enablePeriodicCleanup` | `boolean`  | `true`          | Enable automatic cleanup of expired entries |
-| `store`                 | `ArcStore` | In-memory store | Custom store (e.g. Redis, SQL)              |
+| Option                   | Type       | Default         | Description                                              |
+| ------------------------ | ---------- | --------------- | -------------------------------------------------------- |
+| `maxRequests`            | `number`   | `10`            | Maximum requests allowed per window                      |
+| `windowMs`               | `number`   | `60000`         | Time window in milliseconds (1 minute)                   |
+| `blockDurationMs`        | `number`   | `300000`        | Block duration in milliseconds (5 minutes)               |
+| `identifier`             | `string`   | `"default-arc"` | Service identifier for token generation                  |
+| `serverSecret`           | `string`   | **required**    | Secret key for HMAC token generation                     |
+| `enablePeriodicCleanup`  | `boolean`  | `true`          | Enable automatic cleanup of expired entries              |
+| `store`                  | `ArcStore` | In-memory store | Custom store (e.g., Deno KV, SQL, MongoDB)               |
 
 #### Methods
 
 ##### `checkRateLimit(request: Request)`
 
-Manually check rate limit for a request.
+Manually check the rate limit for a request.
 
 ```typescript
 const result = await rateLimiter.checkRateLimit(request);
 console.log(result);
 // {
-//   allowed: true,
-//   remaining: 9,
-//   resetTime: 1234567890,
-//   arcToken: "abc123..."
+//   allowed: true,
+//   remaining: 9,
+//   resetTime: 1234567890,
+//   arcToken: "abc123..."
 // }
 ```
 
@@ -122,7 +123,7 @@ rateLimiter.destroy();
 
 ## Configuration Examples
 
-### Basic Rate Limiting
+### Basic rate-limiting
 
 ```typescript
 // 100 requests per hour
@@ -136,7 +137,7 @@ const rateLimiter = new ArcRateLimiter({
 ### API Protection
 
 ```typescript
-// Strict API rate limiting
+// Strict API rate-limiting
 const apiLimiter = new ArcRateLimiter({
     maxRequests: 30,
     windowMs: 15 * 60 * 1000, // per 15 minutes
@@ -151,19 +152,18 @@ app.use('/api', apiLimiter.middleware());
 ### Custom Store Integration (Deno KV Example)
 
 ```typescript
-const redis = new RedisClient(...);
-
+const denoKVStore = new DenoKVArcStore();
 const rateLimiter = new ArcRateLimiter({
-  maxRequests: 50,
-  windowMs: 60 * 1000,
-  serverSecret: Deno.env.get("ARC_SECRET")!,
-  store: await (new DenoKVArcStore()).init(), // Custom Deno KV store
+    maxRequests: 50,
+    windowMs: 60 * 1000,
+    serverSecret: Deno.env.get('ARC_SECRET')!,
+    store: await denoKVStore.init('./arc-database.db'), // Custom Deno KV store
 });
 ```
 
 ## Response Headers
 
-When rate limiting is active, these headers are automatically added:
+When rate-limiting is active, these headers are automatically added:
 
 - `X-RateLimit-Limit`: Maximum requests allowed
 - `X-RateLimit-Remaining`: Requests remaining in current window
@@ -172,7 +172,7 @@ When rate limiting is active, these headers are automatically added:
 
 ## Error Handling
 
-When rate limit is exceeded, the middleware throws an `HttpError`:
+When the rate limit is exceeded, the middleware throws an `HttpError`:
 
 ```typescript
 // This is handled automatically by the middleware
@@ -202,13 +202,13 @@ throw new HttpError(429, 'Too Many Requests', {
 
 ### Client Identification Fallback
 
-When IP address is not available (e.g., behind certain proxies), the system falls back to:
+When an IP address is not available (e.g., behind certain proxies), the system falls back to:
 
 ```
 hash(user_agent:accept_header:daily_salt:service_id)
 ```
 
-This provides rate limiting functionality while maintaining privacy.
+This provides rate-limiting functionality while maintaining privacy.
 
 ## Monitoring
 
@@ -275,6 +275,7 @@ MIT License - see LICENSE file for details.
 
 ## Related
 
+- [VailNote](https://vailnote.com) - The application using this library
 - [Fresh Framework](https://fresh.deno.dev)
 - [Deno](https://deno.land)
-- [Rate Limiting Best Practices](https://tools.ietf.org/html/rfc6585)
+- [rate-limiting Best Practices](https://tools.ietf.org/html/rfc6585)

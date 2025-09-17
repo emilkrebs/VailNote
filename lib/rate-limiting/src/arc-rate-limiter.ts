@@ -30,6 +30,16 @@ export interface ArcEntry {
     blockUntil?: number;
 }
 
+/** Options for configuring the ARC rate limiter
+ * @interface ArcRateLimiterOptions
+ * @param maxRequests Maximum requests allowed per window
+ * @param windowMs Time window in milliseconds
+ * @param blockDurationMs Duration to block after exceeding limit in milliseconds
+ * @param identifier Service identifier for ARC token generation
+ * @param serverSecret Secret key for HMAC generation
+ * @param store Custom store implementation for flexibility (defaults to in-memory)
+ * @param enablePeriodicCleanup Whether to enable periodic cleanup of expired entries
+ */
 export interface ArcRateLimiterOptions {
     maxRequests?: number;
     windowMs?: number;
@@ -43,18 +53,19 @@ export interface ArcRateLimiterOptions {
 /**
  * Anonymous Rate-Limited Credentials (ARC) system
  * Uses anonymous tokens derived from IP addresses with daily rotation
- * to provide rate limiting while preserving user privacy.
+ * to provide rate-limiting while preserving user privacy.
  * @constructor ArcRateLimiter
- * @param maxRequests Maximum requests allowed per window
- * @param windowMs Time window in milliseconds
- * @param blockDurationMs Duration to block after exceeding limit in milliseconds
- * @param identifier Service identifier for ARC token generation
- * @param serverSecret Secret key for HMAC generation
- * @param store Custom store implementation for flexibility (defaults to in-memory)
- * @param enablePeriodicCleanup Whether to enable periodic cleanup of expired entries
+ * @param options Configuration options for the rate limiter
  * @example
  * // Custom service identifier for ARC tokens
- * const rateLimiter = new ArcRateLimiter(10, 60000, 300000, 'my-service', 'super-secret', true);
+ * const rateLimiter = new ArcRateLimiter({
+ *   maxRequests: 10,
+ *   windowMs: 60000,
+ *   blockDurationMs: 300000,
+ *   identifier: 'my-service',
+ *   serverSecret: 'super-secret',
+ *   enablePeriodicCleanup: true
+ * });
  * app.use(rateLimiter.middleware());
  */
 export class ArcRateLimiter {
@@ -292,7 +303,7 @@ export class ArcRateLimiter {
             }
         }
         if (tokensToDelete.length > 0) {
-            if (typeof (this.store as any).deleteMany === 'function') {
+            if (this.store.deleteMany) {
                 await (this.store as any).deleteMany(tokensToDelete);
             } else {
                 for (const token of tokensToDelete) {
@@ -339,8 +350,8 @@ export class ArcRateLimiter {
     }
 
     /**
-     * Create Fresh middleware function for rate limiting
-     * @returns Fresh middleware that applies rate limiting to requests
+     * Create Fresh middleware function for rate-limiting
+     * @returns Fresh middleware that applies rate-limiting to requests
      * @template State - Fresh context state type
      * @example
      * ```ts

@@ -1,7 +1,7 @@
 {
     "name": "@vailnote/rate-limiter",
-    "version": "1.0.0",
-    "description": "A simple and efficient rate limiting library for Deno Fresh applications.",
+    "version": "1.0.1",
+    "description": "A simple and efficient rate-limiting library for Fresh applications using Anonymous Rate-Limited Credentials (ARC) used at VailNote.",
     "license": "MIT",
     "exports": {
         ".": "./mod.ts"

@@ -22,7 +22,8 @@ focus on user-friendliness and security.
 - 🔑 **Optional password protection**
 - ⏰ **Configurable expiration times** (10 minutes to 30 days)
 - 🚫 **No tracking or analytics**
-- 🛡️ **Privacy-preserving rate limiting** using Anonymous Rate-Limited Credentials (ARC)
+- 🛡️ **Privacy-preserving rate-limiting** using Anonymous Rate-Limited Credentials (ARC)
+  [(View Implementation)](lib/rate-limiting/)
 
 ## Tech Stack
 
@@ -98,6 +99,7 @@ The system has been compromised and is marked with (!).
 ### Environment Variables
 
 - `DATABASE_URI` - Deno KV connection string
+- `ARC_SECRET` - Secret for ARC rate-limiting
 
 ## License
 
