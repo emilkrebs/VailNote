@@ -280,9 +280,9 @@ function DisplayDecryptedNote(
                         </div>
 
                         <div class='relative bg-gray-900/80 rounded-lg p-6 shadow-inner border border-gray-700/50 max-w-full max-h-96 overflow-auto'>
-                            <p class='inline break-words break-all text-gray-100 leading-relaxed text-base pr-12'>
+                            <div class='text-gray-100 leading-relaxed text-base pr-12 break-words whitespace-pre-wrap'>
                                 {content}
-                            </p>
+                            </div>
                         </div>
                     </CardContent>
 
