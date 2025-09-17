@@ -90,7 +90,7 @@ for storage.
 ## Disclaimer and Limitation of Liability
 
 **Use at Your Own Risk:** VailNote is provided "as is" without any warranties, express or implied. While we implement
-With industry-standard security measures, no system is 100% secure.
+industry-standard security measures, no system is 100% secure.
 
 **Content Responsibility:** You are solely responsible for the content you share through VailNote. We do not monitor,
 review, or control user content, and are not responsible for any content shared through our service.
