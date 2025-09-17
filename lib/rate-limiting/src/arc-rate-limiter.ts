@@ -58,7 +58,14 @@ export interface ArcRateLimiterOptions {
  * @param options Configuration options for the rate limiter
  * @example
  * // Custom service identifier for ARC tokens
- * const rateLimiter = new ArcRateLimiter({10, 60000, 300000, 'my-service', 'super-secret', true});
+ * const rateLimiter = new ArcRateLimiter({
+ *   maxRequests: 10,
+ *   windowMs: 60000,
+ *   blockDurationMs: 300000,
+ *   identifier: 'my-service',
+ *   serverSecret: 'super-secret',
+ *   enablePeriodicCleanup: true
+ * });
  * app.use(rateLimiter.middleware());
  */
 export class ArcRateLimiter {
