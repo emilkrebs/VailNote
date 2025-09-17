@@ -1,8 +1,7 @@
 # Fresh Rate Limit 🚦
 
-A privacy-preserving rate limiting middleware for
-[Fresh](https://fresh.deno.dev) applications using Anonymous Rate-Limited
-Credentials (ARC).
+A privacy-preserving rate limiting middleware for [Fresh](https://fresh.deno.dev) applications using Anonymous
+Rate-Limited Credentials (ARC).
 
 ## Features
 
@@ -22,35 +21,31 @@ deno add jsr:@vailnote/rate-limiter
 ## Quick Start
 
 ```typescript
-import { App } from "fresh";
-import { ArcRateLimiter } from "@vailnote/rate-limiter";
+import { App } from 'fresh';
+import { ArcRateLimiter } from '@vailnote/rate-limiter';
 
 const rateLimiter = new ArcRateLimiter({
-  maxRequests: 10, // 10 requests
-  windowMs: 60 * 1000, // per minute
-  blockDurationMs: 5 * 60 * 1000, // 5-minute block
-  serverSecret: Deno.env.get("ARC_SECRET")!, // required
+    maxRequests: 10, // 10 requests
+    windowMs: 60 * 1000, // per minute
+    blockDurationMs: 5 * 60 * 1000, // 5-minute block
+    serverSecret: Deno.env.get('ARC_SECRET')!, // required
 });
 
 const app = new App()
-  .use(rateLimiter.middleware())
-  .get("/", () => new Response("Hello World!"));
+    .use(rateLimiter.middleware())
+    .get('/', () => new Response('Hello World!'));
 
 await app.listen({ port: 8000 });
 ```
 
 ## How ARC (Anonymous Rate-Limited Credentials) Works
 
-Traditional rate limiting stores client IP addresses, which raises privacy
-concerns. This library implements ARC tokens that provide rate limiting while
-preserving user privacy:
+Traditional rate limiting stores client IP addresses, which raises privacy concerns. This library implements ARC tokens
+that provide rate limiting while preserving user privacy:
 
-1. **Client Identification**: Extracts client identifier from request headers
-   (IP address when available)
-2. **Daily Salt Generation**: Creates a daily rotating salt based on current
-   date
-3. **Token Generation**:
-   `HMAC-SHA256(client_identifier + daily_salt + service_identifier, serverSecret)`
+1. **Client Identification**: Extracts client identifier from request headers (IP address when available)
+2. **Daily Salt Generation**: Creates a daily rotating salt based on current date
+3. **Token Generation**: `HMAC-SHA256(client_identifier + daily_salt + service_identifier, serverSecret)`
 4. **Privacy Protection**: Raw IP addresses are never stored, only hashed tokens
 
 ### Daily Token Rotation
@@ -132,9 +127,9 @@ rateLimiter.destroy();
 ```typescript
 // 100 requests per hour
 const rateLimiter = new ArcRateLimiter({
-  maxRequests: 100,
-  windowMs: 60 * 60 * 1000,
-  serverSecret: Deno.env.get("ARC_SECRET")!,
+    maxRequests: 100,
+    windowMs: 60 * 60 * 1000,
+    serverSecret: Deno.env.get('ARC_SECRET')!,
 });
 ```
 
@@ -143,14 +138,14 @@ const rateLimiter = new ArcRateLimiter({
 ```typescript
 // Strict API rate limiting
 const apiLimiter = new ArcRateLimiter({
-  maxRequests: 30,
-  windowMs: 15 * 60 * 1000, // per 15 minutes
-  blockDurationMs: 60 * 60 * 1000, // 1 hour block
-  identifier: "api-v1",
-  serverSecret: Deno.env.get("ARC_SECRET")!,
+    maxRequests: 30,
+    windowMs: 15 * 60 * 1000, // per 15 minutes
+    blockDurationMs: 60 * 60 * 1000, // 1 hour block
+    identifier: 'api-v1',
+    serverSecret: Deno.env.get('ARC_SECRET')!,
 });
 
-app.use("/api", apiLimiter.middleware());
+app.use('/api', apiLimiter.middleware());
 ```
 
 ### Custom Store Integration (Deno KV Example)
@@ -181,13 +176,13 @@ When rate limit is exceeded, the middleware throws an `HttpError`:
 
 ```typescript
 // This is handled automatically by the middleware
-throw new HttpError(429, "Too Many Requests", {
-  cause: {
-    allowed: false,
-    remaining: 0,
-    retryAfter: 300,
-    resetTime: 1234567890,
-  },
+throw new HttpError(429, 'Too Many Requests', {
+    cause: {
+        allowed: false,
+        remaining: 0,
+        retryAfter: 300,
+        resetTime: 1234567890,
+    },
 });
 ```
 
@@ -207,8 +202,7 @@ throw new HttpError(429, "Too Many Requests", {
 
 ### Client Identification Fallback
 
-When IP address is not available (e.g., behind certain proxies), the system
-falls back to:
+When IP address is not available (e.g., behind certain proxies), the system falls back to:
 
 ```
 hash(user_agent:accept_header:daily_salt:service_id)
@@ -229,13 +223,13 @@ console.log(`Blocked tokens: ${stats.blockedTokens}`);
 ### Custom Monitoring
 
 ```typescript
-app.get("/admin/rate-limit-stats", () => {
-  const stats = rateLimiter.getStats();
-  return new Response(JSON.stringify({
-    ...stats,
-    timestamp: new Date().toISOString(),
-    memoryUsage: (stats.activeTokens * 100) + " bytes (estimated)",
-  }));
+app.get('/admin/rate-limit-stats', () => {
+    const stats = rateLimiter.getStats();
+    return new Response(JSON.stringify({
+        ...stats,
+        timestamp: new Date().toISOString(),
+        memoryUsage: (stats.activeTokens * 100) + ' bytes (estimated)',
+    }));
 });
 ```
 
@@ -251,10 +245,10 @@ For development testing, disable cleanup:
 
 ```typescript
 const rateLimiter = new ArcRateLimiter({
-  maxRequests: 10,
-  windowMs: 60000,
-  enablePeriodicCleanup: false, // Disable cleanup for testing
-  serverSecret: Deno.env.get("ARC_SECRET")!,
+    maxRequests: 10,
+    windowMs: 60000,
+    enablePeriodicCleanup: false, // Disable cleanup for testing
+    serverSecret: Deno.env.get('ARC_SECRET')!,
 });
 ```
 

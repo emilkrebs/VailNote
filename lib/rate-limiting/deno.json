@@ -1,12 +1,12 @@
 {
-  "name": "@vailnote/rate-limiter",
-  "version": "1.0.0",
-  "description": "A simple and efficient rate limiting library for Deno Fresh applications.",
-  "license": "MIT",
-  "exports": {
-    ".": "./mod.ts"
-  },
-  "imports": {
-    "fresh": "jsr:@fresh/core@^2.1.0"
-  }
+    "name": "@vailnote/rate-limiter",
+    "version": "1.0.0",
+    "description": "A simple and efficient rate limiting library for Deno Fresh applications.",
+    "license": "MIT",
+    "exports": {
+        ".": "./mod.ts"
+    },
+    "imports": {
+        "fresh": "jsr:@fresh/core@^2.1.0"
+    }
 }
