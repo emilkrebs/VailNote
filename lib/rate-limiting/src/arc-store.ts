@@ -10,6 +10,9 @@ export interface ArcStore {
     /** Delete an entry by token */
     delete(token: string): Promise<void>;
 
+    /** Delete multiple entries at once by their tokens */
+    deleteMany?(tokens: string[]): Promise<void>;
+
     /**
      * Get all entries in the store
      * @example
@@ -45,6 +48,8 @@ export class InMemoryArcStore implements ArcStore {
     }
 }
 
+/** Deno KV implementation for the ARC store
+ */
 export class DenoKVArcStore implements ArcStore {
     private kv?: Deno.Kv;
 

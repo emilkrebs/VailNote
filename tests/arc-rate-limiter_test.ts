@@ -113,7 +113,7 @@ Deno.test('ARC Rate Limiter - privacy protection', async () => {
     const result1 = await handler(request);
     const result2 = await handler(request);
 
-    // Same client should have consistent token (indirectly verified by rate limiting working)
+    // Same client should have consistent token (indirectly verified by rate-limiting working)
     assertEquals(result1.status, 200);
     assertEquals(result2.status, 200);
     assertEquals(result1.headers.get('X-RateLimit-Remaining'), '1');

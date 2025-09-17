@@ -1,4 +1,4 @@
-name: Publish Rate Limiting Package
+name: Publish rate-limiting Package
 
 on:
   push:

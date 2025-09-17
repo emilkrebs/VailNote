@@ -1,7 +1,7 @@
 import { ORIGIN } from '../lib/types/common.ts';
 
 const defaultDescription =
-    'VailNote - Open-source, encrypted note sharing with end-to-end encryption, self-destructing notes, and privacy-preserving rate limiting. Share secure notes that automatically delete after viewing.';
+    'VailNote - Open-source, encrypted note sharing with end-to-end encryption, self-destructing notes, and privacy-preserving rate-limiting. Share secure notes that automatically delete after viewing.';
 
 interface HeadProps {
     title?: string;

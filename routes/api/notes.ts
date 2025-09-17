@@ -13,7 +13,7 @@ import { State } from '../../lib/types/common.ts';
 	* Note: The content should be encrypted before sending to this endpoint and the password should be hashed with PBKDF2
 	* on the client side for security, then securely hashed with bcrypt on the server for storage.
 	*
-	* Rate Limiting (ARC - Anonymous Rate-Limited Credentials):
+	* rate-limiting (ARC - Anonymous Rate-Limited Credentials):
 	* - Limit: 10 requests per minute per client
 	* - Block duration: 5 minutes for rate limit violations
 	* - Privacy-preserving: Uses anonymous tokens with daily rotation
