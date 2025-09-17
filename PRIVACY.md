@@ -110,7 +110,7 @@ regulations in their jurisdiction.
 
 **Limitation of Liability:** To the maximum extent permitted by law, VailNote and its developers shall not be liable for
 any direct, indirect, incidental, consequential, or punitive damages arising from your use of the service, including but
-not not limited to data loss, security breaches, or unauthorized access to shared content.
+not limited to data loss, security breaches, or unauthorized access to shared content.
 
 ## Changes to This Policy
 
