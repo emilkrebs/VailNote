@@ -40,7 +40,7 @@ collects, uses, and protects your information when you use our secure note-shari
 
 - **Technical Headers:**\
   Standard HTTP headers (User-Agent, Accept headers) may be processed as fallback identifiers for rate-limiting when IP
-  addresses are not available. Addresses are unavailable.
+  addresses are not available.
 
 ## Use of Your Information
 
