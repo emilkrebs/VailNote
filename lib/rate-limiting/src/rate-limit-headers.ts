@@ -8,14 +8,14 @@
  * @interface RateLimitResult
  */
 export interface RateLimitResult {
-    /** Whether the request is allowed to proceed */
-    allowed: boolean;
-    /** Number of requests remaining in the current window */
-    remaining: number;
-    /** Timestamp when the current window resets */
-    resetTime: number;
-    /** Seconds to wait before retrying (only present when blocked) */
-    retryAfter?: number;
+  /** Whether the request is allowed to proceed */
+  allowed: boolean;
+  /** Number of requests remaining in the current window */
+  remaining: number;
+  /** Timestamp when the current window resets */
+  resetTime: number;
+  /** Seconds to wait before retrying (only present when blocked) */
+  retryAfter?: number;
 }
 
 /**
@@ -25,31 +25,31 @@ export interface RateLimitResult {
  * @returns Headers object with rate limit information
  */
 export function generateRateLimitHeaders(
-    rateLimitResult: RateLimitResult,
-    maxRequests = 10,
+  rateLimitResult: RateLimitResult,
+  maxRequests = 10,
 ): Record<string, string> {
-    // Input validation
-    if (!rateLimitResult || typeof rateLimitResult !== 'object') {
-        throw new Error('rateLimitResult is required and must be an object');
-    }
-    if (maxRequests <= 0) {
-        throw new Error('maxRequests must be positive');
-    }
+  // Input validation
+  if (!rateLimitResult || typeof rateLimitResult !== "object") {
+    throw new Error("rateLimitResult is required and must be an object");
+  }
+  if (maxRequests <= 0) {
+    throw new Error("maxRequests must be positive");
+  }
 
-    const resetTime = new Date(rateLimitResult.resetTime);
+  const resetTime = new Date(rateLimitResult.resetTime);
 
-    const headers: Record<string, string> = {
-        'X-RateLimit-Limit': maxRequests.toString(),
-        'X-RateLimit-Remaining': Math.max(0, rateLimitResult.remaining).toString(),
-        'X-RateLimit-Reset': resetTime.toISOString(),
-    };
+  const headers: Record<string, string> = {
+    "X-RateLimit-Limit": maxRequests.toString(),
+    "X-RateLimit-Remaining": Math.max(0, rateLimitResult.remaining).toString(),
+    "X-RateLimit-Reset": resetTime.toISOString(),
+  };
 
-    // Add Retry-After header for blocked requests
-    if (!rateLimitResult.allowed && rateLimitResult.retryAfter) {
-        headers['Retry-After'] = Math.max(0, rateLimitResult.retryAfter).toString();
-    }
+  // Add Retry-After header for blocked requests
+  if (!rateLimitResult.allowed && rateLimitResult.retryAfter) {
+    headers["Retry-After"] = Math.max(0, rateLimitResult.retryAfter).toString();
+  }
 
-    return headers;
+  return headers;
 }
 
 /**
@@ -60,18 +60,18 @@ export function generateRateLimitHeaders(
  * @returns Merged headers object
  */
 export function mergeWithRateLimitHeaders(
-    existingHeaders: Record<string, string>,
-    rateLimitResult: RateLimitResult,
-    maxRequests = 10,
+  existingHeaders: Record<string, string>,
+  rateLimitResult: RateLimitResult,
+  maxRequests = 10,
 ): Record<string, string> {
-    // Input validation
-    if (!existingHeaders || typeof existingHeaders !== 'object') {
-        throw new Error('existingHeaders is required and must be an object');
-    }
+  // Input validation
+  if (!existingHeaders || typeof existingHeaders !== "object") {
+    throw new Error("existingHeaders is required and must be an object");
+  }
 
-    const rateLimitHeaders = generateRateLimitHeaders(
-        rateLimitResult,
-        maxRequests,
-    );
-    return { ...existingHeaders, ...rateLimitHeaders };
+  const rateLimitHeaders = generateRateLimitHeaders(
+    rateLimitResult,
+    maxRequests,
+  );
+  return { ...existingHeaders, ...rateLimitHeaders };
 }
