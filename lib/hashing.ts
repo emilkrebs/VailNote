@@ -1,24 +1,3 @@
-export async function generateSHA256Hash(input: string): Promise<string> {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(input);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    // Convert ArrayBuffer to base64 string
-    return btoa(String.fromCharCode(...new Uint8Array(hashBuffer)));
-}
-
-export async function generateHMACSHA256(input: string, secret: string): Promise<string> {
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-        'raw',
-        encoder.encode(secret),
-        { name: 'HMAC', hash: 'SHA-256' },
-        false,
-        ['sign'],
-    );
-    const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(input));
-    return btoa(String.fromCharCode(...new Uint8Array(signature)));
-}
-
 /**
  * Client-side secure password hashing using PBKDF2 (alternative to bcrypt for browsers)
  * This provides similar security to bcrypt but works in web browsers

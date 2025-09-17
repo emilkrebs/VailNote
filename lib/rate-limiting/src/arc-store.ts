@@ -1,5 +1,5 @@
 // deno-lint-ignore-file require-await
-import { ArcEntry } from './arc-rate-limiter.ts';
+import type { ArcEntry } from './arc-rate-limiter.ts';
 
 /** Interface for the ARC store */
 export interface ArcStore {

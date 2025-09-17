@@ -2,8 +2,8 @@
 import { type Context, HttpError, type Middleware } from 'fresh';
 
 import { generateRateLimitHeaders, type RateLimitResult } from './rate-limit-headers.ts';
-import { generateHMACSHA256 } from '../../hashing.ts';
 import { type ArcStore, InMemoryArcStore } from './arc-store.ts';
+import { generateHMACSHA256 } from './hashing.ts';
 
 // Constants for better maintainability
 const DEFAULT_MAX_REQUESTS = 10;
