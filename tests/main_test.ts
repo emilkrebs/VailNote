@@ -61,7 +61,10 @@ Deno.test({
 
         await t.step('should create note via API', async () => {
             const passwordClientHash = await generateDeterministicClientHash(testData.password);
-            const encryptedContent = await encryptNoteContent(testData.content, testData.password);
+            const authKey = 'testAuthKey123';
+            const authKeyClientHash = await generateDeterministicClientHash(authKey);
+            const encryptionKey = `${authKey}:${testData.password}`; // Combined key for encryption
+            const encryptedContent = await encryptNoteContent(testData.content, encryptionKey);
 
             const response = await handler(
                 new Request(`http://localhost/api/notes`, {
@@ -70,6 +73,7 @@ Deno.test({
                         content: encryptedContent.encrypted,
                         iv: encryptedContent.iv,
                         password: passwordClientHash,
+                        authKey: authKeyClientHash,
                         expiresIn: testData.expiresIn,
                     }),
                     headers: { 'Content-Type': 'application/json' },
@@ -86,11 +90,14 @@ Deno.test({
 
         await t.step('should retrieve note by ID', async () => {
             const passwordHash = await generateDeterministicClientHash(testData.password);
+            const authKey = 'testAuthKey123';
+            const authKeyHash = await generateDeterministicClientHash(authKey);
+
             const response = await handler(
                 new Request(`http://localhost/api/notes/${apiNoteId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ passwordHash }),
+                    body: JSON.stringify({ passwordHash, authKeyHash }),
                 }),
             );
 

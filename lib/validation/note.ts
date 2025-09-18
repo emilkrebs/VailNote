@@ -18,6 +18,7 @@ export enum MANUAL_DELETION_OPTIONS {
 
 export const NOTE_CONTENT_MAX_LENGTH = 1024 * 1024; // 1 MB
 export const NOTE_PASSWORD_MAX_LENGTH = 256; // 256 characters
+export const NOTE_AUTH_KEY_MAX_LENGTH = 256; // 256 characters for auth key
 
 export const createNoteSchema = v.object({
     content: v.pipe(
@@ -38,6 +39,31 @@ export const createNoteSchema = v.object({
     ), // Allow empty string for default value
 });
 
+export const createNoteServerSchema = v.object({
+    content: v.pipe(
+        v.string(),
+        v.nonEmpty('Note content is required'),
+        v.maxLength(NOTE_CONTENT_MAX_LENGTH, 'Note content is too long (max 1MB)'),
+    ),
+    password: v.optional(
+        v.pipe(
+            v.string(),
+            v.maxLength(NOTE_PASSWORD_MAX_LENGTH, 'Password is too long (max 256 characters)'),
+        ),
+    ), // Optional password with max length
+    authKey: v.optional(
+        v.pipe(
+            v.string(),
+            v.maxLength(NOTE_AUTH_KEY_MAX_LENGTH, 'Auth key is too long (max 256 characters)'),
+        ),
+    ), // Optional auth key with max length
+    expiresIn: v.enum(EXPIRY_OPTIONS, 'Invalid expiration time. Please select a valid option.'),
+    manualDeletion: v.union(
+        [v.optional(v.enum(MANUAL_DELETION_OPTIONS)), v.boolean()],
+        'Invalid manual deletion setting. Please select a valid option.',
+    ), // Allow empty string for default value
+});
+
 export const viewNoteSchema = v.object({
     password: v.pipe(
         v.string(),
@@ -47,6 +73,7 @@ export const viewNoteSchema = v.object({
 });
 
 export type CreateNoteSchema = v.InferOutput<typeof createNoteSchema>;
+export type CreateNoteServerSchema = v.InferOutput<typeof createNoteServerSchema>;
 export type ViewNoteSchema = v.InferOutput<typeof viewNoteSchema>;
 
 export const expirationOptions: string[] = Object.values(EXPIRY_OPTIONS);
