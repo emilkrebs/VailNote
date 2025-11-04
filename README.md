@@ -67,9 +67,7 @@ The system has been compromised and is marked with (!).
 5. After successful decryption, the client requests that the server delete the note.
 6. If decryption fails, the note remains on the server until a valid decryption attempt is made or it expires.
 
-
 <img width="1059" height="809" alt="architecture diagram" src="https://github.com/user-attachments/assets/90d13e22-5888-4b2e-8120-6ce43d532a6f" />
-
 
 ## Known Issues
 
