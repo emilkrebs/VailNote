@@ -18,18 +18,18 @@
         }
     },
     "exclude": [
-        "**/_fresh/*",
-        "**/node_modules/**"
+        "**/_fresh/*"
     ],
     "imports": {
-        "fresh": "jsr:@fresh/core@^2.1.0",
-        "preact": "npm:preact@^10.27.2",
-        "@preact/signals": "npm:@preact/signals@^2.3.1",
-        "@fresh/plugin-vite": "jsr:@fresh/plugin-vite@^1.0.3",
-        "vite": "npm:vite@^7.1.5",
-        "tailwindcss": "npm:tailwindcss@^4.1.13",
-        "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.1.13",
+        "@/": "./",
         "@deno/gfm": "jsr:@deno/gfm@^0.11.0",
+        "fresh": "jsr:@fresh/core@^2.1.4",
+        "preact": "npm:preact@^10.27.2",
+        "@preact/signals": "npm:@preact/signals@^2.3.2",
+        "@fresh/plugin-vite": "jsr:@fresh/plugin-vite@^1.0.7",
+        "vite": "npm:vite@^7.1.12",
+        "tailwindcss": "npm:tailwindcss@^4.1.16",
+        "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.1.16",
         "@valibot/valibot": "jsr:@valibot/valibot@^1.1.0",
         "$std/": "https://deno.land/std@0.216.0/",
         "bcrypt": "https://deno.land/x/bcrypt/mod.ts"
