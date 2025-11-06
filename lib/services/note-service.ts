@@ -12,11 +12,11 @@ export default class NoteService {
         return this.provider.create(data);
     }
 
-    static getNote(noteId: string, password?: string) {
-        return this.provider.get(noteId, password);
+    static getNote(noteId: string, authKey?: string, password?: string) {
+        return this.provider.get(noteId, authKey, password);
     }
 
-    static deleteNote(noteId: string, password?: string) {
-        return this.provider.delete(noteId, password);
+    static deleteNote(noteId: string, authKey?: string, password?: string) {
+        return this.provider.delete(noteId, authKey, password);
     }
 }

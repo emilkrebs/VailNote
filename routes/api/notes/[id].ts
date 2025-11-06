@@ -17,14 +17,34 @@ export const handler = async (ctx: Context<State>): Promise<Response> => {
 
     if (ctx.req.method === 'POST') {
         const note = await db.getNoteById(id);
-        const { passwordHash } = await ctx.req.json();
+        const { passwordHash, authKeyHash } = await ctx.req.json();
 
-        if (!note || !passwordHash) {
-            return new Response('Note not found or password hash missing', { status: 404 });
+        if (!note) {
+            return new Response('Note not found', { status: 404 });
         }
 
-        if (note.password && !compareHash(passwordHash, note.password)) {
-            return new Response('Invalid password or auth key', { status: 403 });
+        // Check authentication - need either password+authKey combo or just authKey (for legacy notes)
+        let isAuthenticated = false;
+
+        if (note.password && note.authKey) {
+            // Note requires both password and auth key
+            if (passwordHash && authKeyHash) {
+                isAuthenticated = compareHash(passwordHash, note.password) && compareHash(authKeyHash, note.authKey);
+            }
+        } else if (note.authKey && !note.password) {
+            // Note only requires auth key (legacy or no-password notes)
+            if (authKeyHash) {
+                isAuthenticated = compareHash(authKeyHash, note.authKey);
+            }
+        } else if (note.password && !note.authKey) {
+            // Legacy note with only password (shouldn't happen with new system but handle gracefully)
+            if (passwordHash) {
+                isAuthenticated = compareHash(passwordHash, note.password);
+            }
+        }
+
+        if (!isAuthenticated) {
+            return new Response('Invalid authentication credentials', { status: 403 });
         }
 
         // If the note doesn't require manual deletion, delete it to ensure it has been destroyed
@@ -46,14 +66,35 @@ export const handler = async (ctx: Context<State>): Promise<Response> => {
         );
     } else if (ctx.req.method === 'DELETE') {
         const note = await db.getNoteById(id);
-        const { passwordHash } = await ctx.req.json();
+        const { passwordHash, authKeyHash } = await ctx.req.json();
         if (!note) {
             return new Response('Note not found', { status: 404 });
         }
 
-        if (note.password && !compareHash(passwordHash, note.password)) {
-            return new Response('Invalid password or auth key', { status: 403 });
+        // Check authentication for deletion - same logic as retrieval
+        let isAuthenticated = false;
+
+        if (note.password && note.authKey) {
+            // Note requires both password and auth key
+            if (passwordHash && authKeyHash) {
+                isAuthenticated = compareHash(passwordHash, note.password) && compareHash(authKeyHash, note.authKey);
+            }
+        } else if (note.authKey && !note.password) {
+            // Note only requires auth key (legacy or no-password notes)
+            if (authKeyHash) {
+                isAuthenticated = compareHash(authKeyHash, note.authKey);
+            }
+        } else if (note.password && !note.authKey) {
+            // Legacy note with only password (shouldn't happen with new system but handle gracefully)
+            if (passwordHash) {
+                isAuthenticated = compareHash(passwordHash, note.password);
+            }
         }
+
+        if (!isAuthenticated) {
+            return new Response('Invalid authentication credentials', { status: 403 });
+        }
+
         await db.deleteNote(id);
         return new Response(
             JSON.stringify({
