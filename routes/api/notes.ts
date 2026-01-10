@@ -44,7 +44,7 @@ export const handler = {
             const hasPassword = password && password.trim() !== '';
 
             // if password is provided, hash it with bcrypt (password should be PBKDF2 hashed on client before sending)
-            const passwordHash = hasPassword ? generateHash(password) : undefined;
+            const passwordHash = hasPassword ? await generateHash(password) : undefined;
 
             // check if content is encrypted
             const result: Note = {
@@ -94,7 +94,7 @@ export const handler = {
     },
 };
 
-function generateHash(password: string): string {
-    const salt = bcrypt.genSaltSync(12);
-    return bcrypt.hashSync(password, salt);
+async function generateHash(password: string): Promise<string> {
+    const salt = await bcrypt.genSalt(12);
+    return await bcrypt.hash(password, salt);
 }

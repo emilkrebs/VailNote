@@ -7,23 +7,20 @@ import { defaultLogger } from './lib/logging.ts';
 
 const serverSecret = Deno.env.get('ARC_SECRET');
 const databasePath = Deno.env.get('DATABASE_PATH');
+let noteDatabase: NoteDatabase;
 
 if (!serverSecret) {
     throw new Error('ARC_SECRET environment variable is not set');
 }
 
-defaultLogger.log(`Database Path Source: ${databasePath ? 'env' : 'default'}`);
-
-let noteDatabase: NoteDatabase;
-
 try {
     noteDatabase = await new NoteDatabase(databasePath).init();
+    defaultLogger.log(`Database Path Source: ${databasePath ? 'env' : 'default'}`);
 } catch (error) {
     defaultLogger.error('Failed to initialize NoteDatabase', error);
     throw error;
 }
 
-export { noteDatabase };
 // Configure rate limiter: 15 requests per minute, 5 min block duration
 const rateLimiter = new ArcRateLimiter({
     maxRequests: 15,
@@ -32,6 +29,8 @@ const rateLimiter = new ArcRateLimiter({
     identifier: 'vailnote-rate-limiter',
     serverSecret,
 });
+
+export { noteDatabase };
 
 export const app = new App<State>()
     .use(staticFiles())

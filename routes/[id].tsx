@@ -28,23 +28,6 @@ export const handler = {
         // The client will handle password input and decryption entirely
         return { data: { note, message: 'Note found - the client will handle decryption' } };
     },
-
-    async POST(ctx: Context<State>) {
-        // For backward compatibility, POST requests should also render the client-side component
-        // All password validation and decryption now happens client-side
-        const { id } = ctx.params;
-        if (!id) {
-            throw new HttpError(404);
-        }
-        const note = await noteDatabase.getNoteById(id);
-
-        if (!note) {
-            throw new HttpError(404);
-        }
-
-        // Always render the client-side component - password validation is now client-side
-        return { data: { note, message: 'Note found - the client will handle decryption' } };
-    },
 };
 
 export default function NotePage({ data }: { data: NotePageProps }) {

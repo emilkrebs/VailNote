@@ -4,6 +4,26 @@ import * as bcrypt from 'bcrypt';
 import { State } from '../../../lib/types/common.ts';
 import { noteDatabase } from '../../../main.ts';
 
+async function validateNoteAccess(id: string, passwordHash?: string): Promise<{ note: Note | null; error?: Response }> {
+    const note = await noteDatabase.getNoteById(id);
+
+    if (!note) {
+        return {
+            note: null,
+            error: new Response('Note not found', { status: 404 }),
+        };
+    }
+
+    if (note.password && passwordHash && !(await compareHash(passwordHash, note.password))) {
+        return {
+            note: null,
+            error: new Response('Invalid password or auth key', { status: 403 }),
+        };
+    }
+
+    return { note };
+}
+
 export const handler = async (ctx: Context<State>): Promise<Response> => {
     if (ctx.req.method !== 'POST' && ctx.req.method !== 'DELETE') {
         return new Response('Method not allowed', { status: 405 });
@@ -14,62 +34,40 @@ export const handler = async (ctx: Context<State>): Promise<Response> => {
         return new Response('Note ID is required', { status: 400 });
     }
 
+    const { passwordHash } = await ctx.req.json();
+    const { note, error } = await validateNoteAccess(id, passwordHash);
+
+    if (error) return error;
+    if (!note) return new Response('Note not found', { status: 404 });
+
     if (ctx.req.method === 'POST') {
-        const note = await noteDatabase.getNoteById(id);
-        const { passwordHash } = await ctx.req.json();
-
-        if (!note || !passwordHash) {
-            return new Response('Note not found or password hash missing', { status: 404 });
-        }
-
-        if (note.password && !compareHash(passwordHash, note.password)) {
-            return new Response('Invalid password or auth key', { status: 403 });
-        }
-
-        // If the note doesn't require manual deletion, delete it to ensure it has been destroyed
+        // Auto-delete non-manual notes after viewing
         if (!note.manualDeletion) {
             await noteDatabase.deleteNote(id);
         }
 
         return new Response(
-            JSON.stringify({
-                id: note.id,
-                content: note.content,
-                iv: note.iv,
-                expiresIn: note.expiresIn,
-                manualDeletion: note.manualDeletion,
-            } as Note),
+            JSON.stringify(note),
             {
                 status: 200,
+                headers: { 'Content-Type': 'application/json' },
             },
         );
-    } else if (ctx.req.method === 'DELETE') {
-        const note = await noteDatabase.getNoteById(id);
-        const { passwordHash } = await ctx.req.json();
-        if (!note) {
-            return new Response('Note not found', { status: 404 });
-        }
-
-        if (note.password && !compareHash(passwordHash, note.password)) {
-            return new Response('Invalid password or auth key', { status: 403 });
-        }
+    } else { // DELETE
         await noteDatabase.deleteNote(id);
         return new Response(
-            JSON.stringify({
-                message: 'Note deleted successfully',
-            }),
+            JSON.stringify({ message: 'Note deleted successfully' }),
             {
                 status: 200,
+                headers: { 'Content-Type': 'application/json' },
             },
         );
-    } else {
-        return new Response('Method not allowed', { status: 405 });
     }
 };
 
-function compareHash(plainText: string, hash: string): boolean {
+async function compareHash(plainText: string, hash: string): Promise<boolean> {
     try {
-        return bcrypt.compareSync(plainText, hash);
+        return await bcrypt.compare(plainText, hash);
     } catch (error) {
         console.error('Error comparing hash:', error);
         return false;
