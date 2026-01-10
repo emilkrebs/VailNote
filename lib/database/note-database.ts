@@ -116,23 +116,25 @@ export class NoteDatabase {
     async generateNoteId(): Promise<string> {
         if (!this.kv) throw new Error('Database not initialized');
 
-        let id = '';
-        let note = null;
-        let attempts = 0;
-        let length = 10; // Start with a length of 10 characters
+        const MAX_ATTEMPTS = 5;
+        const BASE_LENGTH = 12; // Start with longer IDs to reduce collisions
 
-        do {
-            attempts++;
-            if (attempts > 10) {
-                length++;
-            }
-            id = Math.random().toString(36).substring(2, length + 2);
+        for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+            const length = BASE_LENGTH + Math.floor(attempt / 2); // Increase length after failed attempts
+            const id = crypto.randomUUID().replace(/-/g, '').substring(0, length);
 
             const res = await this.kv.get<Note>(['note', id]);
-            note = res.value;
-        } while (note);
+            if (!res.value) {
+                return id;
+            }
+        }
 
-        return id;
+        // Fallback to cryptographically secure random ID if all attempts fail
+        const fallbackId = (
+            crypto.randomUUID().replace(/-/g, '') +
+            crypto.randomUUID().replace(/-/g, '')
+        ).substring(0, 20);
+        return fallbackId;
     }
 
     async clearAllNotes(): Promise<void> {

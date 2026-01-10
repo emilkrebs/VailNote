@@ -7,7 +7,10 @@
  * const hash = await generateHMACSHA256('myInput', Deno.env.get('ARC_SECRET')!);
  * console.log(hash); // Outputs the HMAC SHA-256 hash in base64 format
  */
-export async function generateHMACSHA256(input: string, secret: string): Promise<string> {
+export async function generateHMACSHA256(
+    input: string,
+    secret: string,
+): Promise<string> {
     const encoder = new TextEncoder();
     const key = await crypto.subtle.importKey(
         'raw',
@@ -16,6 +19,10 @@ export async function generateHMACSHA256(input: string, secret: string): Promise
         false,
         ['sign'],
     );
-    const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(input));
+    const signature = await crypto.subtle.sign(
+        'HMAC',
+        key,
+        encoder.encode(input),
+    );
     return btoa(String.fromCharCode(...new Uint8Array(signature)));
 }

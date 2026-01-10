@@ -18,6 +18,7 @@ const defaultRateLimitOptions = {
     enablePeriodicCleanup: false,
 };
 
+Deno.env.set('ARC_SECRET', defaultRateLimitOptions.serverSecret);
 Deno.test('ARC Rate Limiter - basic functionality', async () => {
     const rateLimiter = new ArcRateLimiter(defaultRateLimitOptions);
     const app = new App<State>()

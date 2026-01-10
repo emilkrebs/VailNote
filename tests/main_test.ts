@@ -21,6 +21,9 @@ export class TestDataFactory {
     };
 }
 
+const testArcSecret = crypto.randomUUID();
+Deno.env.set('ARC_SECRET', testArcSecret);
+
 // Test suite for basic HTTP functionality
 Deno.test({
     name: 'HTTP - Basic functionality',
