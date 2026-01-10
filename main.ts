@@ -2,12 +2,19 @@ import { App, cors, csp, csrf, staticFiles } from 'fresh';
 import { headers } from './middleware.ts';
 import { ArcRateLimiter } from './lib/rate-limiting/src/arc-rate-limiter.ts';
 import { ORIGIN, State } from './lib/types/common.ts';
+import { NoteDatabase } from './lib/database/note-database.ts';
+import { defaultLogger } from './lib/logging.ts';
 
 const serverSecret = Deno.env.get('ARC_SECRET');
+const databasePath = Deno.env.get('DATABASE_PATH');
 
 if (!serverSecret) {
     throw new Error('ARC_SECRET environment variable is not set');
 }
+
+defaultLogger.log(`Database Path Source: ${databasePath ? 'env' : 'default'}`);
+
+export const noteDatabase: NoteDatabase = await new NoteDatabase(databasePath).init();
 
 // Configure rate limiter: 15 requests per minute, 5 min block duration
 const rateLimiter = new ArcRateLimiter({

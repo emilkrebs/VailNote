@@ -21,6 +21,8 @@ export class TestDataFactory {
     };
 }
 
+Deno.env.set('ARC_SECRET', 'super-secret');
+
 // Test suite for basic HTTP functionality
 Deno.test({
     name: 'HTTP - Basic functionality',

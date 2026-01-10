@@ -9,39 +9,24 @@
         "preview": "deno task build && deno task start",
         "clean": "rm -rf ./dist && rm -rf ./_fresh && rm -rf ./node_modules && rm -f ./deno.lock && rm -f ./package-lock.json"
     },
-    "lint": {
-        "rules": {
-            "tags": [
-                "fresh",
-                "recommended"
-            ]
-        }
-    },
-    "exclude": [
-        "**/_fresh/*"
-    ],
+    "lint": { "rules": { "tags": ["fresh", "recommended"] } },
+    "exclude": ["**/_fresh/*"],
     "imports": {
         "@/": "./",
         "@deno/gfm": "jsr:@deno/gfm@^0.11.0",
-        "fresh": "jsr:@fresh/core@^2.1.4",
-        "preact": "npm:preact@^10.27.2",
-        "@preact/signals": "npm:@preact/signals@^2.3.2",
-        "@fresh/plugin-vite": "jsr:@fresh/plugin-vite@^1.0.7",
-        "vite": "npm:vite@^7.1.12",
-        "tailwindcss": "npm:tailwindcss@^4.1.16",
-        "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.1.16",
-        "@valibot/valibot": "jsr:@valibot/valibot@^1.1.0",
+        "fresh": "jsr:@fresh/core@^2.2.0",
+        "preact": "npm:preact@^10.28.2",
+        "@preact/signals": "npm:@preact/signals@^2.5.1",
+        "@fresh/plugin-vite": "jsr:@fresh/plugin-vite@^1.0.8",
+        "vite": "npm:vite@^7.3.1",
+        "tailwindcss": "npm:tailwindcss@^4.1.18",
+        "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.1.18",
+        "@valibot/valibot": "jsr:@valibot/valibot@^1.2.0",
         "$std/": "https://deno.land/std@0.216.0/",
         "bcrypt": "https://deno.land/x/bcrypt/mod.ts"
     },
     "compilerOptions": {
-        "lib": [
-            "dom",
-            "dom.asynciterable",
-            "dom.iterable",
-            "deno.ns",
-            "deno.unstable"
-        ],
+        "lib": ["dom", "dom.asynciterable", "dom.iterable", "deno.ns", "deno.unstable"],
         "jsx": "precompile",
         "jsxImportSource": "preact",
         "jsxPrecompileSkipElements": [
@@ -60,9 +45,7 @@
             "noscript",
             "template"
         ],
-        "types": [
-            "vite/client"
-        ]
+        "types": ["vite/client"]
     },
     "fmt": {
         "useTabs": false,
@@ -70,12 +53,7 @@
         "indentWidth": 4,
         "singleQuote": true,
         "proseWrap": "always",
-        "exclude": [
-            "**/node_modules/**",
-            "**/.git/**",
-            "**/.vscode/**",
-            "**/.github/**"
-        ]
+        "exclude": ["**/node_modules/**", "**/.git/**", "**/.vscode/**", "**/.github/**"]
     },
     "nodeModulesDir": "auto"
 }

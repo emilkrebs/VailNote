@@ -3,8 +3,8 @@ import { Note } from '../lib/types.ts';
 import Header from '../components/Header.tsx';
 import ViewEncryptedNote from '../islands/ViewNote.tsx';
 import { HttpError } from 'fresh';
-import { getNoteDatabase } from '../lib/services/database-service.ts';
 import { State } from '../lib/types/common.ts';
+import { noteDatabase } from '../main.ts';
 
 interface NotePageProps {
     note: Note;
@@ -18,8 +18,7 @@ export const handler = {
             throw new HttpError(404);
         }
 
-        const db = await getNoteDatabase();
-        const note = await db.getNoteById(id);
+        const note = await noteDatabase.getNoteById(id);
 
         if (!note) {
             throw new HttpError(404);
@@ -37,8 +36,7 @@ export const handler = {
         if (!id) {
             throw new HttpError(404);
         }
-        const db = await getNoteDatabase();
-        const note = await db.getNoteById(id);
+        const note = await noteDatabase.getNoteById(id);
 
         if (!note) {
             throw new HttpError(404);
