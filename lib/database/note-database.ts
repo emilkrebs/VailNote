@@ -129,8 +129,12 @@ export class NoteDatabase {
             }
         }
 
-        // Fallback to timestamp-based ID if all attempts fail
-        return `${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+        // Fallback to cryptographically secure random ID if all attempts fail
+        const fallbackId = (
+            crypto.randomUUID().replace(/-/g, '') +
+            crypto.randomUUID().replace(/-/g, '')
+        ).substring(0, 20);
+        return fallbackId;
     }
 
     async clearAllNotes(): Promise<void> {
