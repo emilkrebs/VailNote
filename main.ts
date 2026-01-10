@@ -14,8 +14,16 @@ if (!serverSecret) {
 
 defaultLogger.log(`Database Path Source: ${databasePath ? 'env' : 'default'}`);
 
-export const noteDatabase: NoteDatabase = await new NoteDatabase(databasePath).init();
+let noteDatabase: NoteDatabase;
 
+try {
+    noteDatabase = await new NoteDatabase(databasePath).init();
+} catch (error) {
+    defaultLogger.error('Failed to initialize NoteDatabase', error);
+    throw error;
+}
+
+export { noteDatabase };
 // Configure rate limiter: 15 requests per minute, 5 min block duration
 const rateLimiter = new ArcRateLimiter({
     maxRequests: 15,
