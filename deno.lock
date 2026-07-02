@@ -40,6 +40,7 @@
     "npm:@remix-run/node-fetch-server@0.12": "0.12.0",
     "npm:@tailwindcss/vite@^4.3.2": "4.3.2_vite@7.3.6",
     "npm:@types/babel__core@^7.20.5": "7.20.5",
+    "npm:bcryptjs@*": "3.0.3",
     "npm:esbuild-wasm@~0.25.11": "0.25.12",
     "npm:esbuild@0.25.7": "0.25.7",
     "npm:esbuild@~0.25.5": "0.25.12",
@@ -58,6 +59,7 @@
     "npm:rollup@^4.55.1": "4.60.4",
     "npm:sanitize-html@^2.17.0": "2.17.4",
     "npm:tailwindcss@^4.3.2": "4.3.2",
+    "npm:vite@*": "7.3.6",
     "npm:vite@^7.1.4": "7.3.6",
     "npm:vite@^7.3.6": "7.3.6"
   },
@@ -1112,6 +1114,10 @@
       "integrity": "sha512-B0xUquLkiGLgHhpPBqvl7GWegWBUNuujQ6kXd/r1U38ElPT6Ok8KZ8e+FpUGEc2ZoRQUzq/aUnaKFc/svWUGSg==",
       "bin": true
     },
+    "bcryptjs@3.0.3": {
+      "integrity": "sha512-GlF5wPWnSa/X5LKM1o0wz0suXIINz1iHRLvTS+sLyi7XPbe5ycmYI3DlZqVGZZtDgl4DmasFg7gOB3JYbphV5g==",
+      "bin": true
+    },
     "browserslist@4.28.1": {
       "integrity": "sha512-ZC5Bd0LgJXgwGqUknZY/vkUQ04r8NXnJZ3yYi4vDmSiZmC/pdSN0NbNRPxZpbtO4uAfDUAFffO8IZoM3Gj8IkA==",
       "dependencies": [
@@ -1663,6 +1669,7 @@
       "jsr:@valibot/valibot@^1.4.2",
       "npm:@preact/signals@^2.9.2",
       "npm:@tailwindcss/vite@^4.3.2",
+      "npm:bcryptjs@*",
       "npm:preact@^10.29.3",
       "npm:tailwindcss@^4.3.2",
       "npm:vite@^7.3.6"

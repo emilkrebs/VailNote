@@ -23,7 +23,7 @@
         "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.3.2",
         "@valibot/valibot": "jsr:@valibot/valibot@^1.4.2",
         "$std/": "https://deno.land/std@0.216.0/",
-        "bcrypt": "https://deno.land/x/bcrypt/mod.ts"
+        "bcrypt": "npm:bcryptjs"
     },
     "compilerOptions": {
         "lib": ["dom", "dom.asynciterable", "dom.iterable", "deno.ns", "deno.unstable"],
