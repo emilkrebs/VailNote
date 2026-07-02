@@ -48,7 +48,9 @@ export default class RemoteStorage implements StorageProvider {
             }
 
             const { noteId, ...res } = await response.json();
-            const link = password ? noteId : `${noteId}#auth=${authKey}`;
+            // The auth key is always part of the link; password-protected notes
+            // additionally require the password to decrypt.
+            const link = `${noteId}#auth=${authKey}`;
 
             return { success: true, noteId, authKey, message: res.message, link };
         } catch (_err) {

@@ -6,6 +6,7 @@ import SiteHeader from '../components/SiteHeader.tsx';
 import { Button } from '../components/Button.tsx';
 import { formatExpirationMessage, Note } from '../lib/types.ts';
 import { decryptNoteContent } from '../lib/encryption.ts';
+import { combineNoteSecrets } from '../lib/services/crypto-service.ts';
 import LoadingPage from '../components/LoadingPage.tsx';
 import NoteService from '../lib/services/note-service.ts';
 import Card, { CardContent, CardFooter, CardHeader, CardTitle } from '../components/Card.tsx';
@@ -82,6 +83,12 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
         try {
             const result = await NoteService.getNote(noteId, authKey);
             if (!result.success || !result.note) {
+                // Password-protected notes reject the auth key alone (403);
+                // the password prompt collects the second factor.
+                if (result.message?.includes('Invalid password')) {
+                    showPasswordPrompt();
+                    return;
+                }
                 throw new Error(result.message);
             }
 
@@ -142,9 +149,9 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
         const data = Object.fromEntries(new FormData(form));
         const formData = v.parse(viewNoteSchema, data) as ViewNoteSchema;
 
-        const password = formData.password;
+        const enteredPassword = formData.password;
 
-        if (!password.trim()) {
+        if (!enteredPassword.trim()) {
             setDecryptionError(MESSAGES.ENTER_PASSWORD);
             setLoading(false);
             return;
@@ -152,7 +159,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 
         try {
             setDecryptionError(undefined);
-            const result = await NoteService.getNote(noteId, password);
+            const result = await NoteService.getNote(noteId, enteredPassword);
 
             if (!result.success || !result.note) {
                 setDecryptionError(MESSAGES.INVALID_PASSWORD);
@@ -160,8 +167,13 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
                 return;
             }
 
-            const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, password);
+            // Notes created with a link auth key are encrypted with password + auth key
+            // combined; older password-only notes fall back to the password alone.
+            const authKey = getAuthKey();
+            const decryptionKey = authKey ? combineNoteSecrets(enteredPassword, authKey) : enteredPassword;
+            const decryptedContent = await decryptNoteContent(result.note.content, result.note.iv, decryptionKey);
 
+            password.current = manualDeletion ? enteredPassword : undefined;
             setNote({ ...result.note, content: decryptedContent });
             setNeedsPassword(false);
             setConfirmed(true);
