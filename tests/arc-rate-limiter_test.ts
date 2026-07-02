@@ -11,7 +11,10 @@ import { DenoKVArcStore } from '../lib/rate-limiting/src/arc-store.ts';
 
 const defaultRateLimitOptions = {
     maxRequests: 2,
-    windowMs: 1000,
+    // Generous window so slow CI runners (600k-iteration PBKDF2 in encryptNoteContent
+    // can take longer than expected) don't let the window reset mid-test and mask
+    // the rate limit being hit. No test relies on the window itself expiring.
+    windowMs: 60_000,
     blockDurationMs: 2000,
     identifier: 'test-arc-rate-limiter',
     serverSecret: 'super-secret',
