@@ -14,11 +14,15 @@ async function validateNoteAccess(id: string, passwordHash?: string): Promise<{ 
         };
     }
 
-    if (note.password && passwordHash && !(await compareHash(passwordHash, note.password))) {
-        return {
-            note: null,
-            error: new Response('Invalid password or auth key', { status: 403 }),
-        };
+    // If the note is password-protected, a valid password hash is REQUIRED.
+    // Do not fail open when the caller omits the hash.
+    if (note.password) {
+        if (!passwordHash || !(await compareHash(passwordHash, note.password))) {
+            return {
+                note: null,
+                error: new Response('Invalid password or auth key', { status: 403 }),
+            };
+        }
     }
 
     return { note };
@@ -34,7 +38,14 @@ export const handler = async (ctx: Context<State>): Promise<Response> => {
         return new Response('Note ID is required', { status: 400 });
     }
 
-    const { passwordHash } = await ctx.req.json();
+    let passwordHash: string | undefined;
+    try {
+        const body = await ctx.req.json();
+        passwordHash = body?.passwordHash;
+    } catch {
+        return new Response('Invalid request body', { status: 400 });
+    }
+
     const { note, error } = await validateNoteAccess(id, passwordHash);
 
     if (error) return error;

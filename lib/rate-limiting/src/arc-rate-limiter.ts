@@ -39,6 +39,7 @@ export interface ArcEntry {
  * @param serverSecret Secret key for HMAC generation
  * @param store Custom store implementation for flexibility (defaults to in-memory)
  * @param enablePeriodicCleanup Whether to enable periodic cleanup of expired entries
+ * @param trustedProxyCount Number of trusted reverse proxies in front of the app (default 1); used to pick the real client IP from X-Forwarded-For
  */
 export interface ArcRateLimiterOptions {
     maxRequests?: number;
@@ -48,6 +49,7 @@ export interface ArcRateLimiterOptions {
     serverSecret: string;
     enablePeriodicCleanup?: boolean;
     store?: ArcStore;
+    trustedProxyCount?: number;
 }
 
 /**
@@ -75,6 +77,7 @@ export class ArcRateLimiter {
     private readonly blockDurationMs: number;
     private readonly identifier: string;
     private readonly serverSecret: string;
+    private readonly trustedProxyCount: number;
     private cleanupTimer?: number;
 
     constructor({
@@ -85,6 +88,7 @@ export class ArcRateLimiter {
         serverSecret,
         enablePeriodicCleanup = true,
         store = new InMemoryArcStore(),
+        trustedProxyCount = 1,
     }: ArcRateLimiterOptions) {
         if (maxRequests <= 0) throw new Error('maxRequests must be positive');
         if (windowMs <= 0) throw new Error('windowMs must be positive');
@@ -93,6 +97,9 @@ export class ArcRateLimiter {
         }
         if (!identifier.trim()) throw new Error('identifier cannot be empty');
         if (!serverSecret.trim()) throw new Error('serverSecret cannot be empty');
+        if (trustedProxyCount < 0) {
+            throw new Error('trustedProxyCount cannot be negative');
+        }
 
         this.maxRequests = maxRequests;
         this.windowMs = windowMs;
@@ -100,6 +107,7 @@ export class ArcRateLimiter {
         this.identifier = identifier.trim();
         this.serverSecret = serverSecret;
         this.store = store;
+        this.trustedProxyCount = trustedProxyCount;
 
         if (enablePeriodicCleanup) {
             this.startPeriodicCleanup();
@@ -210,11 +218,19 @@ export class ArcRateLimiter {
     private extractClientIdentifier(request: Request): string {
         const headers = request.headers;
 
-        // Try to get real IP from common proxy headers (!)
+        // Try to get the real client IP from X-Forwarded-For. The header is a list
+        // "client, proxy1, proxy2, ..." where the RIGHTMOST entries are appended by
+        // our own trusted proxies and cannot be spoofed by the client. Select the hop
+        // added just before our trusted proxies rather than the (spoofable) leftmost.
         const xForwardedFor = headers.get('x-forwarded-for');
         if (xForwardedFor) {
-            const clientIp = xForwardedFor.split(',')[0].trim();
-            if (this.isValidIp(clientIp)) {
+            const parts = xForwardedFor
+                .split(',')
+                .map((part) => part.trim())
+                .filter((part) => part.length > 0);
+            const index = parts.length - this.trustedProxyCount;
+            const clientIp = index >= 0 ? parts[index] : undefined;
+            if (clientIp && this.isValidIp(clientIp)) {
                 return clientIp;
             }
         }

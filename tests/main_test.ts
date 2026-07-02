@@ -87,6 +87,49 @@ Deno.test({
             apiNoteId = data.noteId;
         });
 
+        await t.step('should reject password-protected note read without passwordHash', async () => {
+            const passwordClientHash = await generateDeterministicClientHash(testData.password);
+            const encryptedContent = await encryptNoteContent(testData.content, testData.password);
+
+            const createResponse = await handler(
+                new Request(`http://localhost/api/notes`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        content: encryptedContent.encrypted,
+                        iv: encryptedContent.iv,
+                        password: passwordClientHash,
+                        expiresIn: testData.expiresIn,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                }),
+            );
+
+            assertEquals(createResponse.status, 201);
+            const createData = await createResponse.json();
+            const protectedNoteId = createData.noteId;
+            assertExists(protectedNoteId, 'Note ID should be present in API response');
+
+            const unauthorizedResponse = await handler(
+                new Request(`http://localhost/api/notes/${protectedNoteId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}),
+                }),
+            );
+
+            assertEquals(unauthorizedResponse.status, 403);
+
+            const authorizedResponse = await handler(
+                new Request(`http://localhost/api/notes/${protectedNoteId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ passwordHash: passwordClientHash }),
+                }),
+            );
+
+            assertEquals(authorizedResponse.status, 200);
+        });
+
         await t.step('should retrieve note by ID', async () => {
             const passwordHash = await generateDeterministicClientHash(testData.password);
             const response = await handler(

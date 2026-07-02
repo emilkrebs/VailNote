@@ -5,6 +5,7 @@ import { Context } from 'fresh';
 import * as bcrypt from 'bcrypt';
 import { State } from '../../lib/types/common.ts';
 import { noteDatabase } from '../../main.ts';
+import { defaultLogger } from '../../lib/logging.ts';
 
 /* used for client side note creation and encryption
     * This endpoint handles only POST requests.
@@ -59,14 +60,10 @@ export const handler = {
             const insertResult = await noteDatabase.insertNote(result);
 
             if (!insertResult.success) {
+                defaultLogger.error(`Failed to save note: ${insertResult.error}`);
                 return new Response(
-                    JSON.stringify({
-                        message: 'Failed to save note',
-                        error: insertResult.error,
-                    }),
-                    {
-                        status: 500,
-                    },
+                    JSON.stringify({ message: 'Failed to save note' }),
+                    { status: 500 },
                 );
             }
 
@@ -80,15 +77,10 @@ export const handler = {
                 },
             );
         } catch (error) {
-            // Unexpected error handling
+            defaultLogger.error(`Unexpected error creating note: ${error instanceof Error ? error.message : error}`);
             return new Response(
-                JSON.stringify({
-                    message: 'Failed to process request',
-                    error: error instanceof Error ? error.message : 'Unknown error',
-                }),
-                {
-                    status: 500,
-                },
+                JSON.stringify({ message: 'Failed to process request' }),
+                { status: 500 },
             );
         }
     },

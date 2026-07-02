@@ -61,7 +61,12 @@ export class AESEncryption {
 }
 
 export function uint8ArrayToBase64(uint8Array: Uint8Array): string {
-    const binaryString = String.fromCharCode.apply(null, Array.from(uint8Array));
+    const CHUNK_SIZE = 0x8000; // 32 KB chunks stay well under the argument-count limit
+    let binaryString = '';
+    for (let i = 0; i < uint8Array.length; i += CHUNK_SIZE) {
+        const chunk = uint8Array.subarray(i, i + CHUNK_SIZE);
+        binaryString += String.fromCharCode.apply(null, Array.from(chunk));
+    }
     return btoa(binaryString);
 }
 
@@ -111,6 +116,32 @@ export function getAESEncryptionIV(iv: string): Uint8Array {
     return base64ToUint8Array(iv);
 }
 
+// Iteration count for deriving the AES content key from the password/auth key.
+// PBKDF2-SHA256 with a per-note salt (the IV) makes offline brute-force of note
+// content by anyone holding the ciphertext computationally expensive.
+const CONTENT_KEY_ITERATIONS = 600000;
+
+async function deriveContentKey(secret: string, salt: Uint8Array): Promise<string> {
+    const keyMaterial = await crypto.subtle.importKey(
+        'raw',
+        new TextEncoder().encode(secret),
+        'PBKDF2',
+        false,
+        ['deriveBits'],
+    );
+    const derivedBits = await crypto.subtle.deriveBits(
+        {
+            name: 'PBKDF2',
+            salt: new Uint8Array(salt).buffer, // ensure concrete ArrayBuffer
+            iterations: CONTENT_KEY_ITERATIONS,
+            hash: 'SHA-256',
+        },
+        keyMaterial,
+        256,
+    );
+    return uint8ArrayToBase64(new Uint8Array(derivedBits));
+}
+
 /**
  * Encrypt note content using a password
  * @param content The note content
@@ -121,16 +152,12 @@ export async function encryptNoteContent(
     content: string,
     password: string,
 ): Promise<{ encrypted: string; iv: string }> {
-    // Hash the password to get a 32-byte key (SHA-256)
-    const keyBuffer = await crypto.subtle.digest(
-        'SHA-256',
-        new TextEncoder().encode(password),
-    );
-    const keyBase64 = uint8ArrayToBase64(new Uint8Array(keyBuffer));
-
-    // Generate a random IV
+    // Generate a random IV (also used as the PBKDF2 salt for key derivation)
     const ivBytes = generateEncryptionIv();
     const ivBase64 = uint8ArrayToBase64(ivBytes);
+
+    // Derive a 32-byte AES key from the password using PBKDF2 (salted with the IV)
+    const keyBase64 = await deriveContentKey(password, ivBytes);
 
     // Encrypt the content
     const aes = new AESEncryption();
@@ -151,12 +178,8 @@ export async function decryptNoteContent(
     iv: string,
     password: string,
 ): Promise<string> {
-    // Hash the password to get a 32-byte key (SHA-256)
-    const keyBuffer = await crypto.subtle.digest(
-        'SHA-256',
-        new TextEncoder().encode(password),
-    );
-    const keyBase64 = uint8ArrayToBase64(new Uint8Array(keyBuffer));
+    // Derive the 32-byte AES key from the password using PBKDF2 (salted with the IV)
+    const keyBase64 = await deriveContentKey(password, base64ToUint8Array(iv));
 
     // Decrypt the content
     const aes = new AESEncryption();
