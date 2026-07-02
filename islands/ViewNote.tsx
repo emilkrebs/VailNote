@@ -275,7 +275,7 @@ function DisplayDecryptedNote(
                         </div>
 
                         <div class='relative bg-gray-900/80 rounded-lg p-6 shadow-inner border border-gray-700/50 max-w-full max-h-96 overflow-auto'>
-                            <div class='text-gray-100 leading-relaxed text-base pr-12 break-words whitespace-pre-wrap'>
+                            <div class='text-gray-100 leading-relaxed text-base pr-12 wrap-break-word whitespace-pre-wrap'>
                                 {content}
                             </div>
                         </div>
