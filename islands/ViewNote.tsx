@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import HomeButton from '../components/HomeButton.tsx';
 import Message from '../components/Message.tsx';
-import PenIcon from '../components/PenIcon.tsx';
-import SiteHeader from '../components/SiteHeader.tsx';
+import PageShell from '../components/PageShell.tsx';
 import { Button } from '../components/Button.tsx';
 import { formatExpirationMessage, Note } from '../lib/types.ts';
 import { decryptNoteContent } from '../lib/encryption.ts';
@@ -16,12 +15,13 @@ import * as v from '@valibot/valibot';
 import ErrorPage from '../components/ErrorPage.tsx';
 import PasswordToggle from '../components/PasswordToggle.tsx';
 import CopyButton from '../components/CopyButton.tsx';
+import { ClockCountdownIcon, EyeIcon, FireIcon, TrashSimpleIcon, WarningIcon } from '../components/Icons.tsx';
 
 // Constants for messages
 const MESSAGES = {
     NO_AUTH_KEY: 'No auth key provided, note requires password',
-    MANUAL_DELETION_PROMPT: 'The note has been retrieved. Click the button below to delete it.',
-    AUTO_DELETION_COMPLETE: 'This note has been destroyed. It will not be retrievable again.',
+    MANUAL_DELETION_PROMPT: 'The note has been retrieved. You can delete it below at any time.',
+    AUTO_DELETION_COMPLETE: 'This note has been destroyed. It cannot be retrieved again.',
     DECRYPTION_FAILED: 'Failed to decrypt note with provided authentication key',
     ENTER_PASSWORD: 'Please enter a password',
     NOTE_NOT_AVAILABLE: 'Note data not available',
@@ -220,8 +220,8 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
     if (loading) {
         return (
             <LoadingPage
-                title='Decrypting Note'
-                message='Please wait while we securely decrypt your note...'
+                title='Decrypting note'
+                message='Your browser is decrypting the note locally.'
             />
         );
     }
@@ -245,190 +245,140 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
     );
 }
 
-interface DisplayDecryptedNoteProps {
-    content: string;
-    message?: string;
-    manualDeletion?: boolean;
-    expiresIn: Date;
-    onDeleteNote: () => void;
-}
-
 function DisplayDecryptedNote(
     { content, message, manualDeletion, expiresIn, onDeleteNote }: DisplayDecryptedNoteProps,
 ) {
     return (
-        <div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
-            <SiteHeader />
-            <div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-                <Card>
-                    {/* Header with icon and title */}
-                    <CardHeader>
-                        <CardTitle>
-                            <div class='flex items-center justify-start gap-3'>
-                                <div class='p-3 bg-blue-600/20 rounded-xl'>
-                                    <PenIcon />
-                                </div>
-                                <div>
-                                    Note Retrieved
-                                    {manualDeletion && <ExpirationMessage expiresIn={expiresIn} />}
-                                </div>
-                            </div>
-                        </CardTitle>
-                        <Message variant='success'>
-                            {message || MESSAGES.AUTO_DELETION_COMPLETE}
-                        </Message>
-                    </CardHeader>
+        <PageShell>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Note decrypted</CardTitle>
+                    {manualDeletion && <ExpirationMessage expiresIn={expiresIn} />}
+                    <Message variant='success'>
+                        {message || MESSAGES.AUTO_DELETION_COMPLETE}
+                    </Message>
+                </CardHeader>
 
-                    {/* Content section */}
-                    <CardContent>
-                        <div class='flex items-center gap-2 mb-4'>
-                            <CopyButton value={content} />
-                            <h3 class='text-xl font-semibold text-white'>Content</h3>
-                        </div>
+                <CardContent>
+                    <div class='mb-2 flex items-center justify-between gap-2'>
+                        <h3 class='text-sm font-medium text-muted'>Contents</h3>
+                        <CopyButton value={content} label='Copy note contents' />
+                    </div>
 
-                        <div class='relative bg-gray-900/80 rounded-lg p-6 shadow-inner border border-gray-700/50 max-w-full max-h-96 overflow-auto'>
-                            <div class='text-gray-100 leading-relaxed text-base pr-12 wrap-break-word whitespace-pre-wrap'>
-                                {content}
-                            </div>
+                    <div class='max-h-96 overflow-auto rounded-control border border-line-strong bg-bg p-4'>
+                        <div class='font-mono text-sm leading-relaxed text-ink whitespace-pre-wrap wrap-break-word'>
+                            {content}
                         </div>
-                    </CardContent>
+                    </div>
+                </CardContent>
 
-                    <CardFooter>
-                        <div class='flex flex-col sm:flex-row gap-4'>
-                            <HomeButton />
-                            {manualDeletion && (
-                                <Button variant='danger' onClick={onDeleteNote}>
-                                    Delete Note
-                                </Button>
-                            )}
-                        </div>
-                    </CardFooter>
-                </Card>
-            </div>
-        </div>
+                <CardFooter>
+                    <div class='flex flex-col gap-3 sm:flex-row'>
+                        <HomeButton />
+                        {manualDeletion && (
+                            <Button variant='danger' onClick={onDeleteNote}>
+                                <TrashSimpleIcon size={17} />
+                                Delete note
+                            </Button>
+                        )}
+                    </div>
+                </CardFooter>
+            </Card>
+        </PageShell>
     );
 }
 
 function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequiredViewProps) {
     return (
-        <div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
-            <SiteHeader />
-            <div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-                <Card>
-                    <CardHeader>
-                        <div class='flex items-center justify-start gap-3'>
-                            <div class='p-3 bg-blue-600/20 rounded-xl'>
-                                <PenIcon />
-                            </div>
-                            Enter Password
-                        </div>
-                        <p class='text-yellow-300 text-sm font-medium'>
-                            This note is encrypted and requires a password
-                        </p>
-                    </CardHeader>
+        <PageShell>
+            <Card>
+                <CardHeader>
+                    <CardTitle>This note is locked</CardTitle>
+                    <p class='text-[0.9375rem] leading-relaxed text-muted'>
+                        Enter the password it was created with. Decryption happens in your browser.
+                    </p>
+                </CardHeader>
 
-                    <CardContent>
-                        {!manualDeletion && <WarningMessage />}
+                <CardContent class='flex flex-col gap-6'>
+                    {!manualDeletion && <DestroyFacts />}
 
-                        <NoScriptWarning />
+                    <NoScriptWarning />
 
-                        {/* Password form */}
-                        <form className='space-y-6' onSubmit={onSubmit} autoComplete='off'>
-                            <FormGroup>
-                                <Label htmlFor='password'>
-                                    Enter Password
-                                </Label>
-                                <PasswordToggle
-                                    type='password'
-                                    name='password'
-                                    id='password'
-                                    placeholder='Enter password to decrypt note'
-                                    error={error}
-                                    autoFocus
-                                    autoComplete='off'
-                                    required
-                                />
-                            </FormGroup>
-                            <Button type='submit' variant={manualDeletion ? 'primary' : 'danger'} class='w-full'>
-                                {manualDeletion ? 'View Note' : 'View & Destroy'}
-                            </Button>
-                        </form>
-                    </CardContent>
+                    <form class='flex flex-col gap-6' onSubmit={onSubmit} autoComplete='off'>
+                        <FormGroup>
+                            <Label htmlFor='password'>
+                                Password
+                            </Label>
+                            <PasswordToggle
+                                type='password'
+                                name='password'
+                                id='password'
+                                placeholder='Password for this note'
+                                error={error}
+                                autoFocus
+                                autoComplete='off'
+                                required
+                            />
+                        </FormGroup>
+                        <Button type='submit' variant={manualDeletion ? 'primary' : 'danger'} class='w-full'>
+                            {manualDeletion ? 'Decrypt note' : 'Decrypt and destroy'}
+                        </Button>
+                    </form>
+                </CardContent>
 
-                    <CardFooter>
-                        <HomeButton class='w-full' />
-                    </CardFooter>
-                </Card>
-            </div>
-        </div>
+                <CardFooter>
+                    <HomeButton class='w-full' />
+                </CardFooter>
+            </Card>
+        </PageShell>
     );
 }
 
 function ConfirmViewNote({ onSubmit }: { onSubmit: () => void }) {
     return (
-        <div class='flex flex-col items-center min-h-screen h-full w-full background-animate text-white py-16'>
-            <SiteHeader />
-            <div class='flex flex-col items-center justify-center w-full max-w-screen-md mx-auto px-4 py-8'>
-                <Card>
-                    {/* Header */}
-                    <CardHeader>
-                        <CardTitle>Confirm View & Destroy</CardTitle>
-                        <p class='text-gray-300 text-base leading-relaxed'>
-                            This action is{' '}
-                            <span class='text-red-400 font-semibold'>irreversible</span>. The note will be permanently
-                            destroyed after viewing.
-                        </p>
-                    </CardHeader>
+        <PageShell>
+            <Card>
+                <CardHeader>
+                    <CardTitle>View and destroy this note?</CardTitle>
+                    <p class='text-[0.9375rem] leading-relaxed text-muted'>
+                        This note can be read exactly once. Decrypting it deletes it from the server permanently.
+                    </p>
+                </CardHeader>
 
-                    <CardContent>
-                        <WarningMessage />
+                <CardContent class='flex flex-col gap-6'>
+                    <DestroyFacts />
 
-                        <NoScriptWarning />
+                    <NoScriptWarning />
 
-                        <div class='flex flex-col sm:flex-row w-full justify-between gap-4'>
-                            <HomeButton class='w-full sm:min-w-max' />
-                            <Button variant='danger' class='w-full' onClick={onSubmit}>
-                                View and Destroy Note
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
+                    <div class='flex flex-col gap-3 sm:flex-row-reverse sm:justify-between'>
+                        <Button variant='danger' class='w-full sm:w-auto' onClick={onSubmit}>
+                            <FireIcon size={17} />
+                            View and destroy note
+                        </Button>
+                        <HomeButton class='w-full sm:w-auto' />
+                    </div>
+                </CardContent>
+            </Card>
+        </PageShell>
     );
 }
 
-function WarningMessage() {
+const destroyFacts = [
+    { icon: EyeIcon, text: 'The note decrypts in your browser, not on the server.' },
+    { icon: FireIcon, text: 'It is deleted from the server the moment it is retrieved.' },
+    { icon: WarningIcon, text: 'There is no undo and no second view.' },
+];
+
+function DestroyFacts() {
     return (
-        <div class='bg-red-900/20 border border-red-700/30 rounded-xl p-6 mb-8'>
-            <div class='flex items-start gap-4'>
-                <svg class='w-6 h-6 text-red-400 mt-1 flex-shrink-0' fill='currentColor' viewBox='0 0 20 20'>
-                    <path
-                        fill-rule='evenodd'
-                        d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z'
-                        clip-rule='evenodd'
-                    >
-                    </path>
-                </svg>
-                <div>
-                    <h3 class='text-red-300 font-semibold text-lg mb-2'>What happens next:</h3>
-                    <ul class='text-red-200 text-sm space-y-2'>
-                        <li class='flex items-center gap-2'>
-                            <span class='w-1.5 h-1.5 bg-red-400 rounded-full'></span>
-                            Note content will be decrypted in your browser
-                        </li>
-                        <li class='flex items-center gap-2'>
-                            <span class='w-1.5 h-1.5 bg-red-400 rounded-full'></span>
-                            Note will be immediately deleted from our servers
-                        </li>
-                        <li class='flex items-center gap-2'>
-                            <span class='w-1.5 h-1.5 bg-red-400 rounded-full'></span>
-                            This action cannot be undone
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+        <ul class='flex flex-col gap-3 rounded-control border border-line bg-bg/50 p-4'>
+            {destroyFacts.map((fact) => (
+                <li key={fact.text} class='flex items-start gap-3 text-[0.9375rem] leading-relaxed text-muted'>
+                    <fact.icon size={18} class='mt-0.5 shrink-0 text-warn' />
+                    {fact.text}
+                </li>
+            ))}
+        </ul>
     );
 }
 
@@ -437,7 +387,7 @@ function ExpirationMessage({ expiresIn }: { expiresIn: Date }) {
 
     const updateMessage = () => {
         const timeString = formatExpirationMessage(expiresIn);
-        setMessage(`Expires in: ${timeString}`);
+        setMessage(`Expires in ${timeString}`);
     };
 
     useEffect(() => {
@@ -447,7 +397,8 @@ function ExpirationMessage({ expiresIn }: { expiresIn: Date }) {
     }, [expiresIn]);
 
     return (
-        <p class='text-yellow-300 text-xs font-medium mt-1'>
+        <p class='flex items-center gap-1.5 font-mono text-sm text-warn'>
+            <ClockCountdownIcon size={16} class='shrink-0' />
             {message}
         </p>
     );
@@ -456,32 +407,21 @@ function ExpirationMessage({ expiresIn }: { expiresIn: Date }) {
 function NoScriptWarning() {
     return (
         <noscript>
-            <div class='bg-yellow-900/20 border border-yellow-700/30 rounded-xl p-6 mb-8'>
-                <div class='flex items-start gap-4'>
-                    <svg class='w-6 h-6 text-yellow-400 mt-1 flex-shrink-0' fill='currentColor' viewBox='0 0 20 20'>
-                        <path
-                            fill-rule='evenodd'
-                            d='M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v4a1 1 0 102 0V7zm-1 6a1.5 1.5 0 110-3 1.5 1.5 0 010 3z'
-                            clip-rule='evenodd'
-                        />
-                    </svg>
-                    <div>
-                        <h3 class='text-yellow-300 font-semibold text-lg mb-2'>JavaScript is required</h3>
-                        <p class='text-yellow-200 text-sm'>
-                            To ensure the security and functionality of VailNote, please enable JavaScript in your
-                            browser settings.{' '}
-                            <a
-                                href='https://www.enable-javascript.com/'
-                                target='_blank'
-                                rel='noopener noreferrer'
-                                class='underline'
-                            >
-                                Learn more
-                            </a>
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <Message variant='warning'>
+                <p class='font-semibold'>JavaScript is required</p>
+                <p class='mt-1 text-sm'>
+                    Notes are decrypted in your browser, never on the server, and that needs JavaScript. Enable it in
+                    your browser settings to continue.{' '}
+                    <a
+                        href='https://www.enable-javascript.com/'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        class='underline underline-offset-2'
+                    >
+                        Learn more
+                    </a>
+                </p>
+            </Message>
         </noscript>
     );
 }

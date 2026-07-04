@@ -1,11 +1,23 @@
+import Card, { CardContent } from './Card.tsx';
+import HomeButton from './HomeButton.tsx';
+import PageShell from './PageShell.tsx';
+import { WarningIcon } from './Icons.tsx';
+
 export default function ErrorPage({ message }: { message: string }) {
     return (
-        <div class='flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4'>
-            <h1 class='text-4xl font-bold text-red-600 mb-4'>Error</h1>
-            <p class='text-lg text-gray-700'>{message}</p>
-            <a href='/' class='mt-6 text-blue-500 hover:underline'>
-                Return to Home
-            </a>
-        </div>
+        <PageShell>
+            <Card>
+                <CardContent class='flex flex-col items-center gap-4 pt-10 pb-10 text-center'>
+                    <span class='flex size-12 items-center justify-center rounded-control bg-danger-soft text-danger'>
+                        <WarningIcon size={24} />
+                    </span>
+                    <div>
+                        <h1 class='text-xl font-bold tracking-tight'>Something went wrong</h1>
+                        <p class='mt-1 max-w-md text-[0.9375rem] leading-relaxed text-muted'>{message}</p>
+                    </div>
+                    <HomeButton class='mt-2' />
+                </CardContent>
+            </Card>
+        </PageShell>
     );
 }

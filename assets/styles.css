@@ -1,95 +1,168 @@
 @import 'tailwindcss';
 
-:root {
-    --animation-time: 360s;
+/*
+ * VailNote design tokens - see DESIGN.md for the contract.
+ * Dark theme, locked. One interactive accent (brand blue); green/red/amber are semantic state only.
+ */
+@theme {
+    --color-bg: oklch(15.5% 0.018 262);
+    --color-surface: oklch(20% 0.02 262);
+    --color-raised: oklch(24.5% 0.022 262);
+    --color-ink: oklch(96% 0.005 262);
+    --color-muted: oklch(76% 0.015 262);
+    --color-faint: oklch(62% 0.02 262);
+    --color-line: oklch(100% 0 0 / 10%);
+    --color-line-strong: oklch(100% 0 0 / 18%);
+    --color-accent: oklch(62% 0.19 262);
+    --color-accent-bright: oklch(70% 0.16 262);
+    --color-accent-deep: oklch(51% 0.21 262);
+    --color-accent-deeper: oklch(45% 0.2 262);
+    --color-accent-soft: oklch(62% 0.19 262 / 12%);
+    --color-ok: oklch(78% 0.14 165);
+    --color-ok-soft: oklch(78% 0.14 165 / 10%);
+    --color-danger: oklch(72% 0.17 22);
+    --color-danger-deep: oklch(48% 0.17 25);
+    --color-danger-deeper: oklch(42% 0.16 25);
+    --color-danger-soft: oklch(72% 0.17 22 / 10%);
+    --color-warn: oklch(83% 0.13 85);
+    --color-warn-soft: oklch(83% 0.13 85 / 10%);
+
+    --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+    /* Radius rule: controls 12px, containers 18px, pills full. No other radii. */
+    --radius-control: 12px;
+    --radius-panel: 18px;
+
+    --text-display: clamp(2.25rem, 1.4rem + 4vw, 3.75rem);
+    --text-display--line-height: 1.05;
+    --text-display--letter-spacing: -0.03em;
+    --text-display--font-weight: 800;
+    --text-title: clamp(1.5rem, 1.2rem + 1.5vw, 2.25rem);
+    --text-title--line-height: 1.15;
+    --text-title--letter-spacing: -0.02em;
+    --text-title--font-weight: 700;
 }
 
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: #1e293b;
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        background-color: var(--color-bg);
+        color: var(--color-ink);
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    h1,
+    h2,
+    h3 {
+        text-wrap: balance;
+    }
+
+    ::selection {
+        background-color: var(--color-accent-deep);
+        color: white;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+    }
 }
 
+/* Form control base shared by inputs, textareas, and selects. */
 @utility input {
-    @apply w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-600 text-white placeholder-gray-400
-        focus:outline-none focus:ring-2 focus:ring-blue-500 user-invalid:focus:ring-red-500 transition-colors;
-}
+    @apply w-full px-4 py-3 rounded-control bg-raised border border-line-strong text-ink placeholder-faint
+        transition-colors duration-150;
 
-/* Animation Utilities */
-
-@utility animate-fade-in {
-    animation: fadeInBio 0.5s ease forwards;
-}
-
-@utility animate-slide-up {
-    animation: slideUpBio 0.4s ease-out;
-}
-
-@utility animation-delay-sm {
-    animation-delay: 10ms;
-}
-
-@utility animation-delay-md {
-    animation-delay: 20ms;
-}
-
-@utility animation-delay-lg {
-    animation-delay: 30ms;
-}
-
-@utility background-animate {
-    background-size: 300%;
-
-    -webkit-animation: animateBackground var(--animation-time) ease alternate infinite;
-    -moz-animation: animateBackground var(--animation-time) ease alternate infinite;
-    animation: animateBackground var(--animation-time) ease alternate infinite;
-
-    background-image: linear-gradient(
-        45deg,
-        #2563eb 0%,
-        #10b981 46%,
-        #2563eb 62%,
-        #1e293b 100%
-    );
-}
-
-@keyframes animateBackground {
-    0%,
-    100% {
-        background-position: 0% 50%;
+    &:hover {
+        border-color: oklch(100% 0 0 / 26%);
     }
 
-    50% {
-        background-position: 100% 50%;
+    &:focus {
+        outline: none;
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 3px var(--color-accent-soft);
+    }
+
+    &:user-invalid:focus {
+        border-color: var(--color-danger);
+        box-shadow: 0 0 0 3px var(--color-danger-soft);
     }
 }
 
-@keyframes fadeInBio {
+/*
+ * The veil aura: VailNote's signature blue-to-emerald wash, descended from the old animated
+ * body gradient. One per page, behind the header/hero, purely decorative.
+ */
+@utility aura {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: -30%;
+        left: 50%;
+        width: min(70rem, 130vw);
+        aspect-ratio: 16 / 9;
+        transform: translateX(-58%) rotate(-8deg);
+        background:
+            radial-gradient(42% 55% at 30% 42%, oklch(62% 0.19 262 / 21%), transparent 70%),
+            radial-gradient(36% 48% at 72% 55%, oklch(78% 0.14 165 / 11%), transparent 70%);
+        animation: aura-drift 24s ease-in-out infinite alternate;
+    }
+}
+
+@keyframes aura-drift {
+    from {
+        transform: translateX(-62%) rotate(-8deg);
+    }
+    to {
+        transform: translateX(-52%) rotate(-5deg);
+    }
+}
+
+/* Single page-load entrance: fade + 12px rise, staggered over at most three elements. */
+@utility reveal {
+    animation: reveal-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@utility reveal-2 {
+    animation-delay: 90ms;
+}
+
+@utility reveal-3 {
+    animation-delay: 180ms;
+}
+
+@keyframes reveal-rise {
     from {
         opacity: 0;
-        filter: blur(10px);
+        transform: translateY(12px);
     }
     to {
         opacity: 1;
-        filter: blur(0);
+        transform: translateY(0);
     }
 }
 
-@keyframes slideUpBio {
-    from {
-        opacity: 0;
-        transform: translateY(30px) scale(0.95);
-        filter: blur(5px);
+@media (prefers-reduced-motion: reduce) {
+    .aura::before,
+    .reveal {
+        animation: none;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: blur(0);
-    }
-}
-
-/* Loading Spinner Animations */
-.animate-reverse {
-    animation-direction: reverse;
 }
 
 .scrollbar-hidden::-webkit-scrollbar {
@@ -101,26 +174,52 @@ body {
     scrollbar-width: none;
 }
 
-/* Markdown Styles */
+/* Overrides for @deno/gfm's .markdown-body (privacy/terms pages) so rendered
+   markdown sits on our surface tokens instead of GitHub's page colors. */
 .markdown-body {
-    font-size: 1rem;
-    line-height: 1.6;
-    color: #e2e8f0;
+    background: transparent !important;
+    font-family: var(--font-sans) !important;
+    color: var(--color-ink) !important;
 }
 
 .markdown-body a {
-    color: #60a5fa;
-    text-decoration: underline;
+    color: var(--color-accent-bright) !important;
 }
 
-.markdown-body ul {
-    list-style-type: disc;
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4 {
+    border-color: var(--color-line) !important;
+    color: var(--color-ink) !important;
 }
 
-.markdown-body ol {
-    list-style-type: decimal;
+.markdown-body code,
+.markdown-body pre {
+    background-color: var(--color-raised) !important;
+    font-family: var(--font-mono) !important;
+    color: var(--color-ink) !important;
 }
 
-.markdown-body svg {
-    filter: invert(1);
+.markdown-body blockquote {
+    color: var(--color-muted) !important;
+    border-left-color: var(--color-line-strong) !important;
+}
+
+.markdown-body table td,
+.markdown-body table th {
+    border-color: var(--color-line-strong) !important;
+}
+
+.markdown-body table tr {
+    background-color: transparent !important;
+    border-color: var(--color-line) !important;
+}
+
+.markdown-body table tr:nth-child(2n) {
+    background-color: var(--color-surface) !important;
+}
+
+.markdown-body hr {
+    background-color: var(--color-line) !important;
 }

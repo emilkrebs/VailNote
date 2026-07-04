@@ -1,15 +1,14 @@
 import { useState } from 'preact/hooks';
 import { JSX } from 'preact';
 import { FormField } from './Form.tsx';
+import { EyeIcon, EyeSlashIcon } from './Icons.tsx';
 
 interface PasswordToggleProps extends JSX.InputHTMLAttributes {
     error?: string;
     helpText?: string;
 }
 
-export default function PasswordToggle(
-    props: PasswordToggleProps,
-) {
+export default function PasswordToggle(props: PasswordToggleProps) {
     const [isHidden, setIsHidden] = useState(true);
 
     return (
@@ -17,21 +16,17 @@ export default function PasswordToggle(
             <div class='relative w-full'>
                 <input
                     {...props}
-                    class={`input ${props.class || ''}`}
+                    class={`input pr-12 ${props.class || ''}`}
                     type={isHidden ? 'password' : 'text'}
                 />
                 <button
                     type='button'
-                    class='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors cursor-pointer'
+                    class='absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-control text-muted hover:text-ink transition-colors cursor-pointer'
                     onClick={() => setIsHidden(!isHidden)}
+                    aria-label={isHidden ? 'Show password' : 'Hide password'}
+                    title={isHidden ? 'Show password' : 'Hide password'}
                 >
-                    <span title={isHidden ? 'Show' : 'Hide'}>
-                        <img
-                            src={isHidden ? '/icons/visibility.svg' : '/icons/visibility_off.svg'}
-                            alt={isHidden ? 'Show' : 'Hide'}
-                            class='fill-white'
-                        />
-                    </span>
+                    {isHidden ? <EyeIcon size={20} /> : <EyeSlashIcon size={20} />}
                 </button>
             </div>
         </FormField>

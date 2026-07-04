@@ -8,20 +8,16 @@ type CopyFieldProps = {
 
 export default function CopyField({ label, value, title }: CopyFieldProps) {
     return (
-        <div class='bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 overflow-hidden min-h-12'>
-            <div class='flex items-start gap-3 min-w-0'>
-                <div class='flex-1 min-w-0'>
-                    <p class='text-xs font-medium text-green-300 mb-1'>{label}</p>
-                    <div class='flex items-center gap-2 min-w-0'>
-                        <code
-                            class='flex-1 min-w-0 text-sm font-mono text-slate-200 bg-slate-900/50 px-2 py-1 rounded border border-slate-600/30 break-all overflow-hidden'
-                            title={title ?? value}
-                        >
-                            {value}
-                        </code>
-                        <CopyButton value={value} />
-                    </div>
-                </div>
+        <div class='flex flex-col gap-1.5 min-w-0'>
+            <p class='text-sm font-medium text-muted'>{label}</p>
+            <div class='flex items-center gap-2 min-w-0 bg-bg border border-line-strong rounded-control pl-3 pr-1.5 py-1.5'>
+                <code
+                    class='flex-1 min-w-0 font-mono text-sm text-ink break-all py-1'
+                    title={title ?? value}
+                >
+                    {value}
+                </code>
+                <CopyButton value={value} label={`Copy ${label.toLowerCase()}`} />
             </div>
         </div>
     );
