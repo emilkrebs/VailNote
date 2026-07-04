@@ -234,7 +234,7 @@ function CipherPanel() {
 function OpenSource() {
     return (
         <section id='open-source' class='border-t border-line scroll-mt-16'>
-            <div class='mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[1fr_auto] lg:gap-16'>
+            <div class='mx-auto grid max-w-6xl items-start gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[1fr_auto] lg:gap-16'>
                 <div class='max-w-xl'>
                     <h2 class='text-title'>100% Open-Source</h2>
                     <p class='mt-4 text-[1.0625rem] leading-relaxed text-muted'>
@@ -258,7 +258,8 @@ function OpenSource() {
                 </div>
 
                 {/* stamped plate: a small machined-metadata block, standing in for a generic badge row */}
-                <dl class='grid shrink-0 grid-cols-3 gap-x-8 gap-y-1 border-t border-line pt-6 font-mono text-sm lg:grid-cols-1 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-10'>
+            
+                <dl class='grid grid-cols-3 gap-6 text-start text-sm sm:gap-8 border-l border-line pl-6 sm:pl-8 lg:pl-10'>
                     <div>
                         <dt class='text-xs tracking-[0.14em] text-faint'>LICENSE</dt>
                         <dd class='mt-1 text-ink'>MIT</dd>

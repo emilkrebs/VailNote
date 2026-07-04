@@ -14,7 +14,6 @@ import {
 } from '../lib/validation/note.ts';
 import PasswordToggle from '../components/PasswordToggle.tsx';
 import CopyField from '../components/CopyField.tsx';
-import { LockKeyIcon } from '../components/Icons.tsx';
 
 // Constants
 const MESSAGES = {
@@ -216,8 +215,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
                     {submitting ? 'Encrypting' : 'Encrypt note'}
                 </Button>
                 <p class='flex items-center justify-center gap-1.5 text-center text-sm text-muted'>
-                    <LockKeyIcon size={15} class='shrink-0 text-accent-bright' />
-                    AES-256-GCM in your browser. The unencrypted note never leaves this page.
+                   All encryption happens in your browser - we never see your data
                 </p>
             </div>
 
