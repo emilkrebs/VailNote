@@ -35,7 +35,7 @@ export default function NotePage({ data }: { data: NotePageProps }) {
     return (
         <>
             <Header title='Opening Note' description={message} />
-            <ViewEncryptedNote noteId={note.id} manualDeletion={note.manualDeletion} />
+            <ViewEncryptedNote noteId={note.id} manualDeletion={note.manualDeletion} hasPassword={!!note.password} />
         </>
     );
 }

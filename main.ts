@@ -1,4 +1,4 @@
-import { App, cors, csp, csrf, staticFiles } from 'fresh';
+import { App, type Context, cors, csp, csrf, staticFiles } from 'fresh';
 import { headers } from './middleware.ts';
 import { ArcRateLimiter } from './lib/rate-limiting/src/arc-rate-limiter.ts';
 import { ORIGIN, State } from './lib/types/common.ts';
@@ -30,6 +30,8 @@ const rateLimiter = new ArcRateLimiter({
     serverSecret,
 });
 
+const rateLimitMiddleware = rateLimiter.middleware<State>();
+
 export { noteDatabase };
 
 export const app = new App<State>()
@@ -44,7 +46,14 @@ export const app = new App<State>()
         origin: ORIGIN,
     }))
     .use(csp())
-    .use(rateLimiter.middleware()) // 15 requests per minute, 5 min block
+    .use(async (ctx: Context<State>) => {
+        // Skip rate limiting for static legal pages
+        const { pathname } = new URL(ctx.req.url);
+        if (pathname === '/privacy' || pathname === '/terms') {
+            return await ctx.next();
+        }
+        return await rateLimitMiddleware(ctx);
+    })
     .use(headers({
         'Cross-Origin-Resource-Policy': 'same-site',
         'Cross-Origin-Embedder-Policy': 'require-corp',

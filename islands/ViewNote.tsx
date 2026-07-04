@@ -33,6 +33,8 @@ const MESSAGES = {
 interface ViewEncryptedNoteProps {
     noteId: string;
     manualDeletion?: boolean;
+    /** Known upfront from the server so the password prompt can show immediately, with no extra confirm step. */
+    hasPassword?: boolean;
 }
 
 interface PasswordRequiredViewProps {
@@ -50,13 +52,15 @@ interface DisplayDecryptedNoteProps {
 }
 
 // https://vailnote.com/[id]#[authKey] or https://vailnote.com/[id] (password required)
-export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryptedNoteProps) {
+export default function ViewEncryptedNote({ noteId, manualDeletion, hasPassword }: ViewEncryptedNoteProps) {
     // State management
     const [note, setNote] = useState<Note | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const [needsPassword, setNeedsPassword] = useState(false);
-    const [confirmed, setConfirmed] = useState(manualDeletion ? true : false);
+    // A password-protected note always needs the password prompt; entering the password
+    // is itself the confirmation, so these notes skip the separate "view and destroy?" step.
+    const [needsPassword, setNeedsPassword] = useState(!!hasPassword);
+    const [confirmed, setConfirmed] = useState(manualDeletion || hasPassword ? true : false);
     const [decryptionError, setDecryptionError] = useState<string | undefined>(undefined);
     const [message, setMessage] = useState<string | undefined>(undefined);
 
@@ -124,6 +128,13 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
 
     // Main effect for handling note loading logic
     useEffect(() => {
+        // Known password-protected notes skip straight to the password prompt; there is no
+        // point attempting an auth-key-only fetch that the server will always reject.
+        if (hasPassword) {
+            showPasswordPrompt();
+            return;
+        }
+
         const authKey = getAuthKey();
 
         // Show password prompt if no auth key and not confirmed
@@ -138,7 +149,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion }: ViewEncryp
         if (confirmed) {
             fetchAndDecryptNote();
         }
-    }, [confirmed, noteId, manualDeletion]);
+    }, [confirmed, noteId, manualDeletion, hasPassword]);
 
     // Event handlers
     const handlePasswordSubmit = async (event: Event) => {
