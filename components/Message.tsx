@@ -3,10 +3,10 @@ import { CheckCircleIcon, InfoIcon, WarningIcon } from './Icons.tsx';
 
 type MessageVariant = 'success' | 'error' | 'info' | 'warning';
 
-interface MessageProps extends JSX.HTMLAttributes<HTMLDivElement> {
+type MessageProps = JSX.IntrinsicElements['div'] & {
     visible?: boolean;
     variant?: MessageVariant;
-}
+};
 
 const variantClasses: Record<MessageVariant, string> = {
     success: 'bg-ok-soft border-ok/30',

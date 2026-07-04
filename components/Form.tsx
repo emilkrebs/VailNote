@@ -1,13 +1,5 @@
-import { JSX } from 'preact/jsx-runtime';
+import type { JSX } from 'preact';
 import { CaretRightIcon, WarningCircleIcon } from './Icons.tsx';
-
-export function FormGroup({ children, ...props }: JSX.HTMLAttributes<HTMLDivElement>) {
-    return (
-        <div {...props} class={`flex flex-col gap-2 ${props.class || ''}`}>
-            {children}
-        </div>
-    );
-}
 
 interface FormErrorProps {
     error?: string;
@@ -24,7 +16,17 @@ export function FormError({ error }: FormErrorProps) {
     );
 }
 
-interface FormFieldProps extends JSX.HTMLAttributes<HTMLDivElement> {
+type DivProps = JSX.IntrinsicElements['div'];
+
+export function FormGroup({ children, ...props }: DivProps) {
+    return (
+        <div {...props} class={`flex flex-col gap-2 ${props.class || ''}`}>
+            {children}
+        </div>
+    );
+}
+
+interface FormFieldProps extends DivProps {
     error?: string;
     helpText?: string;
 }
@@ -39,9 +41,9 @@ export function FormField({ children, error, helpText, ...props }: FormFieldProp
     );
 }
 
-interface LabelProps extends JSX.LabelHTMLAttributes {
+type LabelProps = JSX.IntrinsicElements['label'] & {
     required?: boolean;
-}
+};
 
 export function Label({ required, ...props }: LabelProps) {
     return (
@@ -52,10 +54,10 @@ export function Label({ required, ...props }: LabelProps) {
     );
 }
 
-export interface InputProps extends JSX.InputHTMLAttributes {
+export type InputProps = JSX.IntrinsicElements['input'] & {
     error?: string;
     helpText?: string;
-}
+};
 
 export function Input(props: InputProps) {
     return (
@@ -68,10 +70,10 @@ export function Input(props: InputProps) {
     );
 }
 
-interface TextareaProps extends JSX.TextareaHTMLAttributes {
+type TextareaProps = JSX.IntrinsicElements['textarea'] & {
     error?: string;
     helpText?: string;
-}
+};
 
 export function Textarea(props: TextareaProps) {
     return (
@@ -85,10 +87,10 @@ export function Textarea(props: TextareaProps) {
     );
 }
 
-interface SelectProps extends JSX.SelectHTMLAttributes {
+type SelectProps = JSX.IntrinsicElements['select'] & {
     error?: string;
     helpText?: string;
-}
+};
 
 export function Select(props: SelectProps) {
     return (
@@ -103,7 +105,7 @@ export function Select(props: SelectProps) {
     );
 }
 
-export function SelectOption(props: JSX.OptionHTMLAttributes) {
+export function SelectOption(props: JSX.IntrinsicElements['option']) {
     return (
         <option
             {...props}
@@ -114,10 +116,10 @@ export function SelectOption(props: JSX.OptionHTMLAttributes) {
     );
 }
 
-interface CollapsibleProps extends JSX.DetailsHTMLAttributes {
+type CollapsibleProps = JSX.IntrinsicElements['details'] & {
     title: string;
     isOpen?: boolean;
-}
+};
 
 export function Collapsible({ title, isOpen = false, children, ...props }: CollapsibleProps) {
     return (

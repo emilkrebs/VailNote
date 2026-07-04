@@ -39,7 +39,7 @@ states them plainly instead of shouting.
 3. **Calm under pressure.** Users may be mid-incident sharing credentials. High contrast, plain language, no motion that
    competes with the task.
 4. **One accent, locked.** Brand blue is the only interactive accent; green/red/amber appear only as semantic state.
-5. **Nothing to hide.** Open source, no tracking, readable legal pages; the design mirrors that transparency.
+5. **100% Open-Source.** Open source, no tracking, readable legal pages; the design mirrors that transparency.
 
 ## Accessibility & Inclusion
 

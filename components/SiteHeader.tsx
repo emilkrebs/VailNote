@@ -1,4 +1,4 @@
-import { GithubLogoIcon, LockKeyIcon } from './Icons.tsx';
+import { GithubLogoIcon } from './Icons.tsx';
 
 const navLinks = [
     { href: '/#how-it-works', label: 'How it works' },
@@ -10,11 +10,14 @@ export default function SiteHeader() {
     return (
         <header class='sticky top-0 z-40 h-16 border-b border-line bg-bg/85 backdrop-blur'>
             <nav class='mx-auto flex h-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6'>
-                <a href='/' class='flex items-center gap-2.5 text-lg font-extrabold tracking-tight text-ink'>
-                    <span class='flex size-8 items-center justify-center rounded-control bg-accent-soft text-accent-bright'>
-                        <LockKeyIcon size={18} />
+                <a href='/' class='group flex items-center gap-2 text-lg font-extrabold tracking-tight text-ink'>
+                    <span>VailNote</span>
+                    <span
+                        class='hidden font-mono text-[0.6875rem] font-normal tracking-normal text-faint sm:inline'
+                        aria-hidden='true'
+                    >
+                        /v2
                     </span>
-                    VailNote
                 </a>
 
                 <div class='flex items-center gap-1 sm:gap-2'>

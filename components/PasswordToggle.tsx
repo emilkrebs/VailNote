@@ -3,10 +3,10 @@ import { JSX } from 'preact';
 import { FormField } from './Form.tsx';
 import { EyeIcon, EyeSlashIcon } from './Icons.tsx';
 
-interface PasswordToggleProps extends JSX.InputHTMLAttributes {
+type PasswordToggleProps = JSX.IntrinsicElements['input'] & {
     error?: string;
     helpText?: string;
-}
+};
 
 export default function PasswordToggle(props: PasswordToggleProps) {
     const [isHidden, setIsHidden] = useState(true);
