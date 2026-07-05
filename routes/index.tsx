@@ -3,15 +3,7 @@ import CreateNote from '../islands/CreateNoteForm.tsx';
 import CipherText from '../islands/CipherText.tsx';
 import { ORIGIN } from '../lib/types/common.ts';
 import { ButtonLink } from '../components/Button.tsx';
-import {
-    CloudSlashIcon,
-    DetectiveIcon,
-    FireIcon,
-    GithubLogoIcon,
-    KeyIcon,
-    LinkSimpleIcon,
-    NotePencilIcon,
-} from '../components/Icons.tsx';
+import { FireIcon, GithubLogoIcon, LinkSimpleIcon, NotePencilIcon } from '../components/Icons.tsx';
 
 export default function Home() {
     return (
@@ -44,7 +36,7 @@ function Hero() {
                         Share secrets that vanish.
                     </h1>
                     <p class='mt-5 max-w-[46ch] text-lg leading-relaxed text-muted'>
-                        Encrypted in your browser, unreadable to us, gone after one view. No account. No tracking.
+                        Encrypted in your browser, unreadable to the server, gone after viewing. True zero-knowledge.
                     </p>
                 </div>
 
@@ -73,7 +65,7 @@ const steps = [
         code: 'DESTROY',
         icon: FireIcon,
         title: 'Read once, then gone',
-        body: 'Opening the note destroys it. Unopened notes expire on a schedule you set, 10 minutes to 30 days.',
+        body: 'Opening the note destroys it. Unopened notes expire on a schedule you set, 10 minutes to 90 days.',
     },
 ];
 
@@ -136,17 +128,14 @@ function HowItWorks() {
 
 const securityFacts = [
     {
-        icon: KeyIcon,
         title: 'Keys stay with you',
         body: 'Link keys live in the URL fragment. Password keys are derived in your browser with PBKDF2.',
     },
     {
-        icon: CloudSlashIcon,
         title: 'Ciphertext at rest',
         body: 'The database holds encrypted bytes and an expiry date. Passwords are stored only as bcrypt hashes.',
     },
     {
-        icon: DetectiveIcon,
         title: 'Nothing to correlate',
         body:
             'No analytics and no ad scripts. Rate limiting uses anonymous credentials (ARC) instead of logging who you are.',
@@ -182,7 +171,6 @@ function Security() {
                                         </span>
                                         <div>
                                             <h3 class='flex items-center gap-2 font-semibold tracking-tight'>
-                                                <fact.icon size={16} class='shrink-0 text-accent-bright' />
                                                 {fact.title}
                                             </h3>
                                             <p class='mt-1 text-[0.9375rem] leading-relaxed text-muted'>
@@ -258,7 +246,7 @@ function OpenSource() {
                 </div>
 
                 {/* stamped plate: a small machined-metadata block, standing in for a generic badge row */}
-            
+
                 <dl class='grid grid-cols-3 gap-6 text-start text-sm sm:gap-8 border-l border-line pl-6 sm:pl-8 lg:pl-10'>
                     <div>
                         <dt class='text-xs tracking-[0.14em] text-faint'>LICENSE</dt>

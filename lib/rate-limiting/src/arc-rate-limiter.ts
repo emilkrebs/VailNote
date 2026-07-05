@@ -78,7 +78,7 @@ export class ArcRateLimiter {
     private readonly identifier: string;
     private readonly serverSecret: string;
     private readonly trustedProxyCount: number;
-    private cleanupTimer?: number;
+    private cleanupTimer?: NodeJS.Timeout;
 
     constructor({
         maxRequests = DEFAULT_MAX_REQUESTS,

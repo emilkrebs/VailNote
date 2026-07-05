@@ -2,9 +2,9 @@ import { JSX } from 'preact';
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger';
 
-interface ButtonProps extends JSX.ButtonHTMLAttributes {
+type ButtonProps = JSX.IntrinsicElements['button'] & {
     variant?: ButtonVariant;
-}
+};
 
 const baseClasses = 'inline-flex items-center justify-center gap-2 px-5 py-3 rounded-control font-semibold ' +
     'transition-colors duration-150 active:translate-y-px cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed';
@@ -26,9 +26,9 @@ export function Button({ variant = 'primary', ...props }: ButtonProps) {
     );
 }
 
-interface ButtonLinkProps extends JSX.AnchorHTMLAttributes {
+type ButtonLinkProps = JSX.IntrinsicElements['a'] & {
     variant?: ButtonVariant;
-}
+};
 
 /** Anchor styled identically to Button, for link actions that should read as buttons. */
 export function ButtonLink({ variant = 'primary', ...props }: ButtonLinkProps) {

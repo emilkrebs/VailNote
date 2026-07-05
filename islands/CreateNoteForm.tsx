@@ -215,7 +215,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
                     {submitting ? 'Encrypting' : 'Encrypt note'}
                 </Button>
                 <p class='flex items-center justify-center gap-1.5 text-center text-sm text-muted'>
-                   All encryption happens in your browser - we never see your data
+                    All encryption happens in your browser - we never see your data
                 </p>
             </div>
 
