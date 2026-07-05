@@ -1,12 +1,5 @@
-import { JSX } from 'preact/jsx-runtime';
-
-export function FormGroup({ children, ...props }: JSX.HTMLAttributes<HTMLDivElement>) {
-    return (
-        <div class={`flex flex-col space-y-2 ${props.class || ''}`} {...props}>
-            {children}
-        </div>
-    );
-}
+import type { JSX } from 'preact';
+import { CaretRightIcon, WarningCircleIcon } from './Icons.tsx';
 
 interface FormErrorProps {
     error?: string;
@@ -16,44 +9,55 @@ export function FormError({ error }: FormErrorProps) {
     if (!error) return null;
 
     return (
-        <div class='text-sm font-medium text-red-200 bg-red-600/20 border border-red-400 px-4 py-3 rounded-lg'>
+        <p class='flex items-center gap-1.5 text-sm font-medium text-danger'>
+            <WarningCircleIcon size={16} class='shrink-0' />
             {error}
+        </p>
+    );
+}
+
+type DivProps = JSX.IntrinsicElements['div'];
+
+export function FormGroup({ children, ...props }: DivProps) {
+    return (
+        <div {...props} class={`flex flex-col gap-2 ${props.class || ''}`}>
+            {children}
         </div>
     );
 }
 
-interface FormFieldProps extends JSX.HTMLAttributes<HTMLDivElement> {
+interface FormFieldProps extends DivProps {
     error?: string;
     helpText?: string;
 }
 
 export function FormField({ children, error, helpText, ...props }: FormFieldProps) {
     return (
-        <div class={`space-y-1 ${props.class || ''}`} {...props}>
-            {helpText && <p class='text-gray-400 text-sm -mt-1'>{helpText}</p>}
+        <div {...props} class={`flex flex-col gap-1.5 ${props.class || ''}`}>
             {children}
-            {error && <FormError error={error} />}
+            {helpText && <p class='text-sm text-faint'>{helpText}</p>}
+            <FormError error={error} />
         </div>
     );
 }
 
-interface LabelProps extends JSX.LabelHTMLAttributes {
+type LabelProps = JSX.IntrinsicElements['label'] & {
     required?: boolean;
-}
+};
 
 export function Label({ required, ...props }: LabelProps) {
     return (
-        <label class={`text-white text-lg font-semibold ${props.class || ''}`} {...props}>
+        <label {...props} class={`text-[0.9375rem] font-medium text-ink ${props.class || ''}`}>
             {props.children}
-            {required && <span class={`text-red-400 ml-1`} title='Required'>*</span>}
+            {required && <span class='text-danger ml-1' title='Required'>*</span>}
         </label>
     );
 }
 
-export interface InputProps extends JSX.InputHTMLAttributes {
+export type InputProps = JSX.IntrinsicElements['input'] & {
     error?: string;
     helpText?: string;
-}
+};
 
 export function Input(props: InputProps) {
     return (
@@ -66,10 +70,10 @@ export function Input(props: InputProps) {
     );
 }
 
-interface TextareaProps extends JSX.TextareaHTMLAttributes {
+type TextareaProps = JSX.IntrinsicElements['textarea'] & {
     error?: string;
     helpText?: string;
-}
+};
 
 export function Textarea(props: TextareaProps) {
     return (
@@ -77,21 +81,23 @@ export function Textarea(props: TextareaProps) {
             <textarea
                 {...props}
                 class={`input ${props.class || ''}`}
-            />
+            >
+            </textarea>
         </FormField>
     );
 }
 
-interface SelectProps extends JSX.SelectHTMLAttributes {
+type SelectProps = JSX.IntrinsicElements['select'] & {
     error?: string;
     helpText?: string;
-}
+};
+
 export function Select(props: SelectProps) {
     return (
         <FormField error={props.error} helpText={props.helpText}>
             <select
                 {...props}
-                class={`input ${props.class || ''}`}
+                class={`input cursor-pointer ${props.class || ''}`}
             >
                 {props.children}
             </select>
@@ -99,46 +105,34 @@ export function Select(props: SelectProps) {
     );
 }
 
-export function SelectOption(props: JSX.OptionHTMLAttributes) {
+export function SelectOption(props: JSX.IntrinsicElements['option']) {
     return (
         <option
             {...props}
-            class={`bg-gray-900 text-white ${props.class || ''}`}
+            class={`bg-raised text-ink ${props.class || ''}`}
         >
             {props.children}
         </option>
     );
 }
 
-interface CollapsibleProps extends JSX.DetailsHTMLAttributes {
+type CollapsibleProps = JSX.IntrinsicElements['details'] & {
     title: string;
     isOpen?: boolean;
-}
+};
 
 export function Collapsible({ title, isOpen = false, children, ...props }: CollapsibleProps) {
     return (
         <details
-            open={isOpen}
-            class={`group bg-gradient-to-br from-gray-800/60 to-gray-900/40 rounded-xl p-6 border border-gray-600/30 hover:border-gray-500/50 transition-all duration-200 ${
-                props.class || ''
-            }`}
             {...props}
+            open={isOpen}
+            class={`group border-t border-line pt-4 ${props.class || ''}`}
         >
-            <summary class='text-white text-lg font-semibold cursor-pointer flex items-center gap-2 hover:text-blue-300 transition-colors'>
-                <span class='transform group-open:rotate-90 transition-transform duration-200'>
-                    <svg
-                        xmlns='http://www.w3.org/2000/svg'
-                        class='h-5 w-5'
-                        fill='none'
-                        viewBox='0 0 24 24'
-                        stroke='currentColor'
-                    >
-                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5l7 7-7 7' />
-                    </svg>
-                </span>
+            <summary class='flex items-center gap-2 text-[0.9375rem] font-medium text-muted cursor-pointer select-none transition-colors hover:text-ink'>
+                <CaretRightIcon size={14} class='transition-transform duration-200 group-open:rotate-90' />
                 {title}
             </summary>
-            <div class='mt-6 pt-4 border-t border-gray-600/30'>
+            <div class='mt-4 flex flex-col gap-2'>
                 {children}
             </div>
         </details>

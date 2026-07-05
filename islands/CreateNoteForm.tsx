@@ -1,6 +1,5 @@
 import { Button } from '../components/Button.tsx';
 import { useState } from 'preact/hooks';
-import PenIcon from '../components/PenIcon.tsx';
 import Message from '../components/Message.tsx';
 import NoteService from '../lib/services/note-service.ts';
 import Card, { CardContent, CardHeader, CardTitle } from '../components/Card.tsx';
@@ -18,7 +17,7 @@ import CopyField from '../components/CopyField.tsx';
 
 // Constants
 const MESSAGES = {
-    CREATE_SUCCESS: 'Note created successfully!',
+    CREATE_SUCCESS: 'Note created.',
     CREATE_ERROR: 'Failed to create note.',
     UNEXPECTED_ERROR: 'An error occurred while creating the note.',
 } as const;
@@ -36,39 +35,19 @@ interface CreateNoteFormProps {
 }
 
 function MessageDisplay({ data }: { data: CreateNoteData }) {
+    if (!data.message) return null;
     const isSuccess = !!data.noteId;
-    return (
-        <Message
-            variant={isSuccess ? 'success' : 'error'}
-            visible={!!data.message}
-        >
-            <div class='flex items-start gap-3'>
-                <div
-                    class={`w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold ${
-                        isSuccess ? 'bg-green-500' : 'bg-red-500'
-                    }`}
-                >
-                    {isSuccess ? '✓' : '✕'}
-                </div>
-                <div class='flex-1'>
-                    <p class={`font-semibold text-lg ${isSuccess ? 'text-green-200' : 'text-red-200'}`}>
-                        {data.message}
-                    </p>
-                    {data.noteId && (
-                        <p class='text-green-300/80 text-sm mt-1' title={`Note ID: ${data.noteId}`}>
-                            Share the link below to give someone access to your note
-                        </p>
-                    )}
-                </div>
-            </div>
 
-            {data.noteId && data.noteLink && (
-                <div class='mt-4 pt-4 border-t border-green-400/20'>
-                    <CopyField
-                        label='Share Link'
-                        value={data.noteLink}
-                        title={data.noteLink}
-                    />
+    return (
+        <Message variant={isSuccess ? 'success' : 'error'}>
+            <p class='font-semibold'>{data.message}</p>
+            {isSuccess && data.noteLink && (
+                <div class='mt-3 flex flex-col gap-3'>
+                    <CopyField label='Share link' value={data.noteLink} title={data.noteLink} />
+                    <p class='text-sm text-muted'>
+                        The link works once. Whoever opens it destroys the note, so send it only to the person it is
+                        for.
+                    </p>
                 </div>
             )}
         </Message>
@@ -79,49 +58,33 @@ export default function CreateNote({ message }: { message?: string }) {
     const [formData, setFormData] = useState<CreateNoteData>({ message });
 
     return (
-        <div class='max-w-4xl mx-auto'>
-            <Card>
-                <CardHeader>
-                    <CardTitle>
-                        <div class='flex items-center justify-start gap-3'>
-                            <div class='p-3 bg-blue-600/20 rounded-xl'>
-                                <PenIcon />
-                            </div>
-                            Create a Note
-                        </div>
-                    </CardTitle>
-                    <p class='text-gray-300 text-lg max-w-2xl mx-auto leading-relaxed'>
-                        Share your notes securely with a password. Notes are{' '}
-                        <span class='font-semibold text-blue-300 bg-blue-500/10 px-2 py-1 rounded'>encrypted</span> and
-                        {' '}
-                        <span class='font-semibold text-blue-300 bg-blue-500/10 px-2 py-1 rounded text-nowrap'>
-                            self-destruct
-                        </span>{' '}
-                        after a set time or after being viewed.
-                    </p>
-                    <MessageDisplay data={formData} />
-                </CardHeader>
-                <CardContent>
-                    <CreateNoteForm
-                        onCreate={(id, message, noteLink) => {
-                            setFormData({ message, noteId: id, noteLink });
-                        }}
-                        onError={(error) => {
-                            setFormData({ message: error, noteId: undefined, noteLink: '' });
-                        }}
-                    />
-                </CardContent>
-            </Card>
-        </div>
+        <Card>
+            <CardHeader>
+                <CardTitle>Create a note</CardTitle>
+                <MessageDisplay data={formData} />
+            </CardHeader>
+            <CardContent>
+                <CreateNoteForm
+                    onCreate={(id, message, noteLink) => {
+                        setFormData({ message, noteId: id, noteLink });
+                    }}
+                    onError={(error) => {
+                        setFormData({ message: error, noteId: undefined, noteLink: '' });
+                    }}
+                />
+            </CardContent>
+        </Card>
     );
 }
 
 function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [submitting, setSubmitting] = useState(false);
 
     const handleSubmit = async (event: Event) => {
         event.preventDefault();
         setErrors({});
+        setSubmitting(true);
 
         const form = event.target as HTMLFormElement;
         try {
@@ -149,7 +112,7 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 
             // Use requestAnimationFrame to prevent blocking the main thread
             requestAnimationFrame(() => {
-                globalThis.scrollTo({ top: 64, behavior: 'smooth' });
+                globalThis.scrollTo({ top: 0, behavior: 'smooth' });
             });
         } catch (error) {
             if (error instanceof v.ValiError) {
@@ -166,149 +129,111 @@ function CreateNoteForm({ onCreate, onError }: CreateNoteFormProps) {
 
             const errorMessage = error instanceof Error ? error.message : MESSAGES.UNEXPECTED_ERROR;
             onError(errorMessage);
+        } finally {
+            setSubmitting(false);
         }
     };
 
     return (
-        <form class='space-y-8' method='post' onSubmit={handleSubmit} autoComplete='off'>
-            <div class='grid gap-8'>
-                {/* Note Content Field */}
-                <FormGroup>
-                    <Label
-                        class='block text-white text-lg font-semibold mb-2'
-                        htmlFor='content'
-                        required
-                    >
-                        Note Content
-                    </Label>
-                    <Textarea
-                        class='w-full h-52'
-                        placeholder='Type your note here...'
-                        name='content'
-                        id='content'
-                        error={errors.content}
-                        required
-                    >
-                    </Textarea>
-                </FormGroup>
+        <form class='flex flex-col gap-6' method='post' onSubmit={handleSubmit} autoComplete='off'>
+            <FormGroup>
+                <Label htmlFor='content' required>
+                    Note content
+                </Label>
+                <Textarea
+                    class='h-40 sm:h-48 resize-y font-mono text-sm leading-relaxed'
+                    placeholder='Type your note here.'
+                    name='content'
+                    id='content'
+                    error={errors.content}
+                    required
+                >
+                </Textarea>
+            </FormGroup>
 
-                {/* Password Field */}
-                <FormGroup>
-                    <Label
-                        htmlFor='password'
-                        title='Set a password to protect and encrypt your note'
-                    >
-                        Password (Optional)
-                    </Label>
-                    <PasswordToggle
-                        name='password'
-                        id='password'
-                        placeholder='Enter to set a password'
-                        helpText='Add password protection for enhanced security, leave blank for no password'
-                        error={errors.password}
-                    />
-                </FormGroup>
+            <FormGroup>
+                <Label htmlFor='password'>
+                    Password (optional)
+                </Label>
+                <PasswordToggle
+                    name='password'
+                    id='password'
+                    placeholder='Leave blank for none'
+                    helpText='Adds a second factor: the reader needs both the link and this password.'
+                    error={errors.password}
+                />
+            </FormGroup>
 
-                {/* Expiration Field */}
-                <FormGroup>
-                    <Label htmlFor='expiresIn'>
-                        Expire After
-                    </Label>
+            <FormGroup>
+                <Label htmlFor='expiresIn'>
+                    Expires after
+                </Label>
+                <Select
+                    name='expiresIn'
+                    id='expiresIn'
+                    defaultValue='24h'
+                    helpText='Unopened notes are deleted automatically after this long.'
+                    error={errors.expiresIn}
+                >
+                    {expirationOptions.map((option) => (
+                        <SelectOption
+                            key={option}
+                            value={option}
+                            selected={option === '24 hours'}
+                        >
+                            {option}
+                        </SelectOption>
+                    ))}
+                </Select>
+            </FormGroup>
 
-                    <Select
-                        name='expiresIn'
-                        id='expiresIn'
-                        defaultValue='24h'
-                        helpText='Note will automatically self-destruct after this time period'
-                        error={errors.expiresIn}
-                    >
-                        {expirationOptions.map((option) => (
-                            <SelectOption
-                                key={option}
-                                value={option}
-                                selected={option === '24 hours'}
-                            >
-                                {option}
-                            </SelectOption>
-                        ))}
-                    </Select>
-                </FormGroup>
+            <Collapsible title='Advanced options'>
+                <Label htmlFor='manualDeletion'>
+                    Manual deletion
+                </Label>
+                <Select
+                    name='manualDeletion'
+                    id='manualDeletion'
+                    defaultValue='disabled'
+                    helpText='Allow anyone with access to delete the note at any time. Turns off destroy-after-viewing, so use with care.'
+                    error={errors.manualDeletion}
+                >
+                    {manualDeletionOptions.map((option) => (
+                        <SelectOption
+                            key={option}
+                            value={option}
+                            selected={option === 'disabled'}
+                        >
+                            {option}
+                        </SelectOption>
+                    ))}
+                </Select>
+            </Collapsible>
 
-                {/* Advanced Options */}
-                <Collapsible title='Advanced Options'>
-                    <Label htmlFor='manualDeletion'>
-                        Manual Deletion
-                    </Label>
-                    <Select
-                        name='manualDeletion'
-                        id='manualDeletion'
-                        defaultValue='disabled'
-                        helpText='Let anybody with access to the note delete it manually at any time. This will turn off self-destruction after viewing - use with caution.'
-                        error={errors.manualDeletion}
-                    >
-                        {manualDeletionOptions.map((option) => (
-                            <SelectOption
-                                key={option}
-                                value={option}
-                                selected={option === 'disabled'}
-                            >
-                                {option}
-                            </SelectOption>
-                        ))}
-                    </Select>
-                </Collapsible>
+            <div class='flex flex-col gap-3'>
+                <Button type='submit' variant='primary' class='w-full' disabled={submitting}>
+                    {submitting ? 'Encrypting' : 'Encrypt note'}
+                </Button>
+                <p class='flex items-center justify-center gap-1.5 text-center text-sm text-muted'>
+                    All encryption happens in your browser - we never see your data
+                </p>
             </div>
 
-            {/* Submit Button */}
-
-            <Button type='submit' variant='primary' class='w-full flex items-center justify-center gap-2'>
-                Save Note
-            </Button>
-
-            {/* Warnings and Info */}
             <noscript>
-                <Message variant='error' class='mt-2'>
-                    <div class='flex items-start gap-3'>
-                        <span class='text-red-400 text-xl'>⚠</span>
-                        <div class='text-red-200'>
-                            <p class='font-semibold mb-1'>JavaScript Required</p>
-                            <p class='text-sm'>
-                                You have JavaScript disabled. Enable JavaScript for client-side encryption.
-                                Zero-knowledge encryption is not possible without JavaScript.
-                            </p>
-                            <a
-                                href='/privacy#javascript-usage'
-                                class='inline-block mt-2 text-red-300 hover:text-red-200 underline'
-                            >
-                                Learn more about JavaScript usage
-                            </a>
-                        </div>
-                    </div>
+                <Message variant='error'>
+                    <p class='font-semibold'>JavaScript is required</p>
+                    <p class='mt-1 text-sm'>
+                        Encryption runs in your browser so the server never sees your note. Without JavaScript,
+                        zero-knowledge encryption is not possible.
+                    </p>
+                    <a
+                        href='/privacy#javascript-usage'
+                        class='mt-2 inline-block text-sm underline underline-offset-2'
+                    >
+                        Learn more about JavaScript usage
+                    </a>
                 </Message>
             </noscript>
-
-            <Message variant='info' class='mt-6'>
-                <div class='flex items-start gap-3'>
-                    <div class='w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold'>
-                        i
-                    </div>
-                    <div class='text-sm text-blue-200 leading-relaxed'>
-                        <p class='font-semibold mb-2'>Security Information:</p>
-                        <ul class='space-y-1 text-blue-300/90'>
-                            <li>• Notes are encrypted with AES-GCM encryption</li>
-                            <li>• Password protection adds an additional security layer</li>
-                            <li>• Notes automatically self-destruct after viewing or expiration</li>
-                            <li>• All encryption happens in your browser - we never see your data</li>
-                        </ul>
-                        <a
-                            href='/privacy#javascript-usage'
-                            class='inline-block mt-3 text-blue-400 hover:text-blue-300 underline transition-colors'
-                        >
-                            Learn more about our security →
-                        </a>
-                    </div>
-                </div>
-            </Message>
         </form>
     );
 }

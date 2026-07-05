@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'preact/hooks';
+import { CheckCircleIcon } from '../components/Icons.tsx';
 
 interface ErrorActionsProps {
     status: number;
     showRetryCountdown?: boolean;
     resetTime?: number; // Unix timestamp when rate limit resets
-    retryAfterSeconds?: number; // Seconds to wait before retry
 }
 
 // TODO: Improve countdown accuracy by relying solely on resetTime and removing retryAfterSeconds
 export default function ErrorActions({ status, showRetryCountdown, resetTime }: ErrorActionsProps) {
-    // Calculate initial countdown from resetTime or use retryAfterSeconds as fallback
+    // Calculate initial countdown from resetTime or use a sane default
     const getInitialCountdown = () => {
         if (resetTime) {
             return Math.max(0, Math.ceil((resetTime - Date.now()) / 1000));
@@ -34,40 +34,25 @@ export default function ErrorActions({ status, showRetryCountdown, resetTime }: 
         }
     }, [countdown, showRetryCountdown, resetTime]);
 
-    if (status === 429) {
-        const totalWaitTime = 60;
-        const progress = totalWaitTime > 0 ? ((totalWaitTime - countdown) / totalWaitTime) * 100 : 100;
+    if (status !== 429) return null;
 
-        return (
-            <div class='flex flex-col gap-6 items-center'>
-                {showRetryCountdown && countdown > 0 && (
-                    <div class='text-center'>
-                        <p class='text-gray-400 mb-3'>Rate limit resets in</p>
+    return (
+        <div class='flex flex-col items-center gap-2' role='status'>
+            {showRetryCountdown && countdown > 0 && (
+                <>
+                    <p class='text-sm text-muted'>Rate limit resets in</p>
+                    <p class='rounded-control border border-line-strong bg-surface px-6 py-3 font-mono text-3xl font-semibold tabular-nums text-ink'>
+                        {countdown}s
+                    </p>
+                </>
+            )}
 
-                        {/* Countdown display */}
-                        <div class='text-4xl font-mono text-orange-400 bg-gray-800/50 px-6 py-4 rounded-lg border border-gray-700 mb-3'>
-                            {countdown}s
-                        </div>
-
-                        {/* Progress bar */}
-                        <div class='w-64 bg-gray-700 rounded-full h-2 mb-3'>
-                            <div
-                                class='bg-gradient-to-r from-orange-500 to-yellow-500 h-2 rounded-full transition-all duration-1000 ease-linear'
-                                style={`width: ${progress}%`}
-                            >
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {showRetryCountdown && countdown === 0 && (
-                    <div class='text-center'>
-                        <div class='text-3xl mb-2'>✅</div>
-                        <p class='text-green-400 mb-2 font-medium'>Rate limit has been reset!</p>
-                        <p class='text-gray-500 text-sm'>You can now try your request again.</p>
-                    </div>
-                )}
-            </div>
-        );
-    }
+            {showRetryCountdown && countdown === 0 && (
+                <p class='flex items-center gap-2 font-medium text-ok'>
+                    <CheckCircleIcon size={20} />
+                    You can try your request again now.
+                </p>
+            )}
+        </div>
+    );
 }

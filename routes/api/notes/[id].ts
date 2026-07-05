@@ -7,6 +7,7 @@ import { noteDatabase } from '../../../main.ts';
 async function validateNoteAccess(id: string, passwordHash?: string): Promise<{ note: Note | null; error?: Response }> {
     const note = await noteDatabase.getNoteById(id);
 
+    // if the note does not exist, return a 404 error
     if (!note) {
         return {
             note: null,
@@ -18,6 +19,7 @@ async function validateNoteAccess(id: string, passwordHash?: string): Promise<{ 
     // Do not fail open when the caller omits the hash.
     if (note.password) {
         if (!passwordHash || !(await compareHash(passwordHash, note.password))) {
+            // If the password hash is missing or does not match, return a 403 error
             return {
                 note: null,
                 error: new Response('Invalid password or auth key', { status: 403 }),

@@ -9,3 +9,10 @@
 _fresh/
 # npm dependencies
 node_modules/
+
+# AI
+/.agents/
+/.github/skills/
+/.opencode/
+/.claude/
+skills-lock.json

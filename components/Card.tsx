@@ -1,45 +1,46 @@
-import { JSX } from 'preact/jsx-runtime';
+import type { JSX } from 'preact';
 
-export default function Card({ children, ...props }: JSX.HTMLAttributes<HTMLDivElement>) {
+type DivProps = JSX.IntrinsicElements['div'];
+type HeadingProps = JSX.IntrinsicElements['h2'];
+
+export default function Card({ children, ...props }: DivProps) {
     return (
         <div
-            class={`bg-gradient-to-br from-gray-800/95 to-gray-700/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-600/50 ${
-                props.class || ''
-            }`}
             {...props}
+            class={`bg-surface rounded-panel border border-line ${props.class || ''}`}
         >
             {children}
         </div>
     );
 }
 
-export function CardHeader({ children, ...props }: JSX.HTMLAttributes<HTMLDivElement>) {
+export function CardHeader({ children, ...props }: DivProps) {
     return (
-        <div class={`flex flex-col space-y-2 p-4 sm:p-8 ${props.class ?? ''}`} {...props}>
+        <div {...props} class={`flex flex-col gap-3 p-5 sm:p-8 ${props.class ?? ''}`}>
             {children}
         </div>
     );
 }
 
-export function CardTitle({ children, ...props }: JSX.HTMLAttributes<HTMLHeadingElement>) {
+export function CardTitle({ children, ...props }: HeadingProps) {
     return (
-        <h2 class={`text-3xl font-bold ${props.class || ''}`} {...props}>
+        <h2 {...props} class={`text-2xl font-bold tracking-tight ${props.class || ''}`}>
             {children}
         </h2>
     );
 }
 
-export function CardContent({ children, ...props }: JSX.HTMLAttributes<HTMLDivElement>) {
+export function CardContent({ children, ...props }: DivProps) {
     return (
-        <div class={`p-4 sm:p-8 !pt-0 ${props.class || ''}`} {...props}>
+        <div {...props} class={`px-5 pb-5 sm:px-8 sm:pb-8 ${props.class || ''}`}>
             {children}
         </div>
     );
 }
 
-export function CardFooter({ children, ...props }: JSX.HTMLAttributes<HTMLDivElement>) {
+export function CardFooter({ children, ...props }: DivProps) {
     return (
-        <div class={`p-4 sm:p-8 border-t border-gray-600/50 ${props.class || ''}`} {...props}>
+        <div {...props} class={`p-5 sm:p-8 border-t border-line ${props.class || ''}`}>
             {children}
         </div>
     );

@@ -18,7 +18,7 @@ function OpenGraphMeta({ title, description, canonicalUrl }: HeadProps) {
     return (
         <>
             <meta name='viewport' content='width=device-width, initial-scale=1' />
-            <meta name='theme-color' content='#2563eb' />
+            <meta name='theme-color' content='#080c14' />
             <meta name='description' content={ogDescription} />
 
             {/* SEO Meta Tags */}

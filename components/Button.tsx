@@ -1,33 +1,43 @@
 import { JSX } from 'preact';
 
-interface ButtonProps extends JSX.ButtonHTMLAttributes {
-    variant?: 'primary' | 'secondary' | 'danger';
-}
+type ButtonVariant = 'primary' | 'secondary' | 'danger';
 
-export function Button(props: ButtonProps) {
-    const baseClasses = 'px-4 py-3 rounded-xl font-semibold text-lg shadow-lg transition-color';
+type ButtonProps = JSX.IntrinsicElements['button'] & {
+    variant?: ButtonVariant;
+};
 
-    const primaryClasses =
-        'bg-gradient-to-r from-blue-500 to-blue-700 text-white hover:from-blue-600 hover:to-blue-800 focus:ring-4 focus:ring-blue-500/30';
-    const secondaryClasses =
-        'bg-gradient-to-r from-gray-500 to-gray-700 text-white hover:from-gray-600 hover:to-gray-800 focus:ring-4 focus:ring-gray-500/30';
-    const dangerClasses =
-        'bg-gradient-to-r from-red-500 to-red-700 text-white hover:from-red-600 hover:to-red-800 focus:ring-4 focus:ring-red-500/30';
+const baseClasses = 'inline-flex items-center justify-center gap-2 px-5 py-3 rounded-control font-semibold ' +
+    'transition-colors duration-150 active:translate-y-px cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed';
 
+const variantClasses: Record<ButtonVariant, string> = {
+    primary: 'bg-accent-deep text-white hover:bg-accent-deeper',
+    secondary: 'bg-raised text-ink border border-line-strong hover:border-accent/60 hover:text-white',
+    danger: 'bg-danger-deep text-white hover:bg-danger-deeper',
+};
+
+export function Button({ variant = 'primary', ...props }: ButtonProps) {
     return (
         <button
             {...props}
-            class={`${baseClasses} ${
-                props.variant === 'primary'
-                    ? primaryClasses
-                    : props.variant === 'secondary'
-                    ? secondaryClasses
-                    : props.variant === 'danger'
-                    ? dangerClasses
-                    : primaryClasses
-            } ${props.class ?? ''}`}
+            class={`${baseClasses} ${variantClasses[variant]} ${props.class ?? ''}`}
         >
             {props.children}
         </button>
+    );
+}
+
+type ButtonLinkProps = JSX.IntrinsicElements['a'] & {
+    variant?: ButtonVariant;
+};
+
+/** Anchor styled identically to Button, for link actions that should read as buttons. */
+export function ButtonLink({ variant = 'primary', ...props }: ButtonLinkProps) {
+    return (
+        <a
+            {...props}
+            class={`${baseClasses} ${variantClasses[variant]} ${props.class ?? ''}`}
+        >
+            {props.children}
+        </a>
     );
 }
