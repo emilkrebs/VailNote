@@ -3,7 +3,7 @@ import CreateNote from '../islands/CreateNoteForm.tsx';
 import CipherText from '../islands/CipherText.tsx';
 import { ORIGIN } from '../lib/types/common.ts';
 import { ButtonLink } from '../components/Button.tsx';
-import { FireIcon, GithubLogoIcon, LinkSimpleIcon, NotePencilIcon } from '../components/Icons.tsx';
+import { ArrowUpRightIcon, FireIcon, GithubLogoIcon, LinkSimpleIcon, NotePencilIcon } from '../components/Icons.tsx';
 
 export default function Home() {
     return (
@@ -18,6 +18,7 @@ export default function Home() {
                 <HowItWorks />
                 <Security />
                 <OpenSource />
+                <FightChatControl />
             </main>
         </>
     );
@@ -216,6 +217,38 @@ function CipherPanel() {
                 Illustrative ciphertext. The transformation happens entirely in your browser.
             </figcaption>
         </figure>
+    );
+}
+
+/**
+ * Closing statement band: privacy advocacy rendered as one oversized link. The EU's
+ * Chat Control proposal would mandate client-side scanning of private messages,
+ * undermining the end-to-end encryption VailNote is built on.
+ */
+function FightChatControl() {
+    return (
+        <section class='border-t border-line'>
+            <div class='mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24'>
+                <p class='font-mono text-xs tracking-[0.14em] text-faint'>PRIVACY IS NOT A GIFT</p>
+                <h2 class='mt-4 text-display'>
+                    <a
+                        href='https://fightchatcontrol.eu/'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        class='group inline-flex flex-wrap items-baseline gap-x-3 text-ink transition-colors duration-150 hover:text-accent-bright'
+                    >
+                        Fight Chat Control
+                        <ArrowUpRightIcon
+                            size='0.62em'
+                            class='self-center text-faint transition-colors duration-150 group-hover:text-accent-bright'
+                        />
+                    </a>
+                </h2>
+                <p class='mt-5 max-w-[52ch] text-lg leading-relaxed text-muted'>
+                    The EU's Chat Control law allows AI scanning of private messages. <a href='https://fightchatcontrol.eu/' target='_blank' rel='noopener noreferrer' class='hover:underline'>Learn how to act.</a>
+                </p>
+            </div>
+        </section>
     );
 }
 
