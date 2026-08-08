@@ -3,7 +3,6 @@ import { GithubLogoIcon } from './Icons.tsx';
 const navLinks = [
     { href: '/#how-it-works', label: 'How it works' },
     { href: '/#security', label: 'Security' },
-    { href: '/#for-agents', label: 'AI agents' },
     { href: '/#open-source', label: 'Open source' },
 ];
 

@@ -24,7 +24,6 @@ export default function Home() {
                 <Hero />
                 <HowItWorks />
                 <Security />
-                <ForAgents />
                 <OpenSource />
                 <FightChatControl />
             </main>
@@ -149,12 +148,19 @@ const securityFacts = [
         body:
             'No analytics and no ad scripts. Rate limiting uses anonymous credentials (ARC) instead of logging who you are.',
     },
+    {
+        title: 'Same rules for the CLI',
+        body:
+            'vailnote-cli encrypts before upload, reads secrets from stdin, and resolves .env links in memory - argv and disk never see the key.',
+    },
 ];
 
 /**
- * Signature moment of the page: a recessed instrument-panel band (darker than the
- * surrounding surface, inset border) housing the mechanism readout. This is the one
- * section that departs from the standard hairline-top rhythm on purpose.
+ * Signature moment of the page: a recessed instrument-panel band (darker than
+ * the surrounding surface, inset border) housing the paired consoles - the
+ * browser readout and the agent terminal - showing the same zero-knowledge
+ * handoff from both entry points. This is the one section that departs from
+ * the standard hairline-top rhythm on purpose.
  */
 function Security() {
     return (
@@ -166,8 +172,8 @@ function Security() {
                             <p class='font-mono text-xs tracking-[0.14em] text-faint'>READOUT / SERVER SIDE</p>
                             <h2 class='mt-3 text-title'>What reaches our server</h2>
                             <p class='mt-4 max-w-[50ch] text-[1.0625rem] leading-relaxed text-muted'>
-                                Encryption happens before upload, and the key never leaves the link fragment. All we can
-                                store is ciphertext with an expiry date.
+                                Encryption happens before upload - in your browser or the CLI - and the key never leaves
+                                the link fragment. All we can store is ciphertext with an expiry date.
                             </p>
                             <ul class='mt-8 flex flex-col gap-6 border-t border-line pt-8'>
                                 {securityFacts.map((fact, i) => (
@@ -189,9 +195,23 @@ function Security() {
                                     </li>
                                 ))}
                             </ul>
+                            <div class='mt-8'>
+                                <ButtonLink
+                                    href='https://vailnote.com/llms.txt'
+                                    target='_blank'
+                                    rel='noopener noreferrer'
+                                    variant='primary'
+                                >
+                                    Read the agent docs
+                                    <ArrowUpRightIcon size={16} />
+                                </ButtonLink>
+                            </div>
                         </div>
 
-                        <CipherPanel />
+                        <div class='flex flex-col gap-6'>
+                            <CipherPanel />
+                            <AgentTerminal />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -268,94 +288,14 @@ function FightChatControl() {
     );
 }
 
-const agentFacts = [
-    {
-        title: 'Encrypted before upload',
-        body:
-            'The CLI uses the same AES-256-GCM + PBKDF2 scheme as the browser. What crosses the wire is ciphertext; the secret itself exists only in memory.',
-    },
-    {
-        title: 'Stdin, not argv',
-        body:
-            'Secrets go in through stdin and passwords through environment variables - never argv, which leaks through process listings and shell history.',
-    },
-    {
-        title: 'Fits inside .env',
-        body:
-            'Keep an encrypted link in your .env and resolve it with `vailnote env` in memory. The real key never sits on disk unencrypted.',
-    },
-];
-
-/**
- * The agent-facing CLI section: a two-column spread that mirrors the Security
- * layout - copy and a numbered facts rail on the left, a terminal readout on
- * the right that shows the install-create-read handoff in three lines.
- */
-function ForAgents() {
-    return (
-        <section id='for-agents' class='border-t border-line scroll-mt-16'>
-            <div class='mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-2 lg:gap-16'>
-                <div>
-                    <p class='font-mono text-xs tracking-[0.14em] text-faint'>FOR AGENTS / SECRETS / CLI</p>
-                    <h2 class='mt-3 text-title'>Give your AI a secret-safe handoff</h2>
-                    <p class='mt-4 max-w-[50ch] text-[1.0625rem] leading-relaxed text-muted'>
-                        An official CLI gives AI agents and automation the same zero-knowledge guarantee as the web app.
-                        Pipe a secret in, get an encrypted link out - the key rides in the URL fragment and the
-                        plaintext never touches disk.{' '}
-                        <code class='font-mono text-sm'>npm install -g vailnote-cli</code>, no Deno required.
-                    </p>
-                    <ul class='mt-8 flex flex-col gap-6 border-t border-line pt-8'>
-                        {agentFacts.map((fact, i) => (
-                            <li key={fact.title} class='flex gap-4'>
-                                <span class='mt-0.5 shrink-0 font-mono text-xs text-faint' aria-hidden='true'>
-                                    {String(i + 1).padStart(2, '0')}
-                                </span>
-                                <div>
-                                    <h3 class='flex items-center gap-2 font-semibold tracking-tight'>
-                                        {fact.title}
-                                    </h3>
-                                    <p class='mt-1 text-[0.9375rem] leading-relaxed text-muted'>
-                                        {fact.body}
-                                    </p>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                    <div class='mt-8 flex flex-col gap-3 sm:flex-row'>
-                        <ButtonLink
-                            href='https://vailnote.com/llms.txt'
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            variant='primary'
-                        >
-                            Read the agent docs
-                            <ArrowUpRightIcon size={16} />
-                        </ButtonLink>
-                        <ButtonLink
-                            href='https://github.com/emilkrebs/VailNote/blob/main/cli/main.ts'
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            variant='secondary'
-                        >
-                            <GithubLogoIcon size={18} />
-                            See the CLI source
-                        </ButtonLink>
-                    </div>
-                </div>
-
-                <AgentTerminal />
-            </div>
-        </section>
-    );
-}
-
-/**
- * Terminal readout of the full handoff: install, create via stdin, read back.
- * Output lines are demoted to muted; prompts and commands read in ink with an
- * accent-bright `$`, matching the machined-console look of the CipherPanel.
- */
 const PROMPT = '$ ';
 
+/**
+ * Agent-side console, paired with the CipherPanel as the second pane of the
+ * instrument band: install, create via stdin, read back. Output lines are
+ * demoted to muted; prompts and commands read in ink with an accent-bright
+ * `$`, matching the machined-console look of the CipherPanel.
+ */
 function AgentTerminal() {
     return (
         <figure class='relative'>
@@ -392,7 +332,7 @@ function AgentTerminal() {
                 </div>
             </div>
             <figcaption class='mt-3 text-sm text-muted'>
-                Plaintext exists only in your memory and theirs - never on disk.
+                Plaintext exists only in the CLI's memory - never on disk.
             </figcaption>
         </figure>
     );
