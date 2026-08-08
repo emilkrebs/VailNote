@@ -48,11 +48,14 @@ export const app = new App<State>()
     }))
     .use(csp())
     .use(async (ctx: Context<State>) => {
-        // Skip rate limiting for static legal pages
-        const { pathname } = new URL(ctx.req.url);
-        if (pathname === '/privacy' || pathname === '/terms') {
+        // Skip rate limiting for read-only requests (GET/HEAD/OPTIONS). Only
+        // mutating requests (e.g. POST /api/notes) are rate limited, so
+        // visitors can always view the site without being blocked.
+        const method = ctx.req.method;
+        if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') {
             return await ctx.next();
         }
+        const { pathname } = new URL(ctx.req.url);
         try {
             return await rateLimitMiddleware(ctx);
         } catch (error) {
