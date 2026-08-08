@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --allow-net --allow-env
+#!/usr/bin/env -S deno run --allow-net --allow-env --allow-read
 
 import { decryptNoteContent } from '../lib/encryption.ts';
 import { generateDeterministicClientHash } from '../lib/hashing.ts';
@@ -58,6 +58,10 @@ Usage:
                                            process listings and shell history).
   vailnote read <link-or-id> [options]     Fetch and decrypt a note, print plaintext to stdout.
   vailnote delete <link-or-id> [options]   Permanently delete a note (manual-deletion notes).
+  vailnote env [file] [options]            Resolve VailNote links in a .env file (default: ./.env)
+                                           to their decrypted values. Prints \`export KEY='value'\`
+                                           lines for shell sourcing, or JSON with --json. Notes
+                                           referenced in .env should be created with --manual-deletion.
   vailnote version                         Print the CLI version.
 
 Options:
@@ -71,10 +75,12 @@ Options:
   -h, --help               Show this help.
 
 Examples:
-  echo "sk-secret" | deno run --allow-net --allow-env cli/main.ts create
-  deno run --allow-net --allow-env cli/main.ts create "hello world" --expires-in 10m
-  deno run --allow-net --allow-env cli/main.ts read "https://vailnote.com/<id>#auth=<key>"
-  VAILNOTE_PASSWORD=my-pw deno run --allow-net --allow-env cli/main.ts read "<link>"
+  echo "sk-secret" | deno run --allow-net --allow-env --allow-read cli/main.ts create
+  deno run --allow-net --allow-env --allow-read cli/main.ts create "hello world" --expires-in 10m
+  deno run --allow-net --allow-env --allow-read cli/main.ts read "https://vailnote.com/<id>#auth=<key>"
+  VAILNOTE_PASSWORD=my-pw deno run --allow-net --allow-env --allow-read cli/main.ts read "<link>"
+  deno run --allow-net --allow-env --allow-read cli/main.ts env                       # resolve ./.env
+  deno run --allow-net --allow-env --allow-read cli/main.ts env ./.env.local --json  # or a specific file
 
 The note content never touches the disk unencrypted. Decryption always
 happens locally; the server only ever stores ciphertext.`;
@@ -208,7 +214,7 @@ export function parseArgs(argv: string[]): CliOptions {
         opts.command = command;
     }
 
-    if (!['create', 'read', 'delete', 'version'].includes(opts.command)) {
+    if (!['create', 'read', 'delete', 'env', 'version'].includes(opts.command)) {
         throw new CliError(`Unknown command: ${opts.command}`);
     }
 
@@ -355,6 +361,105 @@ export async function deleteNote(link: string, opts: CliOptions): Promise<{ note
     return { noteId: id };
 }
 
+/**
+ * Whether a .env value is a VailNote link for the configured origin.
+ * Only links under the configured origin are resolved, so unrelated URLs
+ * pass through untouched.
+ */
+export function isVailNoteLink(value: string, origin: string): boolean {
+    if (!value.startsWith(`${origin}/`)) {
+        return false;
+    }
+    try {
+        parseNoteLink(value);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Parse .env text into key/value pairs without variable expansion (secrets
+ * may contain `$`). Supports blank lines, `#` comments, an optional `export`
+ * prefix, and single- or double-quoted values with escaped quotes.
+ */
+export function parseEnvFile(text: string): Record<string, string> {
+    const env: Record<string, string> = {};
+    for (const rawLine of text.split(/\r?\n/)) {
+        const line = rawLine.trim().replace(/^export\s+/, '');
+        if (!line || line.startsWith('#')) {
+            continue;
+        }
+        const eq = line.indexOf('=');
+        if (eq === -1) {
+            continue;
+        }
+        const key = line.slice(0, eq).trim();
+        if (!key) {
+            continue;
+        }
+        let value = line.slice(eq + 1).trim();
+        if (
+            value.length >= 2 && ((value.startsWith('"') && value.endsWith('"')) ||
+                (value.startsWith("'") && value.endsWith("'")))
+        ) {
+            value = value.slice(1, -1);
+            if (value[0] !== "'") {
+                value = value.replace(/\\(["\\])/g, '$1');
+            }
+        }
+        env[key] = value;
+    }
+    return env;
+}
+
+export interface ResolveEnvResult {
+    env: Record<string, string>;
+    resolvedKeys: string[];
+}
+
+/**
+ * Resolve every VailNote link in an env record to its decrypted value.
+ * Values that are not VailNote links are left untouched. Fails fast (naming
+ * the offending key) if a link cannot be resolved, so a stale or expired
+ * link never silently leaves a secret unresolved.
+ */
+export async function resolveEnv(
+    env: Record<string, string>,
+    opts: CliOptions,
+    resolve: (link: string, opts: CliOptions) => Promise<string> = async (link, options) =>
+        (await readNote(link, options)).content,
+): Promise<ResolveEnvResult> {
+    const resolvedKeys: string[] = [];
+    for (const [key, value] of Object.entries(env)) {
+        if (!isVailNoteLink(value, opts.origin)) {
+            continue;
+        }
+        try {
+            // Strip trailing newlines: env values are usually created with
+            // `echo`, which appends one. read keeps content byte-exact.
+            env[key] = (await resolve(value, opts)).replace(/\r?\n+$/, '');
+            resolvedKeys.push(key);
+        } catch (error) {
+            throw new CliError(
+                `Failed to resolve VailNote link for ${key}: ${error instanceof Error ? error.message : String(error)}`,
+            );
+        }
+    }
+    return { env, resolvedKeys };
+}
+
+/**
+ * Format an env record as shell-sourceable `export KEY='value'` lines.
+ * Values are single-quoted (with the shell's `'\''` escape) so secrets
+ * containing spaces, `$`, or quotes survive sourcing without expansion.
+ */
+export function formatEnvOutput(env: Record<string, string>): string {
+    return Object.entries(env)
+        .map(([key, value]) => `export ${key}='${value.replaceAll("'", "'\\''")}'`)
+        .join('\n');
+}
+
 function printCreateResult(result: CreateResult, opts: CliOptions): void {
     if (opts.json) {
         console.log(JSON.stringify(result, null, 2));
@@ -389,6 +494,26 @@ async function main(argv: string[]): Promise<void> {
 
         if (opts.command === 'version') {
             console.log(`vailnote-cli ${CLI_VERSION}`);
+            return;
+        }
+
+        if (opts.command === 'env') {
+            const filePath = opts.positional[0] || './.env';
+            let text: string;
+            try {
+                text = await Deno.readTextFile(filePath);
+            } catch (error) {
+                throw new CliError(
+                    `Could not read ${filePath}: ${error instanceof Error ? error.message : String(error)}`,
+                );
+            }
+
+            const { env } = await resolveEnv(parseEnvFile(text), opts);
+            if (opts.json) {
+                console.log(JSON.stringify(env, null, 2));
+            } else {
+                console.log(formatEnvOutput(env));
+            }
             return;
         }
 

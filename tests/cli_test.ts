@@ -1,7 +1,15 @@
 import { assertEquals, assertRejects, assertThrows } from '$std/assert/mod.ts';
 import { decryptNoteContent } from '../lib/encryption.ts';
 import { combineNoteSecrets, prepareEncryption } from '../lib/services/crypto-service.ts';
-import { EXPIRY_API_VALUES, parseArgs, parseNoteLink } from '../cli/main.ts';
+import {
+    EXPIRY_API_VALUES,
+    formatEnvOutput,
+    isVailNoteLink,
+    parseArgs,
+    parseEnvFile,
+    parseNoteLink,
+    resolveEnv,
+} from '../cli/main.ts';
 
 Deno.test({
     name: 'CLI - parseNoteLink',
@@ -107,6 +115,103 @@ Deno.test({
             assertEquals(EXPIRY_API_VALUES['1h'], '1 hour');
             assertEquals(EXPIRY_API_VALUES['24h'], '24 hours');
             assertEquals(EXPIRY_API_VALUES['30d'], '30 days');
+        });
+    },
+});
+
+Deno.test({
+    name: 'CLI - env command',
+    fn: async (t) => {
+        await t.step('parses the env command', () => {
+            const opts = parseArgs(['env']);
+            assertEquals(opts.command, 'env');
+        });
+
+        await t.step('parseEnvFile handles comments, quotes, and export prefix', () => {
+            const env = parseEnvFile(
+                [
+                    '# a comment',
+                    'PLAIN=value',
+                    'QUOTED="hello world"',
+                    "SINGLE='it's fine'",
+                    'export EXPORTED=exported-value',
+                    'ESCAPED="a \\"quote\\""',
+                    'WITH_DOLLAR=$HOME/secret',
+                    'EMPTY=',
+                    '',
+                ].join('\n'),
+            );
+            assertEquals(env.PLAIN, 'value');
+            assertEquals(env.QUOTED, 'hello world');
+            assertEquals(env.SINGLE, "it's fine");
+            assertEquals(env.EXPORTED, 'exported-value');
+            assertEquals(env.ESCAPED, 'a "quote"');
+            assertEquals(env.WITH_DOLLAR, '$HOME/secret');
+            assertEquals(env.EMPTY, '');
+            assertEquals(env.UNKNOWN, undefined);
+        });
+
+        await t.step('isVailNoteLink only matches the configured origin', () => {
+            assertEquals(isVailNoteLink('https://vailnote.com/abc123#auth=key', 'https://vailnote.com'), true);
+            assertEquals(isVailNoteLink('https://other.com/abc123#auth=key', 'https://vailnote.com'), false);
+            assertEquals(isVailNoteLink('sk-plain-key', 'https://vailnote.com'), false);
+            assertEquals(isVailNoteLink('https://vailnote.com/', 'https://vailnote.com'), false);
+        });
+
+        await t.step('resolveEnv resolves links, leaves other values untouched', async () => {
+            const fakeResolve = (link: string): Promise<string> => Promise.resolve(`resolved:${link}`);
+            const { env, resolvedKeys } = await resolveEnv(
+                {
+                    OPEN_AI_API_KEY: 'https://vailnote.com/abc123#auth=key',
+                    OTHER: 'https://vailnote.com/def456#auth=key2',
+                    PLAIN: 'sk-plain',
+                    DATABASE_URL: 'postgres://localhost/db',
+                },
+                parseArgs(['env']),
+                fakeResolve,
+            );
+            assertEquals(env.OPEN_AI_API_KEY, 'resolved:https://vailnote.com/abc123#auth=key');
+            assertEquals(env.OTHER, 'resolved:https://vailnote.com/def456#auth=key2');
+            assertEquals(env.PLAIN, 'sk-plain');
+            assertEquals(env.DATABASE_URL, 'postgres://localhost/db');
+            assertEquals(resolvedKeys, ['OPEN_AI_API_KEY', 'OTHER']);
+        });
+
+        await t.step('resolveEnv strips trailing newlines from resolved values', async () => {
+            const fakeResolve = (): Promise<string> => Promise.resolve('sk-key\n');
+            const { env } = await resolveEnv(
+                { SECRET: 'https://vailnote.com/abc123#auth=key' },
+                parseArgs(['env']),
+                fakeResolve,
+            );
+            assertEquals(env.SECRET, 'sk-key');
+        });
+
+        await t.step('resolveEnv fails fast naming the offending key', async () => {
+            const failingResolve = (): Promise<string> => Promise.reject(new Error('Note not found'));
+            await assertRejects(
+                async () => {
+                    await resolveEnv(
+                        { SECRET: 'https://vailnote.com/abc123#auth=key' },
+                        parseArgs(['env']),
+                        failingResolve,
+                    );
+                },
+                Error,
+                'SECRET',
+            );
+        });
+
+        await t.step('formatEnvOutput produces sourceable, single-quoted exports', () => {
+            const output = formatEnvOutput({
+                OPEN_AI_API_KEY: 'sk-$secret',
+                QUOTED: "it's",
+                SPACES: 'a b c',
+            });
+            assertEquals(
+                output,
+                "export OPEN_AI_API_KEY='sk-$secret'\nexport QUOTED='it'\\''s'\nexport SPACES='a b c'",
+            );
         });
     },
 });

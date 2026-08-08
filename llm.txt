@@ -85,15 +85,21 @@ deno run --allow-net --allow-env cli/main.ts read "https://vailnote.com/<noteId>
 VAILNOTE_PASSWORD=my-secret deno run --allow-net --allow-env cli/main.ts read "<link>"
 
 # Delete a manual-deletion note
-VAILNOTE_PASSWORD=my-secret deno run --allow-net --allow-env cli/main.ts delete "<link>"
+VAILNOTE_PASSWORD=my-secret deno run --allow-net --allow-env --allow-read cli/main.ts delete "<link>"
+
+# Resolve every VailNote link in a .env file to its decrypted value.
+# Prints `export KEY='value'` lines for shell sourcing, or JSON with --json.
+deno run --allow-net --allow-env --allow-read cli/main.ts env                  # reads ./.env
+deno run --allow-net --allow-env --allow-read cli/main.ts env ./.env.local --json
 
 # Machine-readable output for agent tooling
-deno run --allow-net --allow-env cli/main.ts create --json
+deno run --allow-net --allow-env --allow-read cli/main.ts create --json
 ```
 
-Commands: `create [content]`, `read <link-or-id>`, `delete <link-or-id>`, `version`.
+Commands: `create [content]`, `read <link-or-id>`, `delete <link-or-id>`, `env [file]`, `version`.
 Options: `-p/--password`, `-e/--expires-in` (short codes: `10m`, `1h`, `6h`, `12h`, `24h`, `3d`, `7d`, `30d`; translated to the API's human-readable values), `-m/--manual-deletion`, `-o/--origin` (default `https://vailnote.com`, env `VAILNOTE_ORIGIN`), `-j/--json`, `-h/--help`.
 Environment: `VAILNOTE_PASSWORD` (recommended over argv), `VAILNOTE_ORIGIN`.
+Note: the `env` command (and reading a `.env` file) requires `--allow-read`.
 
 The CLI reuses the same crypto as the web client (`lib/encryption.ts`, `lib/hashing.ts`, `lib/services/crypto-service.ts`), so links created by the CLI open in the browser and vice versa.
 
@@ -102,6 +108,25 @@ The CLI reuses the same crypto as the web client (`lib/encryption.ts`, `lib/hash
 1. The agent reads the user's encrypted store, or the user pipes the key in: `echo "$API_KEY" | deno run --allow-net --allow-env cli/main.ts create --expires-in 7d`.
 2. The agent returns the resulting link (with the `#auth=` fragment) to the user, who opens it in a browser - or the user's own agent reads it later with the CLI. The key existed as plaintext only in memory, never on disk.
 3. The note self-destructs after the first read unless `--manual-deletion` is used.
+
+### Example workflow: secrets in `.env` without plaintext on disk
+
+Instead of a plaintext API key, the `.env` file holds a VailNote link; the real value is only ever materialized in
+memory when the file is resolved:
+
+```bash
+# One-time setup (note must be created with --manual-deletion to survive reads)
+printf '%s' "$API_KEY" | deno run --allow-net --allow-env --allow-read cli/main.ts create --manual-deletion
+# -> paste the printed link into .env:  OPEN_AI_API_KEY=https://vailnote.com/<id>#auth=<key>
+
+# Resolve all links in the file (fetch ciphertext, decrypt locally)
+set -a; source <(deno run --allow-net --allow-env --allow-read cli/main.ts env); set +a
+# or machine-readable:  deno run --allow-net --allow-env --allow-read cli/main.ts env --json
+```
+
+Rules for this pattern: use `--manual-deletion` so the note survives repeated resolutions; add a password so the
+`.env` link alone is useless (then set `VAILNOTE_PASSWORD` when resolving); use `printf`/`echo -n` when creating so
+the stored value has no trailing newline (the `env` command strips trailing newlines on resolution anyway).
 
 ## Security model
 
