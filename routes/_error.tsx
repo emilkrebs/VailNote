@@ -86,8 +86,6 @@ export default function Error(props: PageProps) {
         defaultLogger.error(`Critical error occurred: ${status} - ${error.message}`);
     }
 
-    const StatusIcon = errorContent.icon;
-
     return (
         <>
             <Header title='Error' description={`An error occurred: ${error.message || 'Unknown error'}`} />
@@ -95,10 +93,9 @@ export default function Error(props: PageProps) {
             <PageShell>
                 <div class='flex flex-col items-center py-8 text-center'>
                     <p class='font-mono text-xs tracking-[0.14em] text-faint'>HTTP {status}</p>
-                    <h1 class='mt-3 text-3xl font-bold tracking-tight sm:text-4xl'>Not found</h1>
+                    <h1 class='mt-3 text-3xl font-bold tracking-tight sm:text-4xl'>{errorContent.title}</h1>
                     <p class='mt-3 max-w-md text-[0.9375rem] leading-relaxed text-muted'>
-                        This page or note does not exist. A note link may have already been read and destroyed, or it
-                        may have expired.
+                        {errorContent.description}
                     </p>
 
                     <ErrorActions
