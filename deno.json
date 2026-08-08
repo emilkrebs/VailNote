@@ -5,12 +5,17 @@
         "dev": "deno run -A --unstable-kv --node-modules-dir npm:vite",
         "build": "deno run -A --unstable-kv --node-modules-dir npm:vite build",
         "test": "deno test --unstable-kv --allow-read --allow-env --allow-net --allow-write --allow-sys",
+        "cli": "deno run --allow-net --allow-env --allow-read cli/main.ts",
+        "install:cli": "deno install -g -f -n vailnote --allow-net --allow-env --allow-read cli/main.ts",
+        "build:cli": "deno compile --allow-net --allow-env --allow-read --output vailnote-cli cli/main.ts",
+        "build:npm": "deno run -A scripts/build-npm.ts",
+        "publish:npm": "deno task build:npm && npm publish ./npm --access public",
         "update": "deno run -A -r jsr:@fresh/update .",
         "preview": "deno task build && deno task start",
         "clean": "rm -rf ./dist && rm -rf ./_fresh && rm -rf ./node_modules && rm -f ./deno.lock && rm -f ./package-lock.json"
     },
     "lint": { "rules": { "tags": ["fresh", "recommended"] } },
-    "exclude": ["**/_fresh/*"],
+    "exclude": ["**/_fresh/*", "npm/bin"],
     "imports": {
         "@/": "./",
         "@deno/gfm": "jsr:@deno/gfm@^0.12.0",
@@ -53,7 +58,7 @@
         "indentWidth": 4,
         "singleQuote": true,
         "proseWrap": "always",
-        "exclude": ["**/node_modules/**", "**/.git/**", "**/.vscode/**", "**/.github/**"]
+        "exclude": ["**/node_modules/**", "**/.git/**", "**/.vscode/**", "**/.github/**", "npm/bin/**"]
     },
     "nodeModulesDir": "auto"
 }

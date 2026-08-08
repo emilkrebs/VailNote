@@ -1,0 +1,55 @@
+name: Publish CLI to npm
+
+permissions:
+    contents: read
+    id-token: write
+
+on:
+    push:
+        branches:
+            - 'main'
+        paths:
+            - 'npm/package.json'
+
+# Never let two publish runs race each other
+concurrency:
+    group: publish
+    cancel-in-progress: false
+
+jobs:
+    publish:
+        name: Publish vailnote-cli
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+            - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+              with:
+                  node-version: '22'
+                  # Required by the publish action for --provenance
+                  registry-url: 'https://registry.npmjs.org'
+
+            # OIDC trusted publishing to npm needs npm >= 11.5.1
+            - name: Upgrade npm
+              run: npm install -g npm@latest
+
+            - name: Setup Deno
+              uses: denoland/setup-deno@61fe2df320078202e33d7d5ad347e7dcfa0e8f31
+              with:
+                  deno-version: v2.x
+
+            - name: Run checks
+              run: deno fmt --check && deno lint
+
+            - name: Build CLI bundle
+              run: deno task build:npm
+
+            - name: Publish
+              # Pin the version to a full commit SHA for supply-chain safety.
+              # Compares local versions against the registry and only publishes
+              # packages whose version is newer (trusted publishing via OIDC).
+              uses: TypeFox/gh-publish-npm@7183224bef010236e419a2367208633ff284337a
+              with:
+                  # Newline-separated. Only non-private, npm-published packages belong here.
+                  npm-packages: |
+                      npm

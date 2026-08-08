@@ -1,6 +1,5 @@
-import { Note } from '../types.ts';
+import { Note, NOTE_CONTENT_MAX_LENGTH, NOTE_PASSWORD_MAX_LENGTH } from '../types.ts';
 import { TerminalColors } from '../logging.ts';
-import { NOTE_CONTENT_MAX_LENGTH, NOTE_PASSWORD_MAX_LENGTH } from '../validation/note.ts';
 import { DatabaseLogger } from './database-logger.ts';
 
 export interface ValidateNoteResult {
@@ -96,7 +95,7 @@ export class NoteDatabase {
         if (data.content.length > NOTE_CONTENT_MAX_LENGTH) {
             return {
                 success: false,
-                message: 'Content too large (max 1MB)',
+                message: 'Content too large (max 46KB)',
             };
         }
 

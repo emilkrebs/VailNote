@@ -1,4 +1,5 @@
 import * as v from '@valibot/valibot';
+import { NOTE_CONTENT_MAX_LENGTH, NOTE_PASSWORD_MAX_LENGTH } from '../types.ts';
 
 export enum EXPIRY_OPTIONS {
     '10m' = '10 minutes',
@@ -10,6 +11,7 @@ export enum EXPIRY_OPTIONS {
     '7d' = '7 days',
     '30d' = '30 days',
     '90d' = '90 days',
+    '180d' = '180 days',
 }
 
 export enum MANUAL_DELETION_OPTIONS {
@@ -17,14 +19,11 @@ export enum MANUAL_DELETION_OPTIONS {
     'enabled' = 'Enable Manual Deletion',
 }
 
-export const NOTE_CONTENT_MAX_LENGTH = 1024 * 1024; // 1 MB
-export const NOTE_PASSWORD_MAX_LENGTH = 256; // 256 characters
-
 export const createNoteSchema = v.object({
     content: v.pipe(
         v.string(),
         v.nonEmpty('Note content is required'),
-        v.maxLength(NOTE_CONTENT_MAX_LENGTH, 'Note content is too long (max 1MB)'),
+        v.maxLength(NOTE_CONTENT_MAX_LENGTH, 'Note content is too long (max 46KB)'),
     ),
     password: v.optional(
         v.pipe(

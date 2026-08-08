@@ -18,6 +18,8 @@ dist-ssr/
 node_modules/
 package-lock.json
 .pnp
+# Generated npm CLI bundle
+npm/bin/vailnote-core.mjs
 .pnp.js
 *.tgz
 

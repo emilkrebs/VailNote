@@ -43,6 +43,7 @@
     "npm:@types/babel__core@^7.20.5": "7.20.5",
     "npm:bcryptjs@*": "3.0.3",
     "npm:esbuild-wasm@~0.25.11": "0.25.12",
+    "npm:esbuild@0.25": "0.25.12",
     "npm:esbuild@0.25.7": "0.25.7",
     "npm:esbuild@~0.25.5": "0.25.12",
     "npm:github-slugger@2": "2.0.0",
