@@ -5,7 +5,7 @@ import { generateDeterministicClientHash } from '../lib/hashing.ts';
 import { combineNoteSecrets, prepareEncryption } from '../lib/services/crypto-service.ts';
 import { NOTE_CONTENT_MAX_LENGTH } from '../lib/types.ts';
 
-export const CLI_VERSION = '1.0.1';
+export const CLI_VERSION = '1.0.2';
 export const DEFAULT_ORIGIN = 'https://vailnote.com';
 export const EXPIRY_OPTIONS = ['10m', '1h', '6h', '12h', '24h', '3d', '7d', '30d', '90d', '180d'] as const;
 export type ExpiryOption = typeof EXPIRY_OPTIONS[number];
