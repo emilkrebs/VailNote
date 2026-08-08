@@ -3,13 +3,7 @@ import CreateNote from '../islands/CreateNoteForm.tsx';
 import CipherText from '../islands/CipherText.tsx';
 import { ORIGIN } from '../lib/types/common.ts';
 import { ButtonLink } from '../components/Button.tsx';
-import {
-    ArrowUpRightIcon,
-    FireIcon,
-    GithubLogoIcon,
-    LinkSimpleIcon,
-    NotePencilIcon,
-} from '../components/Icons.tsx';
+import { ArrowUpRightIcon, FireIcon, GithubLogoIcon, LinkSimpleIcon, NotePencilIcon } from '../components/Icons.tsx';
 
 export default function Home() {
     return (

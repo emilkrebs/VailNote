@@ -42,12 +42,15 @@ interface ViewEncryptedNoteProps {
     manualDeletion?: boolean;
     /** Known upfront from the server so the password prompt can show immediately, with no extra confirm step. */
     hasPassword?: boolean;
+    /** ISO date string; known upfront from the server since it doesn't require decrypting or destroying the note. */
+    expiresIn?: string;
 }
 
 interface PasswordRequiredViewProps {
     onSubmit: (event: Event) => Promise<void>;
     error?: string;
     manualDeletion?: boolean;
+    expiresIn?: string;
 }
 
 interface DisplayDecryptedNoteProps {
@@ -59,7 +62,7 @@ interface DisplayDecryptedNoteProps {
 }
 
 // https://vailnote.com/[id]#[authKey] or https://vailnote.com/[id] (password required)
-export default function ViewEncryptedNote({ noteId, manualDeletion, hasPassword }: ViewEncryptedNoteProps) {
+export default function ViewEncryptedNote({ noteId, manualDeletion, hasPassword, expiresIn }: ViewEncryptedNoteProps) {
     // State management
     const [note, setNote] = useState<Note | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -234,6 +237,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion, hasPassword 
                 onSubmit={handlePasswordSubmit}
                 error={decryptionError}
                 manualDeletion={manualDeletion}
+                expiresIn={expiresIn}
             />
         );
     }
@@ -243,7 +247,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion, hasPassword 
     }
 
     if (!confirmed) {
-        return <ConfirmViewNote onSubmit={() => setConfirmed(true)} />;
+        return <ConfirmViewNote onSubmit={() => setConfirmed(true)} expiresIn={expiresIn} />;
     }
 
     if (!note) {
@@ -324,7 +328,7 @@ function DisplayDecryptedNote(
     );
 }
 
-function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequiredViewProps) {
+function PasswordRequiredView({ onSubmit, manualDeletion, error, expiresIn }: PasswordRequiredViewProps) {
     return (
         <PageShell>
             <Card>
@@ -334,6 +338,7 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
                         The sender protected this note with a password. Only someone who holds it can open it - the
                         password was sent separately from the link.
                     </p>
+                    {expiresIn && <ExpirationMessage expiresIn={expiresIn} />}
                 </CardHeader>
 
                 <CardContent class='flex flex-col gap-6'>
@@ -381,7 +386,7 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
     );
 }
 
-function ConfirmViewNote({ onSubmit }: { onSubmit: () => void }) {
+function ConfirmViewNote({ onSubmit, expiresIn }: { onSubmit: () => void; expiresIn?: string }) {
     return (
         <PageShell>
             <Card>
@@ -390,6 +395,7 @@ function ConfirmViewNote({ onSubmit }: { onSubmit: () => void }) {
                     <p class='text-[0.9375rem] leading-relaxed text-muted'>
                         This note can be read exactly once. Decrypting it deletes it from the server permanently.
                     </p>
+                    {expiresIn && <ExpirationMessage expiresIn={expiresIn} />}
                 </CardHeader>
 
                 <CardContent class='flex flex-col gap-6'>
@@ -463,11 +469,11 @@ function DestroyFactsDisclosure() {
     );
 }
 
-function ExpirationMessage({ expiresIn }: { expiresIn: Date }) {
+function ExpirationMessage({ expiresIn }: { expiresIn: Date | string }) {
     const [message, setMessage] = useState('');
 
     const updateMessage = () => {
-        const timeString = formatExpirationMessage(expiresIn);
+        const timeString = formatExpirationMessage(new Date(expiresIn));
         setMessage(`Expires in ${timeString}`);
     };
 

@@ -17,10 +17,10 @@ export default function App({ Component }: PageProps) {
                 <SiteHeader />
                 <Component />
                 <Footer />
-            {/* impeccable-live-start */}
-<script src="http://localhost:8401/live.js?token=946c914a-91d2-4ea5-b47f-343df63b6686"></script>
-{/* impeccable-live-end */}
-</body>
+                {/* impeccable-live-start */}
+                <script src='http://localhost:8401/live.js?token=946c914a-91d2-4ea5-b47f-343df63b6686'></script>
+                {/* impeccable-live-end */}
+            </body>
         </html>
     );
 }
