@@ -25,8 +25,9 @@ focus on user-friendliness and security.
 - 🛡️ **Privacy-preserving rate-limiting** using Anonymous Rate-Limited Credentials (ARC)
   [(View Implementation)](lib/rate-limiting/)
 - 🤖 **AI-agent ready** - an official CLI ([`cli/main.ts`](cli/main.ts)) that encrypts/decrypts locally, so agents can
-  store and share API keys and other secrets without ever writing them to disk in plaintext. See [llm.txt](llm.txt) for
-  the full agent-facing documentation.
+  store and share API keys and other secrets without ever writing them to disk in plaintext. See
+  [llms.txt](https://vailnote.com/llms.txt) (or the repo's [llms-full.txt](static/llms-full.txt)) for the full
+  agent-facing documentation.
 
 ## Tech Stack
 
@@ -207,8 +208,8 @@ Notes on this pattern:
 - Notes referenced from `.env` should use `echo -n` (or `printf`) when created, so no trailing newline is stored.
 - Values are single-quoted in the output, so `$` and quotes in secrets survive shell sourcing.
 
-Notes are limited to 46 KB of plaintext (the encrypted value must fit Deno KV's 64 KiB limit). `llm.txt` documents the
-HTTP API, encryption protocol, and CLI for AI agents.
+Notes are limited to 46 KB of plaintext (the encrypted value must fit Deno KV's 64 KiB limit).
+[llms.txt](https://vailnote.com/llms.txt) documents the HTTP API, encryption protocol, and CLI for AI agents.
 
 ## License
 

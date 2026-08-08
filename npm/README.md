@@ -27,4 +27,4 @@ vailnote env
 `VAILNOTE_PASSWORD`), `-o/--origin` (default `https://vailnote.com`), `-j/--json`, `-h/--help`.
 
 Requires Node 18+. Requires no Deno runtime. See the [VailNote repo](https://github.com/emilkrebs/VailNote) for the HTTP
-API, encryption protocol, and `llm.txt` agent documentation.
+API, encryption protocol, and [llms.txt](https://vailnote.com/llms.txt) agent documentation.

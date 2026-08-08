@@ -4,9 +4,9 @@
 
 ## What is VailNote?
 
-VailNote (vailnote.com) is an open-source note-sharing service built on Fresh/Deno. Every note is encrypted in the client (or CLI) with AES-256-GCM before it is uploaded, so the server, database, and network can never reveal the content. Notes can self-destruct after the first read or be kept until manually deleted, and they expire automatically (10 minutes to 30 days).
+VailNote (vailnote.com) is an open-source note-sharing service built on Fresh/Deno. Every note is encrypted in the client (or CLI) with AES-256-GCM before it is uploaded, so the server, database, and network can never reveal the content. Notes can self-destruct after the first read or be kept until manually deleted, and they expire automatically (10 minutes to 180 days).
 
-This repository contains the web app, the HTTP API, and an official CLI for AI agents. There is no signup, no tracking, no accounts - anyone can create and read notes.
+There is no signup, no tracking, no accounts - anyone can create and read notes. The repository contains the web app, the HTTP API, and an official CLI for AI agents.
 
 ## Core concepts
 
@@ -134,8 +134,7 @@ The CLI reuses the same crypto as the web client (`lib/encryption.ts`, `lib/hash
 
 ### Example workflow: secrets in `.env` without plaintext on disk
 
-Instead of a plaintext API key, the `.env` file holds a VailNote link; the real value is only ever materialized in
-memory when the file is resolved:
+Instead of a plaintext API key, the `.env` file holds a VailNote link; the real value is only ever materialized in memory when the file is resolved:
 
 ```bash
 # One-time setup (note must be created with --manual-deletion to survive reads)
@@ -147,9 +146,7 @@ set -a; source <(deno run --allow-net --allow-env --allow-read cli/main.ts env);
 # or machine-readable:  deno run --allow-net --allow-env --allow-read cli/main.ts env --json
 ```
 
-Rules for this pattern: use `--manual-deletion` so the note survives repeated resolutions; add a password so the
-`.env` link alone is useless (then set `VAILNOTE_PASSWORD` when resolving); use `printf`/`echo -n` when creating so
-the stored value has no trailing newline (the `env` command strips trailing newlines on resolution anyway).
+Rules for this pattern: use `--manual-deletion` so the note survives repeated resolutions; add a password so the `.env` link alone is useless (then set `VAILNOTE_PASSWORD` when resolving); use `printf`/`echo -n` when creating so the stored value has no trailing newline (the `env` command strips trailing newlines on resolution anyway).
 
 ## Security model
 
@@ -160,19 +157,19 @@ the stored value has no trailing newline (the `env` command strips trailing newl
 
 ## Documentation
 
-- [README.md](README.md) - project overview, architecture, local development
-- [DESIGN.md](DESIGN.md) - detailed design and security architecture
-- [PRODUCT.md](PRODUCT.md) - product vision and goals
-- [PRIVACY.md](PRIVACY.md) - privacy model and guarantees
-- [TERMS.md](TERMS.md) - terms of service
-- [lib/encryption.ts](lib/encryption.ts) - AES-GCM + PBKDF2 content encryption (shared by web client and CLI)
-- [lib/hashing.ts](lib/hashing.ts) - client-side PBKDF2 password hashing
-- [lib/services/crypto-service.ts](lib/services/crypto-service.ts) - key/auth-key generation and secret combination
-- [lib/services/storage/remote-storage.ts](lib/services/storage/remote-storage.ts) - reference client implementation of the API
-- [routes/api/notes.ts](routes/api/notes.ts) - create endpoint
-- [routes/api/notes/[id].ts](routes/api/notes/[id].ts) - fetch/delete endpoint
-- [lib/rate-limiting/](lib/rate-limiting/) - ARC rate-limiting implementation
-- [cli/main.ts](cli/main.ts) - agent-facing CLI (create/read/delete)
+- [README](https://github.com/emilkrebs/VailNote/blob/main/README.md) - project overview, architecture, local development
+- [DESIGN](https://github.com/emilkrebs/VailNote/blob/main/DESIGN.md) - detailed design and security architecture
+- [PRODUCT](https://github.com/emilkrebs/VailNote/blob/main/PRODUCT.md) - product vision and goals
+- [PRIVACY](https://github.com/emilkrebs/VailNote/blob/main/PRIVACY.md) - privacy model and guarantees
+- [TERMS](https://github.com/emilkrebs/VailNote/blob/main/TERMS.md) - terms of service
+- [lib/encryption.ts](https://github.com/emilkrebs/VailNote/blob/main/lib/encryption.ts) - AES-GCM + PBKDF2 content encryption (shared by web client and CLI)
+- [lib/hashing.ts](https://github.com/emilkrebs/VailNote/blob/main/lib/hashing.ts) - client-side PBKDF2 password hashing
+- [lib/services/crypto-service.ts](https://github.com/emilkrebs/VailNote/blob/main/lib/services/crypto-service.ts) - key/auth-key generation and secret combination
+- [lib/services/storage/remote-storage.ts](https://github.com/emilkrebs/VailNote/blob/main/lib/services/storage/remote-storage.ts) - reference client implementation of the API
+- [routes/api/notes.ts](https://github.com/emilkrebs/VailNote/blob/main/routes/api/notes.ts) - create endpoint
+- [routes/api/notes/[id].ts](https://github.com/emilkrebs/VailNote/blob/main/routes/api/notes/[id].ts) - fetch/delete endpoint
+- [lib/rate-limiting/](https://github.com/emilkrebs/VailNote/tree/main/lib/rate-limiting/) - ARC rate-limiting implementation
+- [cli/main.ts](https://github.com/emilkrebs/VailNote/blob/main/cli/main.ts) - agent-facing CLI (create/read/delete/env)
 
 ## Requirements
 

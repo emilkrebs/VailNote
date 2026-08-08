@@ -1,0 +1,24 @@
+# VailNote
+
+> Privacy-first, end-to-end encrypted note sharing. Create a note, get a link; only whoever holds the link (plus any password) can decrypt it. The server never sees plaintext, so VailNote is ideal for handing secrets - API keys, tokens, credentials - to and from AI agents without ever writing them to disk unencrypted.
+
+Key notes:
+
+- Every note is encrypted client-side with AES-256-GCM (PBKDF2-SHA256, 600,000 iterations) before upload; the server, database, and network only ever see ciphertext.
+- The link fragment (`#auth=<authKey>`) is the decryption key. No accounts, no signup, no tracking.
+- Notes self-destruct after the first read unless manual deletion is set, and expire automatically (10 minutes to 180 days).
+- The official CLI (`vailnote-cli` on npm) creates, reads, and deletes notes locally and resolves VailNote links inside `.env` files without ever writing secrets to disk in plaintext.
+- The server stores no key material and cannot produce plaintext; it only verifies a deterministic hash of the password (hashed again with bcrypt for storage).
+
+## Docs
+
+- [Full documentation (llms-full.txt)](https://vailnote.com/llms-full.txt): Complete reference - HTTP API, encryption protocol, CLI usage, agent workflows, security model
+- [README](https://github.com/emilkrebs/VailNote/blob/main/README.md): Project overview, architecture, local development
+- [CLI source](https://github.com/emilkrebs/VailNote/blob/main/cli/main.ts): The agent-facing CLI (create/read/delete/env/version)
+
+## Optional
+
+- [DESIGN.md](https://github.com/emilkrebs/VailNote/blob/main/DESIGN.md): Detailed design and security architecture
+- [PRODUCT.md](https://github.com/emilkrebs/VailNote/blob/main/PRODUCT.md): Product vision and goals
+- [PRIVACY.md](https://github.com/emilkrebs/VailNote/blob/main/PRIVACY.md): Privacy model and guarantees
+- [TERMS.md](https://github.com/emilkrebs/VailNote/blob/main/TERMS.md): Terms of service
