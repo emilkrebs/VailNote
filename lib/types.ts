@@ -33,6 +33,8 @@ const expirationMap: Record<string, number> = {
     '30 days': 30 * 24 * 60 * 60 * 1000,
     '90d': 90 * 24 * 60 * 60 * 1000,
     '90 days': 90 * 24 * 60 * 60 * 1000,
+    '180d': 180 * 24 * 60 * 60 * 1000,
+    '180 days': 180 * 24 * 60 * 60 * 1000,
 };
 
 export function formatExpiration(expiresIn: string): Date {

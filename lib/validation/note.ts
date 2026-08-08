@@ -10,6 +10,7 @@ export enum EXPIRY_OPTIONS {
     '7d' = '7 days',
     '30d' = '30 days',
     '90d' = '90 days',
+    '180d' = '180 days',
 }
 
 export enum MANUAL_DELETION_OPTIONS {

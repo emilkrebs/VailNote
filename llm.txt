@@ -18,7 +18,7 @@ This repository contains the web app, the HTTP API, and an official CLI for AI a
 - **Password hashing for the server**: the client sends a deterministic PBKDF2-SHA256 hash (600,000 iterations, salt derived from the password) of the password; the server additionally hashes it with bcrypt (12 rounds) for storage. The server can therefore verify the password without ever knowing it, and it never sees the auth key.
 - **Retrieval**: fetching a note returns only the ciphertext. Decryption must happen on the client/CLI side.
 - **Auto-delete**: notes without `manualDeletion` are deleted from the server the first time they are successfully read. Password-protected notes are deleted only after a correct password unlocks them.
-- **Expiration options** (send the human-readable value the API validates): `10 minutes`, `1 hour`, `6 hours`, `12 hours`, `24 hours` (default), `3 days`, `7 days`, `30 days`, `90 days`.
+- **Expiration options** (send the human-readable value the API validates): `10 minutes`, `1 hour`, `6 hours`, `12 hours`, `24 hours` (default), `3 days`, `7 days`, `30 days`, `90 days`, `180 days`.
 - **Content size limit**: 46 KB of plaintext (the stored value is base64 ciphertext plus metadata and must stay under Deno KV's 64 KiB value limit).
 - **Rate limiting**: 15 requests per minute per client (mutating requests only), privacy-preserving anonymous tokens, 5-minute block. 429 responses include `retryAfter` and `resetTime`.
 
@@ -97,7 +97,7 @@ deno run --allow-net --allow-env --allow-read cli/main.ts create --json
 ```
 
 Commands: `create [content]`, `read <link-or-id>`, `delete <link-or-id>`, `env [file]`, `version`.
-Options: `-p/--password`, `-e/--expires-in` (short codes: `10m`, `1h`, `6h`, `12h`, `24h`, `3d`, `7d`, `30d`; translated to the API's human-readable values), `-m/--manual-deletion`, `-o/--origin` (default `https://vailnote.com`, env `VAILNOTE_ORIGIN`), `-j/--json`, `-h/--help`.
+Options: `-p/--password`, `-e/--expires-in` (short codes: `10m`, `1h`, `6h`, `12h`, `24h`, `3d`, `7d`, `30d`, `90d`, `180d`; translated to the API's human-readable values), `-m/--manual-deletion`, `-o/--origin` (default `https://vailnote.com`, env `VAILNOTE_ORIGIN`), `-j/--json`, `-h/--help`.
 Environment: `VAILNOTE_PASSWORD` (recommended over argv), `VAILNOTE_ORIGIN`.
 Note: the `env` command (and reading a `.env` file) requires `--allow-read`.
 

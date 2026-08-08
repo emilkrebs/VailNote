@@ -7,7 +7,7 @@ import { NOTE_CONTENT_MAX_LENGTH } from '../lib/validation/note.ts';
 
 export const CLI_VERSION = '1.0.0';
 export const DEFAULT_ORIGIN = 'https://vailnote.com';
-export const EXPIRY_OPTIONS = ['10m', '1h', '6h', '12h', '24h', '3d', '7d', '30d'] as const;
+export const EXPIRY_OPTIONS = ['10m', '1h', '6h', '12h', '24h', '3d', '7d', '30d', '90d', '180d'] as const;
 export type ExpiryOption = typeof EXPIRY_OPTIONS[number];
 
 // The API schema validates the human-readable labels ("10 minutes"), so the
@@ -21,6 +21,8 @@ export const EXPIRY_API_VALUES: Record<ExpiryOption, string> = {
     '3d': '3 days',
     '7d': '7 days',
     '30d': '30 days',
+    '90d': '90 days',
+    '180d': '180 days',
 };
 
 export interface CliOptions {

@@ -49,11 +49,13 @@ Deno.test('formatExpiration - human-readable values map to the right duration', 
     const oneHour = formatExpiration('1 hour').getTime() - now;
     const threeDays = formatExpiration('3 days').getTime() - now;
     const ninetyDays = formatExpiration('90 days').getTime() - now;
+    const oneHundredEightyDays = formatExpiration('180 days').getTime() - now;
 
     assertEquals(Math.round(tenMinutes / 1000), 10 * 60);
     assertEquals(Math.round(oneHour / 1000), 60 * 60);
     assertEquals(Math.round(threeDays / 1000), 3 * 86_400);
     assertEquals(Math.round(ninetyDays / 1000), 90 * 86_400);
+    assertEquals(Math.round(oneHundredEightyDays / 1000), 180 * 86_400);
 });
 
 Deno.test('formatExpiration - short codes still resolve (CLI compatibility)', () => {
@@ -65,5 +67,9 @@ Deno.test('formatExpiration - short codes still resolve (CLI compatibility)', ()
     assertEquals(
         Math.round((formatExpiration('30d').getTime() - now) / 1000),
         Math.round((formatExpiration('30 days').getTime() - now) / 1000),
+    );
+    assertEquals(
+        Math.round((formatExpiration('180d').getTime() - now) / 1000),
+        Math.round((formatExpiration('180 days').getTime() - now) / 1000),
     );
 });

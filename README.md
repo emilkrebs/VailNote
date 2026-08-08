@@ -141,7 +141,7 @@ $ echo "sk-1234..." | deno task cli create --json
 Options:
 
 - `-p, --password <pw>` / `VAILNOTE_PASSWORD` - protect a note with a password. The env var is preferred over argv.
-- `-e, --expires-in <opt>` - `10m`, `1h`, `6h`, `12h`, `24h` (default), `3d`, `7d`, `30d`
+- `-e, --expires-in <opt>` - `10m`, `1h`, `6h`, `12h`, `24h` (default), `3d`, `7d`, `30d`, `90d`, `180d`
 - `-m, --manual-deletion` - keep the note until it is explicitly deleted (default: self-destructs after first read)
 - `-o, --origin <url>` - API origin for self-hosted instances (env `VAILNOTE_ORIGIN`)
 - `-j, --json` - machine-readable output on stdout

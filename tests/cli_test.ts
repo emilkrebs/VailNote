@@ -115,6 +115,8 @@ Deno.test({
             assertEquals(EXPIRY_API_VALUES['1h'], '1 hour');
             assertEquals(EXPIRY_API_VALUES['24h'], '24 hours');
             assertEquals(EXPIRY_API_VALUES['30d'], '30 days');
+            assertEquals(EXPIRY_API_VALUES['90d'], '90 days');
+            assertEquals(EXPIRY_API_VALUES['180d'], '180 days');
         });
     },
 });
