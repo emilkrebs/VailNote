@@ -25,7 +25,8 @@ focus on user-friendliness and security.
 - 🛡️ **Privacy-preserving rate-limiting** using Anonymous Rate-Limited Credentials (ARC)
   [(View Implementation)](lib/rate-limiting/)
 - 🤖 **AI-agent ready** - an official CLI ([`cli/main.ts`](cli/main.ts)) that encrypts/decrypts locally, so agents can
-  store and share API keys and other secrets without ever writing them to disk in plaintext. See
+  store and share API keys and other secrets without ever writing them to disk in plaintext. The CLI's `env` command
+  resolves VailNote links stored in `.env` files, so secrets can live by reference instead of plaintext. See
   [llms.txt](https://vailnote.com/llms.txt) (or the repo's [llms-full.txt](static/llms-full.txt)) for the full
   agent-facing documentation.
 
@@ -67,7 +68,8 @@ The system has been compromised and is marked with (!).
 2. The client asks the user for confirmation before viewing (and destroying) the note.
 3. If an auth key is present in the URL, the client uses it to decrypt the note. If a password is required, the client
    prompts for it and decrypts locally.
-4. The client never sends the password or auth key to the server—decryption always happens in the browser.
+4. The client never sends the raw password or auth key to the server—only a deterministic PBKDF2 hash of the password
+   (used for access control on fetch/delete); decryption always happens in the browser.
 5. After successful decryption, the client requests that the server delete the note.
 6. If decryption fails, the note remains on the server until a valid decryption attempt is made or it expires.
 
