@@ -3,7 +3,14 @@ import CreateNote from '../islands/CreateNoteForm.tsx';
 import CipherText from '../islands/CipherText.tsx';
 import { ORIGIN } from '../lib/types/common.ts';
 import { ButtonLink } from '../components/Button.tsx';
-import { ArrowUpRightIcon, FireIcon, GithubLogoIcon, LinkSimpleIcon, NotePencilIcon } from '../components/Icons.tsx';
+import {
+    ArrowUpRightIcon,
+    FireIcon,
+    GithubLogoIcon,
+    LinkSimpleIcon,
+    NotePencilIcon,
+    RobotIcon,
+} from '../components/Icons.tsx';
 
 export default function Home() {
     return (
@@ -17,6 +24,7 @@ export default function Home() {
                 <Hero />
                 <HowItWorks />
                 <Security />
+                <ForAgents />
                 <OpenSource />
                 <FightChatControl />
             </main>
@@ -257,6 +265,136 @@ function FightChatControl() {
                 </p>
             </div>
         </section>
+    );
+}
+
+const agentFacts = [
+    {
+        title: 'Encrypted before upload',
+        body:
+            'The CLI uses the same AES-256-GCM + PBKDF2 scheme as the browser. What crosses the wire is ciphertext; the secret itself exists only in memory.',
+    },
+    {
+        title: 'Stdin, not argv',
+        body:
+            'Secrets go in through stdin and passwords through environment variables - never argv, which leaks through process listings and shell history.',
+    },
+    {
+        title: 'Fits inside .env',
+        body:
+            'Keep an encrypted link in your .env and resolve it with `vailnote env` in memory. The real key never sits on disk unencrypted.',
+    },
+];
+
+/**
+ * The agent-facing CLI section: a two-column spread that mirrors the Security
+ * layout - copy and a numbered facts rail on the left, a terminal readout on
+ * the right that shows the install-create-read handoff in three lines.
+ */
+function ForAgents() {
+    return (
+        <section id='for-agents' class='border-t border-line scroll-mt-16'>
+            <div class='mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-2 lg:gap-16'>
+                <div>
+                    <p class='font-mono text-xs tracking-[0.14em] text-faint'>FOR AGENTS / SECRETS / CLI</p>
+                    <h2 class='mt-3 text-title'>Give your AI a secret-safe handoff</h2>
+                    <p class='mt-4 max-w-[50ch] text-[1.0625rem] leading-relaxed text-muted'>
+                        An official CLI gives AI agents and automation the same zero-knowledge guarantee as the web app.
+                        Pipe a secret in, get an encrypted link out - the key rides in the URL fragment and the
+                        plaintext never touches disk.{' '}
+                        <code class='font-mono text-sm'>npm install -g vailnote-cli</code>, no Deno required.
+                    </p>
+                    <ul class='mt-8 flex flex-col gap-6 border-t border-line pt-8'>
+                        {agentFacts.map((fact, i) => (
+                            <li key={fact.title} class='flex gap-4'>
+                                <span class='mt-0.5 shrink-0 font-mono text-xs text-faint' aria-hidden='true'>
+                                    {String(i + 1).padStart(2, '0')}
+                                </span>
+                                <div>
+                                    <h3 class='flex items-center gap-2 font-semibold tracking-tight'>
+                                        {fact.title}
+                                    </h3>
+                                    <p class='mt-1 text-[0.9375rem] leading-relaxed text-muted'>
+                                        {fact.body}
+                                    </p>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                    <div class='mt-8 flex flex-col gap-3 sm:flex-row'>
+                        <ButtonLink
+                            href='https://vailnote.com/llms.txt'
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            variant='primary'
+                        >
+                            Read the agent docs
+                            <ArrowUpRightIcon size={16} />
+                        </ButtonLink>
+                        <ButtonLink
+                            href='https://github.com/emilkrebs/VailNote/blob/main/cli/main.ts'
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            variant='secondary'
+                        >
+                            <GithubLogoIcon size={18} />
+                            See the CLI source
+                        </ButtonLink>
+                    </div>
+                </div>
+
+                <AgentTerminal />
+            </div>
+        </section>
+    );
+}
+
+/**
+ * Terminal readout of the full handoff: install, create via stdin, read back.
+ * Output lines are demoted to muted; prompts and commands read in ink with an
+ * accent-bright `$`, matching the machined-console look of the CipherPanel.
+ */
+const PROMPT = '$ ';
+
+function AgentTerminal() {
+    return (
+        <figure class='relative'>
+            <div class='rounded-panel border border-line-strong bg-surface p-5 font-mono text-sm sm:p-7'>
+                <div class='flex items-center justify-between text-xs text-faint'>
+                    <span class='tracking-[0.14em]'>AGENT → VAILNOTE</span>
+                    <RobotIcon size={16} class='text-faint' />
+                </div>
+
+                <div class='mt-5 flex flex-col gap-3 leading-relaxed'>
+                    <p class='text-ink'>
+                        <span class='text-accent-bright' aria-hidden='true'>{PROMPT}</span>npm install -g vailnote-cli
+                    </p>
+                    <p class='text-ink'>
+                        <span class='text-accent-bright' aria-hidden='true'>{PROMPT}</span>echo "sk-…" | vailnote create
+                        --expires-in 7d
+                    </p>
+                    <p class='break-all text-muted'>
+                        → https://vailnote.com/8f2a9c…#auth=Xk1…
+                    </p>
+
+                    <div class='my-2 flex items-center gap-3 text-xs text-faint' aria-hidden='true'>
+                        <span class='h-px flex-1 bg-line-strong'></span>
+                        ROUNDTRIP
+                        <span class='h-px flex-1 bg-line-strong'></span>
+                    </div>
+
+                    <p class='text-ink'>
+                        <span class='text-accent-bright' aria-hidden='true'>{PROMPT}</span>vailnote read
+                        "https://vailnote.com/8f2a9c…#auth=Xk1…"
+                    </p>
+                    <p class='text-ink'>sk-…</p>
+                    <p class='text-faint'>note destroyed after first read</p>
+                </div>
+            </div>
+            <figcaption class='mt-3 text-sm text-muted'>
+                Plaintext exists only in your memory and theirs - never on disk.
+            </figcaption>
+        </figure>
     );
 }
 
