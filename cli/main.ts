@@ -85,7 +85,7 @@ Examples:
   deno run --allow-net --allow-env --allow-read cli/main.ts env ./.env.local --json  # or a specific file
 
 Install globally:
-  npm install -g vailnote                 # requires Node 18+; no Deno needed
+  npm install -g vailnote-cli              # requires Node 18+; no Deno needed
   deno install -g -n vailnote --allow-net --allow-env --allow-read cli/main.ts
 Then use the \`vailnote\` command directly, e.g. \`vailnote create\`, \`vailnote read <link>\`.
 Prebuilt binaries are also available on the GitHub Releases page.

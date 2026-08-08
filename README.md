@@ -118,7 +118,7 @@ ciphertext - so secrets like API keys never touch the disk unencrypted.
 everywhere:
 
 ```bash
-npm install -g vailnote
+npm install -g vailnote-cli
 vailnote --help
 ```
 

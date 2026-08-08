@@ -6,7 +6,7 @@ Content is encrypted with AES-256-GCM **locally** and decrypted **locally** — 
 secrets like API keys never touch your disk in plaintext.
 
 ```bash
-npm install -g vailnote
+npm install -g vailnote-cli
 
 # Create an encrypted note (content via stdin, so it never appears in argv/history)
 echo "sk-1234..." | vailnote create --expires-in 30d

@@ -74,7 +74,7 @@ The CLI is dependency-free (no import map, no external packages), so it runs any
 
 ```bash
 # npm - most AI agents already ship with Node/npm; no Deno needed
-npm install -g vailnote
+npm install -g vailnote-cli
 
 # Global install with Deno - use the `vailnote` command from any directory (requires Deno 2.3+)
 deno install -g -n vailnote --allow-net --allow-env --allow-read https://raw.githubusercontent.com/emilkrebs/VailNote/main/cli/main.ts

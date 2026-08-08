@@ -1,5 +1,5 @@
 {
-    "name": "vailnote",
+    "name": "vailnote-cli",
     "version": "1.0.0",
     "description": "Official VailNote CLI - create, read, and delete end-to-end encrypted notes. Content is encrypted and decrypted locally; the server only ever stores ciphertext.",
     "license": "MIT",
