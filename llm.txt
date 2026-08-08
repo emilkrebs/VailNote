@@ -68,6 +68,29 @@ Request body: `{ "passwordHash": "<optional>" }`. Returns `200` `{ "message": "N
 
 `cli/main.ts` is the official agent-facing client. It encrypts/decrypts locally, so an API key (or any secret) passed through VailNote is never stored on disk in plaintext and never sent to the server unencrypted. Secrets are better passed via stdin (create) and env vars (password) than as argv, which leaks through process listings and shell history.
 
+### Installing / running the CLI
+
+The CLI is dependency-free (no import map, no external packages), so it runs anywhere:
+
+```bash
+# npm - most AI agents already ship with Node/npm; no Deno needed
+npm install -g vailnote
+
+# Global install with Deno - use the `vailnote` command from any directory (requires Deno 2.3+)
+deno install -g -n vailnote --allow-net --allow-env --allow-read https://raw.githubusercontent.com/emilkrebs/VailNote/main/cli/main.ts
+
+# Run directly from this repo
+deno task cli <command>
+
+# Run from GitHub without cloning
+deno run -A https://raw.githubusercontent.com/emilkrebs/VailNote/main/cli/main.ts <command>
+
+# Prebuilt binaries (no Deno needed) on the GitHub Releases page, built on every `v*` tag
+deno task build:cli   # or compile a binary yourself
+```
+
+Once installed globally, use `vailnote create ...`, `vailnote read <link>`, `vailnote env`, etc.
+
 Run it from this repo with Deno:
 
 ```bash

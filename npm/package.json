@@ -1,0 +1,29 @@
+{
+    "name": "vailnote",
+    "version": "1.0.0",
+    "description": "Official VailNote CLI - create, read, and delete end-to-end encrypted notes. Content is encrypted and decrypted locally; the server only ever stores ciphertext.",
+    "license": "MIT",
+    "type": "module",
+    "bin": {
+        "vailnote": "./bin/vailnote.mjs"
+    },
+    "files": [
+        "bin"
+    ],
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "keywords": [
+        "vailnote",
+        "encryption",
+        "secrets",
+        "notes",
+        "e2e-encrypted",
+        "aes-256-gcm",
+        "cli"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/emilkrebs/VailNote.git"
+    }
+}

@@ -112,24 +112,57 @@ VailNote ships with an official CLI ([`cli/main.ts`](cli/main.ts)) that AI agent
 and delete end-to-end encrypted notes. Content is encrypted locally and decrypted locally - the server only ever stores
 ciphertext - so secrets like API keys never touch the disk unencrypted.
 
+### Installing the CLI
+
+**Option 1 - npm (recommended, no Deno needed):** most AI agents already ship with Node/npm, so one command works
+everywhere:
+
+```bash
+npm install -g vailnote
+vailnote --help
+```
+
+**Option 2 - Global install with Deno (requires Deno 2.3+):**
+
+```bash
+deno install -g -n vailnote --allow-net --allow-env --allow-read https://raw.githubusercontent.com/emilkrebs/VailNote/main/cli/main.ts
+vailnote --help
+```
+
+Or install from a local clone: `deno task install:cli`.
+
+**Option 3 - Single binary (no Deno needed):** download the prebuilt binary for your platform from the
+[GitHub Releases](https://github.com/emilkrebs/VailNote/releases) page (`vailnote-x86_64-unknown-linux-gnu`,
+`vailnote-aarch64-apple-darwin`, `vailnote-x86_64-pc-windows-msvc`, ...). They are built automatically whenever a `v*`
+tag is pushed. To build one yourself: `deno task build:cli` (produces `./vailnote-cli`).
+
+**Option 4 - Run without installing:** the CLI is dependency-free, so it runs straight from the repo or GitHub:
+
+```bash
+deno task cli <command>                                    # from a clone
+deno run -A https://raw.githubusercontent.com/emilkrebs/VailNote/main/cli/main.ts <command>
+```
+
+### Usage
+
 ```bash
 # Create an encrypted note. Content via stdin, so it never appears in argv or shell history.
-echo "sk-1234..." | deno task cli create
+echo "sk-1234..." | vailnote create
 
 # The command prints a link; the #auth= fragment is the decryption key.
 # https://vailnote.com/<noteId>#auth=<authKey>
 
 # Read/decrypt a note - the plaintext goes to stdout.
-deno task cli read "https://vailnote.com/<noteId>#auth=<authKey>"
+vailnote read "https://vailnote.com/<noteId>#auth=<authKey>"
 
 # Delete a note (required for --manual-deletion notes).
-deno task cli delete "<link>"
+vailnote delete "<link>"
 ```
 
 Machine-readable output for agent tooling:
 
 ```bash
-$ echo "sk-1234..." | deno task cli create --json
+$ echo "sk-1234..." | vailnote create --json
 {
   "noteId": "2293cc2e6498",
   "authKey": "iAJRUq_W",
@@ -155,15 +188,15 @@ fetches the ciphertext from the server and decrypts it locally in memory.
 ```bash
 # Create the note once and paste the printed link into your .env.
 # Use --manual-deletion, otherwise the note self-destructs on the first read.
-echo "sk-1234..." | deno task cli create --manual-deletion --expires-in 30d
+echo "sk-1234..." | vailnote create --manual-deletion --expires-in 30d
 # OPEN_AI_API_KEY=https://vailnote.com/<noteId>#auth=<authKey>
 
 # Resolve every VailNote link in a .env file to its decrypted value.
-deno task cli env                 # prints `export KEY='value'` lines
-deno task cli env ./.env.local --json   # machine-readable
+vailnote env                 # prints `export KEY='value'` lines
+vailnote env ./.env.local --json   # machine-readable
 
 # Load the resolved values into your shell.
-set -a; source <(deno task cli env); set +a
+set -a; source <(vailnote env); set +a
 ```
 
 Notes on this pattern:

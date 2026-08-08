@@ -3,7 +3,7 @@
 import { decryptNoteContent } from '../lib/encryption.ts';
 import { generateDeterministicClientHash } from '../lib/hashing.ts';
 import { combineNoteSecrets, prepareEncryption } from '../lib/services/crypto-service.ts';
-import { NOTE_CONTENT_MAX_LENGTH } from '../lib/validation/note.ts';
+import { NOTE_CONTENT_MAX_LENGTH } from '../lib/types.ts';
 
 export const CLI_VERSION = '1.0.0';
 export const DEFAULT_ORIGIN = 'https://vailnote.com';
@@ -83,6 +83,12 @@ Examples:
   VAILNOTE_PASSWORD=my-pw deno run --allow-net --allow-env --allow-read cli/main.ts read "<link>"
   deno run --allow-net --allow-env --allow-read cli/main.ts env                       # resolve ./.env
   deno run --allow-net --allow-env --allow-read cli/main.ts env ./.env.local --json  # or a specific file
+
+Install globally:
+  npm install -g vailnote                 # requires Node 18+; no Deno needed
+  deno install -g -n vailnote --allow-net --allow-env --allow-read cli/main.ts
+Then use the \`vailnote\` command directly, e.g. \`vailnote create\`, \`vailnote read <link>\`.
+Prebuilt binaries are also available on the GitHub Releases page.
 
 The note content never touches the disk unencrypted. Decryption always
 happens locally; the server only ever stores ciphertext.`;
@@ -556,6 +562,14 @@ async function main(argv: string[]): Promise<void> {
     }
 }
 
+/**
+ * Entry point for the CLI. Kept separate from the auto-run below so the
+ * bundled npm build (bin/vailnote.mjs) can drive it under Node.
+ */
+export async function runCli(args: string[]): Promise<void> {
+    await main(args);
+}
+
 if (import.meta.main) {
-    await main(Deno.args);
+    await runCli(Deno.args);
 }

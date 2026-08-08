@@ -10,6 +10,17 @@ export interface Note {
     manualDeletion?: boolean; // Flag for manual deletion
 }
 
+// Content/password size limits. Defined here (not in validation, which pulls
+// in valibot) so dependency-free consumers like the CLI can enforce them
+// without loading the validation schema.
+// Deno KV has a hard 64 KiB (65,536 byte) max value size. The stored value is
+// the JSON-serialized note, whose content field is base64 ciphertext (~4/3
+// expansion of the plaintext) plus IV, expiration, and password fields. Cap
+// the plaintext so the serialized note always fits with margin. A larger cap
+// would pass validation but fail at kv.set() with "Value too large".
+export const NOTE_CONTENT_MAX_LENGTH = 46 * 1024; // ~46 KiB plaintext
+export const NOTE_PASSWORD_MAX_LENGTH = 256; // 256 characters
+
 // Deno KV stores the whole Note value, so map every accepted expiry label to
 // a duration. The API schema (v.enum over EXPIRY_OPTIONS) validates the
 // human-readable labels the web client sends ("10 minutes"), but older

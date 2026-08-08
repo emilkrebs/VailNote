@@ -1,4 +1,5 @@
 import * as v from '@valibot/valibot';
+import { NOTE_CONTENT_MAX_LENGTH, NOTE_PASSWORD_MAX_LENGTH } from '../types.ts';
 
 export enum EXPIRY_OPTIONS {
     '10m' = '10 minutes',
@@ -17,14 +18,6 @@ export enum MANUAL_DELETION_OPTIONS {
     'disabled' = 'Disable Manual Deletion',
     'enabled' = 'Enable Manual Deletion',
 }
-
-// Deno KV has a hard 64 KiB (65,536 byte) max value size. The stored value is
-// the JSON-serialized note, whose content field is base64 ciphertext (~4/3
-// expansion of the plaintext) plus IV, expiration, and password fields. Cap
-// the plaintext so the serialized note always fits with margin. A larger cap
-// would pass validation but fail at kv.set() with "Value too large".
-export const NOTE_CONTENT_MAX_LENGTH = 46 * 1024; // ~46 KiB plaintext
-export const NOTE_PASSWORD_MAX_LENGTH = 256; // 256 characters
 
 export const createNoteSchema = v.object({
     content: v.pipe(
