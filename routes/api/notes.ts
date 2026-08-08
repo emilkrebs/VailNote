@@ -32,32 +32,38 @@ export const handler = {
                 return jsonError(400, 'Invalid request body', 'INVALID_REQUEST_BODY');
             }
 
-            const { content, iv, password, expiresIn, manualDeletion } = body as {
+            const { content, iv, password, authKeyHash, expiresIn, manualDeletion } = body as {
                 content: string;
                 iv: string;
                 password?: string;
+                authKeyHash?: string;
                 expiresIn: string;
                 manualDeletion?: boolean;
             };
 
             // Validate input using valibot
             try {
-                v.parse(createNoteSchema, { content, iv, password, expiresIn, manualDeletion });
+                v.parse(createNoteSchema, { content, iv, password, authKeyHash, expiresIn, manualDeletion });
             } catch {
                 return jsonError(400, 'Invalid request data', 'INVALID_DATA');
             }
 
             const noteId = await noteDatabase.generateNoteId();
             const hasPassword = password && password.trim() !== '';
+            const hasAuthKeyHash = authKeyHash && authKeyHash.trim() !== '';
 
             // if password is provided, hash it with bcrypt (password should be PBKDF2 hashed on client before sending)
             const passwordHash = hasPassword ? await generateHash(password) : undefined;
+            // if an auth-key verifier is provided, hash it with bcrypt for storage.
+            // The server stores only one-way verifiers - it never sees the auth key itself.
+            const storedAuthKeyHash = hasAuthKeyHash ? await generateHash(authKeyHash) : undefined;
 
             // check if content is encrypted
             const result: Note = {
                 id: noteId,
                 content, // content should be encrypted before sending to this endpoint
                 password: passwordHash, // password is PBKDF2 non-deterministic hashed on client, then bcrypt hashed on server for secure storage
+                authKeyHash: storedAuthKeyHash, // deterministic client hash of the auth key, bcrypt hashed on server
                 iv: iv,
                 expiresIn: formatExpiration(expiresIn),
                 manualDeletion: manualDeletion,

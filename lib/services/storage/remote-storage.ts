@@ -12,6 +12,7 @@ export interface ApiNoteRequest {
     content: string;
     iv: string;
     password?: string;
+    authKeyHash?: string;
     expiresIn?: string;
     manualDeletion?: boolean;
 }
@@ -72,6 +73,7 @@ export default class RemoteStorage implements StorageProvider {
 
         try {
             const { encryptedContent, passwordHash, authKey } = await prepareEncryption(content, password);
+            const authKeyHash = await generateDeterministicClientHash(authKey);
 
             const response = await fetch('/api/notes', {
                 method: 'POST',
@@ -79,6 +81,7 @@ export default class RemoteStorage implements StorageProvider {
                 body: JSON.stringify({
                     content: encryptedContent.encrypted,
                     password: passwordHash,
+                    authKeyHash,
                     expiresIn,
                     manualDeletion,
                     iv: encryptedContent.iv,
@@ -100,14 +103,15 @@ export default class RemoteStorage implements StorageProvider {
         }
     }
 
-    async get(noteId: string, password?: string): Promise<GetEncryptedNoteResult> {
+    async get(noteId: string, authKey?: string, password?: string): Promise<GetEncryptedNoteResult> {
         try {
             const passwordHash = password ? await generateDeterministicClientHash(password) : undefined;
+            const authKeyHash = authKey ? await generateDeterministicClientHash(authKey) : undefined;
 
             const response = await fetch(`/api/notes/${noteId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ passwordHash }),
+                body: JSON.stringify({ passwordHash, authKeyHash }),
             });
 
             if (!response.ok) {
@@ -121,13 +125,15 @@ export default class RemoteStorage implements StorageProvider {
         }
     }
 
-    async delete(noteId: string, password: string): Promise<DeleteNoteResult> {
+    async delete(noteId: string, authKey?: string, password?: string): Promise<DeleteNoteResult> {
         try {
-            const passwordHash = await generateDeterministicClientHash(password);
+            const passwordHash = password ? await generateDeterministicClientHash(password) : undefined;
+            const authKeyHash = authKey ? await generateDeterministicClientHash(authKey) : undefined;
+
             const response = await fetch(`/api/notes/${noteId}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ passwordHash }),
+                body: JSON.stringify({ passwordHash, authKeyHash }),
             });
 
             return response.ok ? { success: true } : { success: false, message: await parseErrorMessage(response) };

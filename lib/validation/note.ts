@@ -31,6 +31,12 @@ export const createNoteSchema = v.object({
             v.maxLength(NOTE_PASSWORD_MAX_LENGTH, 'Password is too long (max 256 characters)'),
         ),
     ), // Optional password with max length
+    authKeyHash: v.optional(
+        v.pipe(
+            v.string(),
+            v.maxLength(NOTE_PASSWORD_MAX_LENGTH, 'Auth key hash is too long (max 256 characters)'),
+        ),
+    ), // Optional deterministic hash of the auth key (enables link-possession gate)
     expiresIn: v.enum(EXPIRY_OPTIONS, 'Invalid expiration time. Please select a valid option.'),
     manualDeletion: v.union(
         [v.optional(v.enum(MANUAL_DELETION_OPTIONS)), v.boolean()],

@@ -35,6 +35,7 @@ Request body:
   "content": "<base64 AES-GCM ciphertext>",
   "iv": "<base64 12-byte IV>",
   "password": "<optional: deterministic PBKDF2 hash of the password>",
+  "authKeyHash": "<optional: deterministic PBKDF2 hash of the auth key>",
   "expiresIn": "24 hours",
   "manualDeletion": false
 }
@@ -46,25 +47,32 @@ Response `201`:
 { "message": "Note saved successfully!", "noteId": "..." }
 ```
 
-Important: the content must be encrypted before this request. The server rejects nothing that lets it see plaintext - encryption is the client's job. Plaintext may be at most 46 KB, and `expiresIn` must be one of the human-readable values listed above (short codes like `24h` are rejected).
+Important: the content must be encrypted before this request. The server rejects nothing that lets it see plaintext - encryption is the client's job. Plaintext may be at most 46 KB, and `expiresIn` must be one of the human-readable values listed above (short codes like `24h` are rejected). `authKeyHash` is the deterministic PBKDF2 hash of the link's auth key; when provided, the server stores a bcrypt verifier and requires possession of the full link (ID + auth key) to fetch or delete the note. Notes created without it remain addressable by ID alone (legacy behavior).
 
 ### Fetch a note - `POST /api/notes/:id`
 
 Request body:
 
 ```json
-{ "passwordHash": "<optional: deterministic PBKDF2 hash of the password>" }
+{
+  "passwordHash": "<optional: deterministic PBKDF2 hash of the password>",
+  "authKeyHash": "<optional: deterministic PBKDF2 hash of the auth key>"
+}
 ```
 
 - `200`: `{ "id", "content", "iv", "expiresIn", "password?", "manualDeletion" }` (ciphertext; auto-delete notes are destroyed after this call).
-- `403`: invalid/missing password for a password-protected note.
+- `403`: invalid/missing password for a password-protected note, or invalid/missing auth-key verifier for a passwordless note created with `authKeyHash`.
 - `404`: note not found (already destroyed or expired).
 
 ### Delete a note - `DELETE /api/notes/:id`
 
-Request body: `{ "passwordHash": "<optional>" }`. Returns `200` `{ "message": "Note deleted successfully" }`.
+Request body: `{ "passwordHash": "<optional>", "authKeyHash": "<optional>" }`. Returns `200` `{ "message": "Note deleted successfully" }`.
 
-`passwordHash` is **required for password-protected notes**: the same access check as fetch applies, and without a matching hash the server responds `403 INVALID_PASSWORD_OR_AUTH_KEY` without deleting anything. It may only be omitted for notes created without a password, where possession of the link is the capability. The hash is a deterministic PBKDF2 verifier (never the raw password), so zero-knowledge is preserved: the server can gate deletion on the password without ever seeing plaintext or the auth key.
+`passwordHash` is **required for password-protected notes**: the same access check as fetch applies, and without a matching hash the server responds `403 INVALID_PASSWORD_OR_AUTH_KEY` without deleting anything. It may only be omitted for notes created without a password, where possession of the link is the capability.
+
+`authKeyHash` is **required for passwordless notes created with `authKeyHash`**: an ID alone is never enough to delete - the caller must prove possession of the full link (ID + auth key). Notes created without a verifier (legacy) remain deletable by ID alone until they expire.
+
+The hashes are deterministic PBKDF2 verifiers (never the raw password or auth key), so zero-knowledge is preserved: the server can gate fetch and deletion on possession of the link without ever seeing plaintext or the auth key itself.
 
 ## Using VailNote from an AI agent (CLI)
 

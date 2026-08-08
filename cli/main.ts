@@ -293,11 +293,13 @@ export async function createNote(content: string, opts: CliOptions): Promise<Cre
     }
 
     const { encryptedContent, passwordHash, authKey } = await prepareEncryption(content, opts.password);
+    const authKeyHash = await generateDeterministicClientHash(authKey);
 
     const data = await apiRequest(opts.origin, '/api/notes', 'POST', {
         content: encryptedContent.encrypted,
         iv: encryptedContent.iv,
         password: passwordHash,
+        authKeyHash,
         expiresIn: EXPIRY_API_VALUES[opts.expiresIn],
         manualDeletion: opts.manualDeletion,
     });
@@ -323,8 +325,9 @@ export async function readNote(link: string, opts: CliOptions): Promise<ReadResu
     const { id, authKey } = parseNoteLink(link);
     const password = opts.password;
     const passwordHash = password ? await generateDeterministicClientHash(password) : undefined;
+    const authKeyHash = authKey ? await generateDeterministicClientHash(authKey) : undefined;
 
-    const data = await apiRequest(opts.origin, `/api/notes/${id}`, 'POST', { passwordHash });
+    const data = await apiRequest(opts.origin, `/api/notes/${id}`, 'POST', { passwordHash, authKeyHash });
 
     if (typeof data.content !== 'string' || typeof data.iv !== 'string') {
         throw new CliError('Server response did not include note data');
@@ -360,12 +363,24 @@ export async function readNote(link: string, opts: CliOptions): Promise<ReadResu
 /**
  * Permanently delete a note. Required for manual-deletion notes; harmless
  * for auto-deleting notes that were already destroyed.
+ *
+ * The link's auth key (or the note password) is required: deletion is gated
+ * by the same possession check as reading, so an ID alone never deletes.
  */
 export async function deleteNote(link: string, opts: CliOptions): Promise<{ noteId: string }> {
-    const { id } = parseNoteLink(link);
-    const passwordHash = opts.password ? await generateDeterministicClientHash(opts.password) : undefined;
+    const { id, authKey } = parseNoteLink(link);
+    const password = opts.password;
+    const passwordHash = password ? await generateDeterministicClientHash(password) : undefined;
+    const authKeyHash = authKey ? await generateDeterministicClientHash(authKey) : undefined;
 
-    await apiRequest(opts.origin, `/api/notes/${id}`, 'DELETE', { passwordHash });
+    if (!authKey && !password) {
+        throw new CliError(
+            'Cannot delete this note: the link has no auth key and no password was provided. ' +
+                'Deletion requires possession of the full link (with #auth=...).',
+        );
+    }
+
+    await apiRequest(opts.origin, `/api/notes/${id}`, 'DELETE', { passwordHash, authKeyHash });
     return { noteId: id };
 }
 

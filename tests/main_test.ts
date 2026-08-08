@@ -57,6 +57,7 @@ Deno.test({
         const handler = new App<State>()
             .post('/api/notes', async (ctx) => await notesHandler.POST(ctx))
             .post('/api/notes/:id', async (ctx) => await notesIdHandler(ctx))
+            .delete('/api/notes/:id', async (ctx) => await notesIdHandler(ctx))
             .handler();
 
         let apiNoteId: string;
@@ -131,6 +132,71 @@ Deno.test({
             );
 
             assertEquals(authorizedResponse.status, 200);
+        });
+
+        await t.step('should require authKeyHash for passwordless note fetch and delete', async () => {
+            const authKey = 'testAuthKey123456';
+            const authKeyHash = await generateDeterministicClientHash(authKey);
+            const encryptedContent = await encryptNoteContent(testData.content, authKey);
+
+            const createResponse = await handler(
+                new Request(`http://localhost/api/notes`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        content: encryptedContent.encrypted,
+                        iv: encryptedContent.iv,
+                        authKeyHash,
+                        expiresIn: testData.expiresIn,
+                        manualDeletion: true,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                }),
+            );
+
+            assertEquals(createResponse.status, 201);
+            const createData = await createResponse.json();
+            const gatedNoteId = createData.noteId;
+            assertExists(gatedNoteId, 'Note ID should be present in API response');
+
+            // Fetch without the auth-key verifier must be rejected.
+            const unauthorizedFetch = await handler(
+                new Request(`http://localhost/api/notes/${gatedNoteId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}),
+                }),
+            );
+            assertEquals(unauthorizedFetch.status, 403);
+
+            // Fetch with the correct verifier succeeds.
+            const authorizedFetch = await handler(
+                new Request(`http://localhost/api/notes/${gatedNoteId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ authKeyHash }),
+                }),
+            );
+            assertEquals(authorizedFetch.status, 200);
+
+            // Delete without the auth-key verifier must be rejected.
+            const unauthorizedDelete = await handler(
+                new Request(`http://localhost/api/notes/${gatedNoteId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}),
+                }),
+            );
+            assertEquals(unauthorizedDelete.status, 403);
+
+            // Delete with the correct verifier succeeds.
+            const authorizedDelete = await handler(
+                new Request(`http://localhost/api/notes/${gatedNoteId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ authKeyHash }),
+                }),
+            );
+            assertEquals(authorizedDelete.status, 200);
         });
 
         await t.step('should retrieve note by ID', async () => {
