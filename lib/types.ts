@@ -6,7 +6,8 @@ export interface Note {
     expiresIn: Date;
 
     // Optional fields for additional functionality
-    password?: string; // password hash for private notes
+    password?: string; // bcrypt'd deterministic hash of the password (password-protected notes)
+    authKeyHash?: string; // bcrypt'd deterministic hash of the auth key (passwordless notes with link-possession gate)
     manualDeletion?: boolean; // Flag for manual deletion
 }
 

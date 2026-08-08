@@ -5,7 +5,11 @@ import { State } from '../../../lib/types/common.ts';
 import { noteDatabase } from '../../../main.ts';
 import { jsonError, jsonResponse } from '../../../lib/http.ts';
 
-async function validateNoteAccess(id: string, passwordHash?: string): Promise<{ note: Note | null; error?: Response }> {
+async function validateNoteAccess(
+    id: string,
+    passwordHash?: string,
+    authKeyHash?: string,
+): Promise<{ note: Note | null; error?: Response }> {
     const note = await noteDatabase.getNoteById(id);
 
     // if the note does not exist, return a 404 error
@@ -26,7 +30,19 @@ async function validateNoteAccess(id: string, passwordHash?: string): Promise<{ 
                 error: jsonError(403, 'Invalid password or auth key', 'INVALID_PASSWORD_OR_AUTH_KEY'),
             };
         }
+    } else if (note.authKeyHash) {
+        // Passwordless notes created with an auth-key verifier: possession of
+        // the link (note ID + auth key) is required to fetch or delete.
+        // Do not fail open when the caller omits the hash.
+        if (!authKeyHash || !(await compareHash(authKeyHash, note.authKeyHash))) {
+            return {
+                note: null,
+                error: jsonError(403, 'Invalid password or auth key', 'INVALID_PASSWORD_OR_AUTH_KEY'),
+            };
+        }
     }
+    // Legacy notes (created without any verifier) remain addressable by ID
+    // alone until they expire - the server never learned a verifier for them.
 
     return { note };
 }
@@ -42,14 +58,16 @@ export const handler = async (ctx: Context<State>): Promise<Response> => {
     }
 
     let passwordHash: string | undefined;
+    let authKeyHash: string | undefined;
     try {
         const body = await ctx.req.json();
         passwordHash = body?.passwordHash;
+        authKeyHash = body?.authKeyHash;
     } catch {
         return jsonError(400, 'Invalid request body', 'INVALID_REQUEST_BODY');
     }
 
-    const { note, error } = await validateNoteAccess(id, passwordHash);
+    const { note, error } = await validateNoteAccess(id, passwordHash, authKeyHash);
 
     if (error) return error;
     if (!note) return jsonError(404, 'Note not found', 'NOTE_NOT_FOUND');

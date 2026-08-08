@@ -180,7 +180,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion, hasPassword,
 
         try {
             setDecryptionError(undefined);
-            const result = await NoteService.getNote(noteId, enteredPassword);
+            const result = await NoteService.getNote(noteId, getAuthKey() ?? undefined, enteredPassword);
 
             if (!result.success || !result.note) {
                 // The API now returns precise messages ("note not found", rate
@@ -217,7 +217,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion, hasPassword,
         }
 
         try {
-            await NoteService.deleteNote(noteId, password.current);
+            await NoteService.deleteNote(noteId, getAuthKey() ?? undefined, password.current);
             setMessage(MESSAGES.DELETE_SUCCESS);
             globalThis.location.href = '/';
         } catch (error) {

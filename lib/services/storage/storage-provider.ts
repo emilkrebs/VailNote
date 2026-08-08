@@ -29,6 +29,6 @@ export interface CreateNoteData {
 
 export interface StorageProvider {
     create(data: CreateNoteData): Promise<CreateNoteResult>;
-    get(noteId: string, password?: string): Promise<GetEncryptedNoteResult>;
-    delete(noteId: string, password?: string): Promise<DeleteNoteResult>;
+    get(noteId: string, authKey?: string, password?: string): Promise<GetEncryptedNoteResult>;
+    delete(noteId: string, authKey?: string, password?: string): Promise<DeleteNoteResult>;
 }
