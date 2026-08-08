@@ -96,7 +96,7 @@ export class NoteDatabase {
         if (data.content.length > NOTE_CONTENT_MAX_LENGTH) {
             return {
                 success: false,
-                message: 'Content too large (max 1MB)',
+                message: 'Content too large (max 46KB)',
             };
         }
 

@@ -5,6 +5,7 @@
         "dev": "deno run -A --unstable-kv --node-modules-dir npm:vite",
         "build": "deno run -A --unstable-kv --node-modules-dir npm:vite build",
         "test": "deno test --unstable-kv --allow-read --allow-env --allow-net --allow-write --allow-sys",
+        "cli": "deno run --allow-net --allow-env cli/main.ts",
         "update": "deno run -A -r jsr:@fresh/update .",
         "preview": "deno task build && deno task start",
         "clean": "rm -rf ./dist && rm -rf ./_fresh && rm -rf ./node_modules && rm -f ./deno.lock && rm -f ./package-lock.json"

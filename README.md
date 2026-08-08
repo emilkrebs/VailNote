@@ -24,6 +24,9 @@ focus on user-friendliness and security.
 - 🚫 **No tracking or analytics**
 - 🛡️ **Privacy-preserving rate-limiting** using Anonymous Rate-Limited Credentials (ARC)
   [(View Implementation)](lib/rate-limiting/)
+- 🤖 **AI-agent ready** - an official CLI ([`cli/main.ts`](cli/main.ts)) that encrypts/decrypts locally, so agents can
+  store and share API keys and other secrets without ever writing them to disk in plaintext. See [llm.txt](llm.txt) for
+  the full agent-facing documentation.
 
 ## Tech Stack
 
@@ -102,6 +105,26 @@ The system has been compromised and is marked with (!).
 
 - `DATABASE_URI` - Deno KV connection string
 - `ARC_SECRET` - Secret for ARC rate-limiting
+
+## AI Agents & CLI
+
+VailNote exposes a small CLI that AI agents (or anyone) can use to create, read, and delete end-to-end encrypted notes.
+Content is encrypted locally and decrypted locally - the server only ever stores ciphertext - so secrets like API keys
+never touch the disk unencrypted.
+
+```bash
+# Create an encrypted note (content via stdin, so it never appears in argv/history)
+echo "sk-1234..." | deno run --allow-net --allow-env cli/main.ts create
+
+# Read/decrypt a note - the plaintext goes to stdout
+deno run --allow-net --allow-env cli/main.ts read "https://vailnote.com/<noteId>#auth=<authKey>"
+
+# Delete a note
+deno run --allow-net --allow-env cli/main.ts delete "<link>"
+```
+
+Use `VAILNOTE_PASSWORD` (or `--password`) for password-protected notes and `--json` for machine-readable output.
+`llm.txt` documents the API and protocol for AI agents.
 
 ## License
 

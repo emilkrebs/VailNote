@@ -10,15 +10,29 @@ export interface Note {
     manualDeletion?: boolean; // Flag for manual deletion
 }
 
+// Deno KV stores the whole Note value, so map every accepted expiry label to
+// a duration. The API schema (v.enum over EXPIRY_OPTIONS) validates the
+// human-readable labels the web client sends ("10 minutes"), but older
+// clients and the CLI may send short codes ("10m"), so both forms resolve.
 const expirationMap: Record<string, number> = {
     '10m': 10 * 60 * 1000,
+    '10 minutes': 10 * 60 * 1000,
     '1h': 60 * 60 * 1000,
+    '1 hour': 60 * 60 * 1000,
     '6h': 6 * 60 * 60 * 1000,
+    '6 hours': 6 * 60 * 60 * 1000,
     '12h': 12 * 60 * 60 * 1000,
+    '12 hours': 12 * 60 * 60 * 1000,
     '24h': 24 * 60 * 60 * 1000,
+    '24 hours': 24 * 60 * 60 * 1000,
     '3d': 3 * 24 * 60 * 60 * 1000,
+    '3 days': 3 * 24 * 60 * 60 * 1000,
     '7d': 7 * 24 * 60 * 60 * 1000,
+    '7 days': 7 * 24 * 60 * 60 * 1000,
     '30d': 30 * 24 * 60 * 60 * 1000,
+    '30 days': 30 * 24 * 60 * 60 * 1000,
+    '90d': 90 * 24 * 60 * 60 * 1000,
+    '90 days': 90 * 24 * 60 * 60 * 1000,
 };
 
 export function formatExpiration(expiresIn: string): Date {

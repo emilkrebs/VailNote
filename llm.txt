@@ -1,0 +1,132 @@
+# VailNote
+
+> Privacy-first, end-to-end encrypted note sharing. Create a note, get a link; only whoever holds the link (plus any password) can decrypt it. The server never sees plaintext, so VailNote is ideal for handing secrets - API keys, tokens, credentials - to and from AI agents without ever writing them to disk unencrypted.
+
+## What is VailNote?
+
+VailNote (vailnote.com) is an open-source note-sharing service built on Fresh/Deno. Every note is encrypted in the client (or CLI) with AES-256-GCM before it is uploaded, so the server, database, and network can never reveal the content. Notes can self-destruct after the first read or be kept until manually deleted, and they expire automatically (10 minutes to 30 days).
+
+This repository contains the web app, the HTTP API, and an official CLI for AI agents. There is no signup, no tracking, no accounts - anyone can create and read notes.
+
+## Core concepts
+
+- **Link format**: `https://vailnote.com/<noteId>#auth=<authKey>`. The auth key is the decryption secret for notes without a password and is always generated client-side.
+- **Encryption**: AES-256-GCM. The 32-byte content key is derived from the secret via PBKDF2-SHA256 with 600,000 iterations, using the 12-byte IV as the salt.
+- **Secret**:
+  - No password: `secret = authKey` (from the link).
+  - Password: `secret = "<password>:<authKey>"` (both are required; the password alone cannot decrypt).
+- **Password hashing for the server**: the client sends a deterministic PBKDF2-SHA256 hash (600,000 iterations, salt derived from the password) of the password; the server additionally hashes it with bcrypt (12 rounds) for storage. The server can therefore verify the password without ever knowing it, and it never sees the auth key.
+- **Retrieval**: fetching a note returns only the ciphertext. Decryption must happen on the client/CLI side.
+- **Auto-delete**: notes without `manualDeletion` are deleted from the server the first time they are successfully read. Password-protected notes are deleted only after a correct password unlocks them.
+- **Expiration options** (send the human-readable value the API validates): `10 minutes`, `1 hour`, `6 hours`, `12 hours`, `24 hours` (default), `3 days`, `7 days`, `30 days`, `90 days`.
+- **Content size limit**: 46 KB of plaintext (the stored value is base64 ciphertext plus metadata and must stay under Deno KV's 64 KiB value limit).
+- **Rate limiting**: 15 requests per minute per client (mutating requests only), privacy-preserving anonymous tokens, 5-minute block. 429 responses include `retryAfter` and `resetTime`.
+
+## HTTP API
+
+Base URL: `https://vailnote.com` (or your self-hosted origin). All responses are JSON; errors are JSON with `{ "message": string, "code": string, "retryAfter?": number }`.
+
+### Create a note - `POST /api/notes`
+
+Request body:
+
+```json
+{
+  "content": "<base64 AES-GCM ciphertext>",
+  "iv": "<base64 12-byte IV>",
+  "password": "<optional: deterministic PBKDF2 hash of the password>",
+  "expiresIn": "24 hours",
+  "manualDeletion": false
+}
+```
+
+Response `201`:
+
+```json
+{ "message": "Note saved successfully!", "noteId": "..." }
+```
+
+Important: the content must be encrypted before this request. The server rejects nothing that lets it see plaintext - encryption is the client's job. Plaintext may be at most 46 KB, and `expiresIn` must be one of the human-readable values listed above (short codes like `24h` are rejected).
+
+### Fetch a note - `POST /api/notes/:id`
+
+Request body:
+
+```json
+{ "passwordHash": "<optional: deterministic PBKDF2 hash of the password>" }
+```
+
+- `200`: `{ "id", "content", "iv", "expiresIn", "password?", "manualDeletion" }` (ciphertext; auto-delete notes are destroyed after this call).
+- `403`: invalid/missing password for a password-protected note.
+- `404`: note not found (already destroyed or expired).
+
+### Delete a note - `DELETE /api/notes/:id`
+
+Request body: `{ "passwordHash": "<optional>" }`. Returns `200` `{ "message": "Note deleted successfully" }`.
+
+## Using VailNote from an AI agent (CLI)
+
+`cli/main.ts` is the official agent-facing client. It encrypts/decrypts locally, so an API key (or any secret) passed through VailNote is never stored on disk in plaintext and never sent to the server unencrypted. Secrets are better passed via stdin (create) and env vars (password) than as argv, which leaks through process listings and shell history.
+
+Run it from this repo with Deno:
+
+```bash
+# Create an encrypted note; content via stdin so it never appears in argv/history
+echo "sk-1234..." | deno run --allow-net --allow-env cli/main.ts create --expires-in 24h
+# -> prints: https://vailnote.com/<noteId>#auth=<authKey>
+
+# Password-protected note (password via env, not argv)
+echo "sk-5678..." | VAILNOTE_PASSWORD=my-secret deno run --allow-net --allow-env cli/main.ts create
+
+# Read (decrypt) a note - plaintext goes to stdout; auto-delete notes are destroyed
+deno run --allow-net --allow-env cli/main.ts read "https://vailnote.com/<noteId>#auth=<authKey>"
+
+# Read a password-protected note
+VAILNOTE_PASSWORD=my-secret deno run --allow-net --allow-env cli/main.ts read "<link>"
+
+# Delete a manual-deletion note
+VAILNOTE_PASSWORD=my-secret deno run --allow-net --allow-env cli/main.ts delete "<link>"
+
+# Machine-readable output for agent tooling
+deno run --allow-net --allow-env cli/main.ts create --json
+```
+
+Commands: `create [content]`, `read <link-or-id>`, `delete <link-or-id>`, `version`.
+Options: `-p/--password`, `-e/--expires-in` (short codes: `10m`, `1h`, `6h`, `12h`, `24h`, `3d`, `7d`, `30d`; translated to the API's human-readable values), `-m/--manual-deletion`, `-o/--origin` (default `https://vailnote.com`, env `VAILNOTE_ORIGIN`), `-j/--json`, `-h/--help`.
+Environment: `VAILNOTE_PASSWORD` (recommended over argv), `VAILNOTE_ORIGIN`.
+
+The CLI reuses the same crypto as the web client (`lib/encryption.ts`, `lib/hashing.ts`, `lib/services/crypto-service.ts`), so links created by the CLI open in the browser and vice versa.
+
+### Example agent workflow: sharing a stored API key
+
+1. The agent reads the user's encrypted store, or the user pipes the key in: `echo "$API_KEY" | deno run --allow-net --allow-env cli/main.ts create --expires-in 7d`.
+2. The agent returns the resulting link (with the `#auth=` fragment) to the user, who opens it in a browser - or the user's own agent reads it later with the CLI. The key existed as plaintext only in memory, never on disk.
+3. The note self-destructs after the first read unless `--manual-deletion` is used.
+
+## Security model
+
+- The server stores only ciphertext, the IV, and bcrypt(password-hash); it can never produce plaintext.
+- There is no encryption key management on the server - the link fragment is the key.
+- The CLI and web client keep secret material in memory only and never log it.
+- Rate limiting uses Anonymous Rate-Limited Credentials (ARC): no IP addresses are stored.
+
+## Documentation
+
+- [README.md](README.md) - project overview, architecture, local development
+- [DESIGN.md](DESIGN.md) - detailed design and security architecture
+- [PRODUCT.md](PRODUCT.md) - product vision and goals
+- [PRIVACY.md](PRIVACY.md) - privacy model and guarantees
+- [TERMS.md](TERMS.md) - terms of service
+- [lib/encryption.ts](lib/encryption.ts) - AES-GCM + PBKDF2 content encryption (shared by web client and CLI)
+- [lib/hashing.ts](lib/hashing.ts) - client-side PBKDF2 password hashing
+- [lib/services/crypto-service.ts](lib/services/crypto-service.ts) - key/auth-key generation and secret combination
+- [lib/services/storage/remote-storage.ts](lib/services/storage/remote-storage.ts) - reference client implementation of the API
+- [routes/api/notes.ts](routes/api/notes.ts) - create endpoint
+- [routes/api/notes/[id].ts](routes/api/notes/[id].ts) - fetch/delete endpoint
+- [lib/rate-limiting/](lib/rate-limiting/) - ARC rate-limiting implementation
+- [cli/main.ts](cli/main.ts) - agent-facing CLI (create/read/delete)
+
+## Requirements
+
+- Deno 2.3+ to run the server (`deno task start`) or the CLI.
+- Environment variables for the server: `ARC_SECRET` (required), `DATABASE_PATH` (optional, Deno KV connection string).
