@@ -164,10 +164,10 @@ Machine-readable output for agent tooling:
 ```bash
 $ echo "sk-1234..." | vailnote create --json
 {
-  "noteId": "2293cc2e6498",
-  "authKey": "iAJRUq_W",
-  "link": "https://vailnote.com/2293cc2e6498#auth=iAJRUq_W",
-  "expiresIn": "1h"
+  "noteId": "a1b2c3d4e5f6",
+  "authKey": "ExAmPlE_AuTh",
+  "link": "https://vailnote.com/a1b2c3d4e5f6#auth=ExAmPlE_AuTh",
+  "expiresIn": "24h"
 }
 ```
 
