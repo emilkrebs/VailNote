@@ -9,7 +9,6 @@ import {
     GithubLogoIcon,
     LinkSimpleIcon,
     NotePencilIcon,
-    RobotIcon,
 } from '../components/Icons.tsx';
 
 export default function Home() {
@@ -24,8 +23,8 @@ export default function Home() {
                 <Hero />
                 <HowItWorks />
                 <Security />
-                <OpenSource />
                 <FightChatControl />
+                <OpenSource />
             </main>
         </>
     );
@@ -166,7 +165,7 @@ function Security() {
     return (
         <section id='security' class='scroll-mt-16 bg-bg py-16 sm:py-24'>
             <div class='mx-auto max-w-6xl px-4 sm:px-6'>
-                <div class='panel-recessed rounded-panel px-5 py-10 sm:px-10 sm:py-14'>
+                <div class='rounded-panel px-5 py-10 sm:px-10 sm:py-14'>
                     <div class='grid items-center gap-12 lg:grid-cols-2 lg:gap-16'>
                         <div>
                             <p class='font-mono text-xs tracking-[0.14em] text-faint'>READOUT / SERVER SIDE</p>
@@ -302,7 +301,6 @@ function AgentTerminal() {
             <div class='rounded-panel border border-line-strong bg-surface p-5 font-mono text-sm sm:p-7'>
                 <div class='flex items-center justify-between text-xs text-faint'>
                     <span class='tracking-[0.14em]'>AGENT → VAILNOTE</span>
-                    <RobotIcon size={16} class='text-faint' />
                 </div>
 
                 <div class='mt-5 flex flex-col gap-3 leading-relaxed'>

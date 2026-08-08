@@ -269,3 +269,14 @@
 .markdown-body hr {
     background-color: var(--color-line) !important;
 }
+
+/*
+ * Struck-through ciphertext on the error ledger panel: the note is already
+ * gone, so the fragment reads as a cancelled payload rather than live data.
+ */
+.cipher {
+    opacity: 0.6;
+    text-decoration: line-through;
+    text-decoration-color: var(--color-line-strong);
+    text-decoration-thickness: 1px;
+}

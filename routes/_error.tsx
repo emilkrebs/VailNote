@@ -93,20 +93,13 @@ export default function Error(props: PageProps) {
             <Header title='Error' description={`An error occurred: ${error.message || 'Unknown error'}`} />
 
             <PageShell>
-                <div class='flex flex-col items-center gap-5 py-10 text-center'>
-                    <span class='flex size-14 items-center justify-center rounded-control bg-accent-soft text-accent-bright'>
-                        <StatusIcon size={28} />
-                    </span>
-
-                    <div>
-                        <p class='font-mono text-sm text-faint'>HTTP {status}</p>
-                        <h1 class='mt-2 text-3xl font-bold tracking-tight sm:text-4xl'>
-                            {errorContent.title}
-                        </h1>
-                        <p class='mx-auto mt-3 max-w-md text-[0.9375rem] leading-relaxed text-muted'>
-                            {errorContent.description}
-                        </p>
-                    </div>
+                <div class='flex flex-col items-center py-8 text-center'>
+                    <p class='font-mono text-xs tracking-[0.14em] text-faint'>HTTP {status}</p>
+                    <h1 class='mt-3 text-3xl font-bold tracking-tight sm:text-4xl'>Not found</h1>
+                    <p class='mt-3 max-w-md text-[0.9375rem] leading-relaxed text-muted'>
+                        This page or note does not exist. A note link may have already been read and destroyed, or it
+                        may have expired.
+                    </p>
 
                     <ErrorActions
                         status={status}
@@ -114,7 +107,9 @@ export default function Error(props: PageProps) {
                         resetTime={rateLimitResetTime}
                     />
 
-                    <HomeButton />
+                    <div class='mt-7'>
+                        <HomeButton />
+                    </div>
                 </div>
             </PageShell>
         </>
