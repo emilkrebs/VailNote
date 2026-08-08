@@ -64,6 +64,8 @@ Request body:
 
 Request body: `{ "passwordHash": "<optional>" }`. Returns `200` `{ "message": "Note deleted successfully" }`.
 
+`passwordHash` is **required for password-protected notes**: the same access check as fetch applies, and without a matching hash the server responds `403 INVALID_PASSWORD_OR_AUTH_KEY` without deleting anything. It may only be omitted for notes created without a password, where possession of the link is the capability. The hash is a deterministic PBKDF2 verifier (never the raw password), so zero-knowledge is preserved: the server can gate deletion on the password without ever seeing plaintext or the auth key.
+
 ## Using VailNote from an AI agent (CLI)
 
 `cli/main.ts` is the official agent-facing client. It encrypts/decrypts locally, so an API key (or any secret) passed through VailNote is never stored on disk in plaintext and never sent to the server unencrypted. Secrets are better passed via stdin (create) and env vars (password) than as argv, which leaks through process listings and shell history.
@@ -147,6 +149,8 @@ set -a; source <(deno run --allow-net --allow-env --allow-read cli/main.ts env);
 ```
 
 Rules for this pattern: use `--manual-deletion` so the note survives repeated resolutions; add a password so the `.env` link alone is useless (then set `VAILNOTE_PASSWORD` when resolving); use `printf`/`echo -n` when creating so the stored value has no trailing newline (the `env` command strips trailing newlines on resolution anyway).
+
+**Important:** only tools that resolve the file (via `vailnote env`) ever see the real value. A process that reads `.env` directly gets the literal link as the value and fails auth — run the resolution *before* starting the consumer, e.g. `set -a; source <(vailnote env .env); set +a; my-agent`. Rotating the secret means creating a new note and swapping the link in `.env`; delete the old note (`vailnote delete`) so the retired secret doesn't linger. Manual-deletion notes persist until explicitly deleted or until the 180-day maximum expiry — schedule rotation accordingly.
 
 ## Security model
 
