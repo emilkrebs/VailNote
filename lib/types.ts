@@ -42,25 +42,28 @@ export function formatExpirationMessage(expiresIn: Date): string {
         return 'Expired';
     }
 
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const days = Math.floor(hours / 24);
+    const totalSeconds = Math.floor(diff / 1000);
+    const days = Math.floor(totalSeconds / 86_400);
+    const hours = Math.floor((totalSeconds % 86_400) / 3_600);
+    const minutes = Math.floor((totalSeconds % 3_600) / 60);
+    const seconds = totalSeconds % 60;
 
-    if (days > 0) {
-        return `${days} day${days > 1 ? 's' : ''} and ${hours % 24} hour${hours % 24 !== 1 ? 's' : ''}`;
-    }
-    if (hours > 0) {
-        return `${hours} hour${hours > 1 ? 's' : ''} and ${minutes % 60} minute${minutes % 60 !== 1 ? 's' : ''}`;
-    }
-    if (minutes > 0) {
-        return `${minutes} minute${minutes > 1 ? 's' : ''} and ${seconds} second${seconds > 1 ? 's' : ''}`;
-    }
-    if (seconds > 0) {
-        return `${seconds} second${seconds !== 1 ? 's' : ''}`;
+    // Always show the largest unit only, so the countdown follows one
+    // visible rule as it ticks down: "3 days" -> "2 hours" -> "1 minute".
+    const units: Array<[string, number]> = [
+        ['day', days],
+        ['hour', hours],
+        ['minute', minutes],
+        ['second', seconds],
+    ];
+    const largest = units.find((unit) => unit[1] > 0);
+
+    if (largest === undefined) {
+        return 'Just now';
     }
 
-    return 'Just now';
+    const [unit, value] = largest;
+    return `${value} ${unit}${value !== 1 ? 's' : ''}`;
 }
 
 export function generateRandomId(length: number = 16): string {

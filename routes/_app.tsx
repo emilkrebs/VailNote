@@ -8,6 +8,12 @@ export default function App({ Component }: PageProps) {
         <html lang='en'>
             <Header />
             <body>
+                <a
+                    href='#main-content'
+                    class='sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-control focus:border focus:border-line-strong focus:bg-raised focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-ink'
+                >
+                    Skip to content
+                </a>
                 <SiteHeader />
                 <Component />
                 <Footer />

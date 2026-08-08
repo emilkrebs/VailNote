@@ -3,6 +3,7 @@ import { Context } from 'fresh';
 import * as bcrypt from 'bcrypt';
 import { State } from '../../../lib/types/common.ts';
 import { noteDatabase } from '../../../main.ts';
+import { jsonError, jsonResponse } from '../../../lib/http.ts';
 
 async function validateNoteAccess(id: string, passwordHash?: string): Promise<{ note: Note | null; error?: Response }> {
     const note = await noteDatabase.getNoteById(id);
@@ -11,7 +12,7 @@ async function validateNoteAccess(id: string, passwordHash?: string): Promise<{ 
     if (!note) {
         return {
             note: null,
-            error: new Response('Note not found', { status: 404 }),
+            error: jsonError(404, 'Note not found', 'NOTE_NOT_FOUND'),
         };
     }
 
@@ -22,7 +23,7 @@ async function validateNoteAccess(id: string, passwordHash?: string): Promise<{ 
             // If the password hash is missing or does not match, return a 403 error
             return {
                 note: null,
-                error: new Response('Invalid password or auth key', { status: 403 }),
+                error: jsonError(403, 'Invalid password or auth key', 'INVALID_PASSWORD_OR_AUTH_KEY'),
             };
         }
     }
@@ -32,12 +33,12 @@ async function validateNoteAccess(id: string, passwordHash?: string): Promise<{ 
 
 export const handler = async (ctx: Context<State>): Promise<Response> => {
     if (ctx.req.method !== 'POST' && ctx.req.method !== 'DELETE') {
-        return new Response('Method not allowed', { status: 405 });
+        return jsonError(405, 'Method not allowed', 'METHOD_NOT_ALLOWED');
     }
 
     const id = ctx.params.id;
     if (!id) {
-        return new Response('Note ID is required', { status: 400 });
+        return jsonError(400, 'Note ID is required', 'NOTE_ID_REQUIRED');
     }
 
     let passwordHash: string | undefined;
@@ -45,13 +46,13 @@ export const handler = async (ctx: Context<State>): Promise<Response> => {
         const body = await ctx.req.json();
         passwordHash = body?.passwordHash;
     } catch {
-        return new Response('Invalid request body', { status: 400 });
+        return jsonError(400, 'Invalid request body', 'INVALID_REQUEST_BODY');
     }
 
     const { note, error } = await validateNoteAccess(id, passwordHash);
 
     if (error) return error;
-    if (!note) return new Response('Note not found', { status: 404 });
+    if (!note) return jsonError(404, 'Note not found', 'NOTE_NOT_FOUND');
 
     if (ctx.req.method === 'POST') {
         // Auto-delete non-manual notes after viewing
@@ -59,22 +60,10 @@ export const handler = async (ctx: Context<State>): Promise<Response> => {
             await noteDatabase.deleteNote(id);
         }
 
-        return new Response(
-            JSON.stringify(note),
-            {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' },
-            },
-        );
+        return jsonResponse(note, 200);
     } else { // DELETE
         await noteDatabase.deleteNote(id);
-        return new Response(
-            JSON.stringify({ message: 'Note deleted successfully' }),
-            {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' },
-            },
-        );
+        return jsonResponse({ message: 'Note deleted successfully' }, 200);
     }
 };
 

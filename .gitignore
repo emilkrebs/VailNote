@@ -1,18 +1,62 @@
-# dotenv environment variable files
+# --- Environment / secrets ---
+# Never commit real secrets. Commit only *.example files.
 .env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
+.env.*
+!.env.example
+!.env.sample
 
-# Fresh build directory
+# --- Deno / Fresh build ---
 _fresh/
-# npm dependencies
-node_modules/
+# Local Deno KV data (file-backed database)
+kv/
+# Vite cache and build output
+.vite/
+dist/
+dist-ssr/
 
-# AI
+# --- npm / node ---
+node_modules/
+package-lock.json
+.pnp
+.pnp.js
+*.tgz
+
+# --- Logs ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Test / coverage ---
+coverage/
+.nyc_output/
+*.lcov
+.tmp/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+
+# --- Editors / IDEs (only ignore local, non-shared files) ---
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tailwind.json
+*.code-workspace
+
+# --- AI assistants / agents ---
 /.agents/
-/.github/skills/
 /.opencode/
 /.claude/
+/.cursor/
+/.github/skills/
+/.github/agents/
+/.github/hooks/
 skills-lock.json
+.impeccable

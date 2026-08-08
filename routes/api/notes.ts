@@ -1,5 +1,6 @@
 import { createNoteSchema } from '../../lib/validation/note.ts';
 import { formatExpiration, Note } from '../../lib/types.ts';
+import { jsonError, jsonResponse } from '../../lib/http.ts';
 import * as v from '@valibot/valibot';
 import { Context } from 'fresh';
 import * as bcrypt from 'bcrypt';
@@ -24,21 +25,26 @@ import { defaultLogger } from '../../lib/logging.ts';
 export const handler = {
     async POST(ctx: Context<State>) {
         try {
-            const { content, iv, password, expiresIn, manualDeletion } = await ctx.req.json();
+            let body: Record<string, unknown>;
+            try {
+                body = await ctx.req.json();
+            } catch {
+                return jsonError(400, 'Invalid request body', 'INVALID_REQUEST_BODY');
+            }
+
+            const { content, iv, password, expiresIn, manualDeletion } = body as {
+                content: string;
+                iv: string;
+                password?: string;
+                expiresIn: string;
+                manualDeletion?: boolean;
+            };
 
             // Validate input using valibot
             try {
                 v.parse(createNoteSchema, { content, iv, password, expiresIn, manualDeletion });
-            } catch (err) {
-                return new Response(
-                    JSON.stringify({
-                        message: 'Invalid request data',
-                        error: err instanceof Error ? err.message : 'Unknown error',
-                    }),
-                    {
-                        status: 400,
-                    },
-                );
+            } catch {
+                return jsonError(400, 'Invalid request data', 'INVALID_DATA');
             }
 
             const noteId = await noteDatabase.generateNoteId();
@@ -61,27 +67,19 @@ export const handler = {
 
             if (!insertResult.success) {
                 defaultLogger.error(`Failed to save note: ${insertResult.error}`);
-                return new Response(
-                    JSON.stringify({ message: 'Failed to save note' }),
-                    { status: 500 },
-                );
+                return jsonError(500, 'Failed to save note', 'SAVE_FAILED');
             }
 
-            return new Response(
-                JSON.stringify({
+            return jsonResponse(
+                {
                     message: 'Note saved successfully!',
                     noteId: noteId,
-                }),
-                {
-                    status: 201,
                 },
+                201,
             );
         } catch (error) {
             defaultLogger.error(`Unexpected error creating note: ${error instanceof Error ? error.message : error}`);
-            return new Response(
-                JSON.stringify({ message: 'Failed to process request' }),
-                { status: 500 },
-            );
+            return jsonError(500, 'Failed to process request', 'INTERNAL_ERROR');
         }
     },
 };

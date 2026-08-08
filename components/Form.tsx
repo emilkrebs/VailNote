@@ -1,5 +1,5 @@
 import type { JSX } from 'preact';
-import { CaretRightIcon, WarningCircleIcon } from './Icons.tsx';
+import { WarningCircleIcon } from './Icons.tsx';
 
 interface FormErrorProps {
     error?: string;
@@ -113,28 +113,5 @@ export function SelectOption(props: JSX.IntrinsicElements['option']) {
         >
             {props.children}
         </option>
-    );
-}
-
-type CollapsibleProps = JSX.IntrinsicElements['details'] & {
-    title: string;
-    isOpen?: boolean;
-};
-
-export function Collapsible({ title, isOpen = false, children, ...props }: CollapsibleProps) {
-    return (
-        <details
-            {...props}
-            open={isOpen}
-            class={`group border-t border-line pt-4 ${props.class || ''}`}
-        >
-            <summary class='flex items-center gap-2 text-[0.9375rem] font-medium text-muted cursor-pointer select-none transition-colors hover:text-ink'>
-                <CaretRightIcon size={14} class='transition-transform duration-200 group-open:rotate-90' />
-                {title}
-            </summary>
-            <div class='mt-4 flex flex-col gap-2'>
-                {children}
-            </div>
-        </details>
     );
 }

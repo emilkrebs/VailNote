@@ -8,6 +8,7 @@ import { assertExists } from '$std/assert/assert_exists.ts';
 import { encryptNoteContent } from '../lib/encryption.ts';
 import { generateDeterministicClientHash } from '../lib/hashing.ts';
 import { DenoKVArcStore } from '../lib/rate-limiting/src/arc-store.ts';
+import { apiErrorHandler, jsonResponse } from '../lib/http.ts';
 
 const defaultRateLimitOptions = {
     maxRequests: 2,
@@ -183,6 +184,47 @@ Deno.test({
             const thirdResponse = await handler(request);
             assertEquals(thirdResponse.status, 429);
         });
+    },
+    sanitizeResources: false,
+    sanitizeOps: false,
+});
+
+Deno.test({
+    name: 'ARC Rate Limiter - API rate-limit responses are JSON, never HTML',
+    fn: async () => {
+        const rateLimiter = new ArcRateLimiter({ ...defaultRateLimitOptions, maxRequests: 1 });
+        const rateLimitMiddleware = rateLimiter.middleware<State>();
+
+        // Mirrors main.ts: the rate limiter throws HttpError(429) from a root
+        // middleware; API requests must be converted to JSON error bodies so
+        // clients never render the HTML error page (the P0 raw-HTML bug).
+        const handler = new App<State>()
+            .use(async (ctx) => {
+                try {
+                    return await rateLimitMiddleware(ctx);
+                } catch (error) {
+                    ctx.error = error;
+                    return apiErrorHandler(ctx);
+                }
+            })
+            .post('/api/notes', () => jsonResponse({ ok: true }, 201))
+            .handler();
+
+        // First request is allowed
+        const first = await handler(new Request('http://localhost/api/notes', { method: 'POST' }));
+        assertEquals(first.status, 201);
+
+        // Second request is rate-limited
+        const blocked = await handler(new Request('http://localhost/api/notes', { method: 'POST' }));
+        assertEquals(blocked.status, 429);
+        assertEquals(blocked.headers.get('content-type'), 'application/json');
+
+        const body = await blocked.json();
+        assertEquals(body.code, 'RATE_LIMITED');
+        assertEquals(typeof body.message, 'string');
+        assertExists(body.retryAfter, 'retryAfter should be included for rate-limit responses');
+
+        rateLimiter.destroy();
     },
     sanitizeResources: false,
     sanitizeOps: false,

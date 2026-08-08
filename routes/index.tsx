@@ -13,7 +13,7 @@ export default function Home() {
                 description='Share encrypted notes securely with VailNote. Open-source note sharing with end-to-end encryption, automatic deletion, and privacy-preserving features. No tracking, maximum security.'
                 canonicalUrl={ORIGIN}
             />
-            <main>
+            <main id='main-content' tabIndex={-1} class='scroll-mt-16 focus:outline-none'>
                 <Hero />
                 <HowItWorks />
                 <Security />
@@ -213,8 +213,8 @@ function CipherPanel() {
                     o5T9dXcE2K/wYq7hZk0mQxV3sB1uNfLgjRa8pDwiCH6yUOJtM4vGnrPS+Abek9zFqW5hT2cLxYmD0uK8sNVi7EJgw==
                 </p>
             </div>
-            <figcaption class='mt-3 text-sm text-faint'>
-                Illustrative ciphertext. The transformation happens entirely in your browser.
+            <figcaption class='mt-3 text-sm text-muted'>
+                Illustrative ciphertext (example). The transformation happens entirely in your browser.
             </figcaption>
         </figure>
     );
@@ -245,7 +245,15 @@ function FightChatControl() {
                     </a>
                 </h2>
                 <p class='mt-5 max-w-[52ch] text-lg leading-relaxed text-muted'>
-                    The EU's Chat Control law allows AI scanning of private messages. <a href='https://fightchatcontrol.eu/' target='_blank' rel='noopener noreferrer' class='hover:underline'>Learn how to act.</a>
+                    The EU's Chat Control law allows AI scanning of private messages.{' '}
+                    <a
+                        href='https://fightchatcontrol.eu/'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        class='hover:underline'
+                    >
+                        Learn how to act.
+                    </a>
                 </p>
             </div>
         </section>

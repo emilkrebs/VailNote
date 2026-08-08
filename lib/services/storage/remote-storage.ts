@@ -16,6 +16,48 @@ export interface ApiNoteRequest {
     manualDeletion?: boolean;
 }
 
+interface ApiErrorBody {
+    message?: string;
+    code?: string;
+    retryAfter?: number;
+}
+
+const STATUS_FALLBACK_MESSAGES: Record<number, string> = {
+    400: 'The request could not be processed. Please check your input and try again.',
+    403: 'The note could not be opened with the provided credentials.',
+    404: 'Note not found. It may have been destroyed already, or the link is invalid.',
+    405: 'The server rejected this request method.',
+    429: 'You have made too many requests. Please wait a moment before trying again.',
+};
+
+function errorMessageFor(status: number, retryAfter?: number): string {
+    const fallback = STATUS_FALLBACK_MESSAGES[status] ??
+        'The request could not be completed. Please try again.';
+    if (status === 429 && retryAfter !== undefined && retryAfter > 0) {
+        return `You have made too many requests. Please try again in ${Math.ceil(retryAfter)} seconds.`;
+    }
+    return fallback;
+}
+
+/**
+ * Extract a user-facing error message from a non-OK API response.
+ * Error bodies are JSON (`{ message, retryAfter? }`); if the body is not
+ * JSON (for example a proxy or CDN HTML page), fall back to a friendly
+ * status-based message instead of surfacing the raw body.
+ */
+async function parseErrorMessage(response: Response): Promise<string> {
+    try {
+        const body = await response.json() as ApiErrorBody;
+        if (typeof body?.message === 'string' && body.message.length > 0) {
+            return body.message;
+        }
+        return errorMessageFor(response.status, body?.retryAfter);
+    } catch {
+        // Non-JSON body (HTML error page, proxy response, etc.)
+        return errorMessageFor(response.status);
+    }
+}
+
 /**
  * RemoteStorage implements the StorageProvider interface to interact with a backend API for note storage.
  * It handles creating, retrieving, and deleting notes by making HTTP requests to the appropriate endpoints.
@@ -44,7 +86,7 @@ export default class RemoteStorage implements StorageProvider {
             });
 
             if (!response.ok) {
-                return { success: false, message: await response.text(), authKey };
+                return { success: false, message: await parseErrorMessage(response), authKey };
             }
 
             const { noteId, ...res } = await response.json();
@@ -69,7 +111,7 @@ export default class RemoteStorage implements StorageProvider {
             });
 
             if (!response.ok) {
-                return { success: false, message: await response.text() };
+                return { success: false, message: await parseErrorMessage(response) };
             }
 
             const note = await response.json();
@@ -88,7 +130,7 @@ export default class RemoteStorage implements StorageProvider {
                 body: JSON.stringify({ passwordHash }),
             });
 
-            return response.ok ? { success: true } : { success: false, message: await response.text() };
+            return response.ok ? { success: true } : { success: false, message: await parseErrorMessage(response) };
         } catch {
             return { success: false, message: 'Failed to delete note' };
         }

@@ -51,4 +51,3 @@ export type CreateNoteSchema = v.InferOutput<typeof createNoteSchema>;
 export type ViewNoteSchema = v.InferOutput<typeof viewNoteSchema>;
 
 export const expirationOptions: string[] = Object.values(EXPIRY_OPTIONS);
-export const manualDeletionOptions: string[] = Object.values(MANUAL_DELETION_OPTIONS);

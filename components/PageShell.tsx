@@ -12,7 +12,11 @@ interface PageShellProps {
  */
 export default function PageShell({ children, width = 'narrow' }: PageShellProps) {
     return (
-        <main class='relative min-h-[70dvh] overflow-hidden'>
+        <main
+            id='main-content'
+            tabIndex={-1}
+            class='relative min-h-[70dvh] overflow-hidden scroll-mt-16 focus:outline-none'
+        >
             <div class='aura' aria-hidden='true'></div>
             <div
                 class={`relative mx-auto w-full ${

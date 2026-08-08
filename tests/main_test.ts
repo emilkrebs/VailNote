@@ -118,6 +118,9 @@ Deno.test({
             );
 
             assertEquals(unauthorizedResponse.status, 403);
+            assertEquals(unauthorizedResponse.headers.get('Content-Type'), 'application/json');
+            const unauthorizedBody = await unauthorizedResponse.json();
+            assertEquals(typeof unauthorizedBody.message, 'string');
 
             const authorizedResponse = await handler(
                 new Request(`http://localhost/api/notes/${protectedNoteId}`, {

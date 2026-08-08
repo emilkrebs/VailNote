@@ -6,7 +6,7 @@ import { Button } from '../components/Button.tsx';
 import { formatExpirationMessage, Note } from '../lib/types.ts';
 import { decryptNoteContent } from '../lib/encryption.ts';
 import { combineNoteSecrets } from '../lib/services/crypto-service.ts';
-import LoadingPage from '../components/LoadingPage.tsx';
+import CipherText from './CipherText.tsx';
 import NoteService from '../lib/services/note-service.ts';
 import Card, { CardContent, CardFooter, CardHeader, CardTitle } from '../components/Card.tsx';
 import { FormGroup, Label } from '../components/Form.tsx';
@@ -15,11 +15,18 @@ import * as v from '@valibot/valibot';
 import ErrorPage from '../components/ErrorPage.tsx';
 import PasswordToggle from '../components/PasswordToggle.tsx';
 import CopyButton from '../components/CopyButton.tsx';
-import { ClockCountdownIcon, EyeIcon, FireIcon, TrashSimpleIcon, WarningIcon } from '../components/Icons.tsx';
+import {
+    CaretRightIcon,
+    ClockCountdownIcon,
+    EyeIcon,
+    FireIcon,
+    LockKeyIcon,
+    TrashSimpleIcon,
+    WarningIcon,
+} from '../components/Icons.tsx';
 
 // Constants for messages
 const MESSAGES = {
-    NO_AUTH_KEY: 'No auth key provided, note requires password',
     MANUAL_DELETION_PROMPT: 'The note has been retrieved. You can delete it below at any time.',
     AUTO_DELETION_COMPLETE: 'This note has been destroyed. It cannot be retrieved again.',
     DECRYPTION_FAILED: 'Failed to decrypt note with provided authentication key',
@@ -173,7 +180,10 @@ export default function ViewEncryptedNote({ noteId, manualDeletion, hasPassword 
             const result = await NoteService.getNote(noteId, enteredPassword);
 
             if (!result.success || !result.note) {
-                setDecryptionError(MESSAGES.INVALID_PASSWORD);
+                // The API now returns precise messages ("note not found", rate
+                // limit); only the wrong-password case gets the specific copy.
+                const message = result.message ?? MESSAGES.INVALID_PASSWORD;
+                setDecryptionError(message.includes('Invalid password') ? MESSAGES.INVALID_PASSWORD : message);
                 setLoading(false);
                 return;
             }
@@ -229,12 +239,7 @@ export default function ViewEncryptedNote({ noteId, manualDeletion, hasPassword 
     }
 
     if (loading) {
-        return (
-            <LoadingPage
-                title='Decrypting note'
-                message='Your browser is decrypting the note locally.'
-            />
-        );
+        return <DecryptingView />;
     }
 
     if (!confirmed) {
@@ -253,6 +258,26 @@ export default function ViewEncryptedNote({ noteId, manualDeletion, hasPassword 
             expiresIn={note.expiresIn}
             onDeleteNote={handleDeleteNote}
         />
+    );
+}
+
+function DecryptingView() {
+    return (
+        <PageShell>
+            <Card>
+                <CardContent class='flex flex-col items-center gap-4 pt-10 pb-10 text-center'>
+                    <div role='status' class='flex flex-col items-center gap-3'>
+                        <p class='font-mono text-xs tracking-[0.14em] text-accent-bright'>
+                            <CipherText text='decrypting in your browser' />
+                        </p>
+                        <h2 class='text-xl font-bold tracking-tight'>Decrypting…</h2>
+                        <p class='text-sm text-muted'>
+                            The note is decrypted on your device - it never leaves your browser as plaintext.
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
+        </PageShell>
     );
 }
 
@@ -306,16 +331,27 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
                 <CardHeader>
                     <CardTitle>This note is locked</CardTitle>
                     <p class='text-[0.9375rem] leading-relaxed text-muted'>
-                        Enter the password it was created with. Decryption happens in your browser.
+                        The sender protected this note with a password. Only someone who holds it can open it - the
+                        password was sent separately from the link.
                     </p>
                 </CardHeader>
 
                 <CardContent class='flex flex-col gap-6'>
-                    {!manualDeletion && <DestroyFacts />}
+                    {!manualDeletion && <DestroyFactsDisclosure />}
 
                     <NoScriptWarning />
 
-                    <form class='flex flex-col gap-6' onSubmit={onSubmit} autoComplete='off'>
+                    <form
+                        class='flex flex-col gap-6'
+                        onSubmit={onSubmit}
+                        autoComplete='off'
+                        onKeyDown={(event) => {
+                            if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                                event.preventDefault();
+                                (event.currentTarget as HTMLFormElement).requestSubmit();
+                            }
+                        }}
+                    >
                         <FormGroup>
                             <Label htmlFor='password'>
                                 Password
@@ -332,7 +368,7 @@ function PasswordRequiredView({ onSubmit, manualDeletion, error }: PasswordRequi
                             />
                         </FormGroup>
                         <Button type='submit' variant={manualDeletion ? 'primary' : 'danger'} class='w-full'>
-                            {manualDeletion ? 'Decrypt note' : 'Decrypt and destroy'}
+                            Decrypt note
                         </Button>
                     </form>
                 </CardContent>
@@ -375,21 +411,55 @@ function ConfirmViewNote({ onSubmit }: { onSubmit: () => void }) {
 }
 
 const destroyFacts = [
-    { icon: EyeIcon, text: 'The note decrypts in your browser, not on the server.' },
-    { icon: FireIcon, text: 'It is deleted from the server the moment it is retrieved.' },
-    { icon: WarningIcon, text: 'There is no undo and no second view.' },
+    { icon: EyeIcon, text: 'Decrypts in your browser, never on the server.' },
+    { icon: FireIcon, text: 'Deleted from the server the moment it is opened.' },
+    { icon: WarningIcon, text: 'No undo, no second view.' },
 ];
 
 function DestroyFacts() {
     return (
-        <ul class='flex flex-col gap-3 rounded-control border border-line bg-bg/50 p-4'>
+        <ul class='flex flex-col gap-2 rounded-control border border-line bg-bg/50 p-3 sm:p-4 sm:gap-3'>
             {destroyFacts.map((fact) => (
-                <li key={fact.text} class='flex items-start gap-3 text-[0.9375rem] leading-relaxed text-muted'>
+                <li
+                    key={fact.text}
+                    class='flex items-start gap-2.5 text-sm leading-relaxed text-muted sm:gap-3 sm:text-[0.9375rem]'
+                >
                     <fact.icon size={18} class='mt-0.5 shrink-0 text-warn' />
                     {fact.text}
                 </li>
             ))}
         </ul>
+    );
+}
+
+/**
+ * Destroy facts are the full-width attention item on desktop, but on narrow
+ * viewports they push the password field below the fold. Below `sm` they
+ * collapse behind a disclosure so the single decision - entering the
+ * password - stays on screen.
+ */
+function DestroyFactsDisclosure() {
+    return (
+        <>
+            <div class='hidden sm:block'>
+                <DestroyFacts />
+            </div>
+            <details class='group sm:hidden'>
+                <summary class='flex cursor-pointer list-none items-center justify-between gap-2 rounded-control border border-line bg-raised px-4 py-3 text-sm font-medium text-ink transition-colors hover:border-line-strong [&::-webkit-details-marker]:hidden'>
+                    <span class='flex items-center gap-2'>
+                        <LockKeyIcon size={18} class='text-accent-bright' />
+                        Why is this secure?
+                    </span>
+                    <CaretRightIcon
+                        size={16}
+                        class='shrink-0 text-muted transition-transform group-open:rotate-90'
+                    />
+                </summary>
+                <div class='mt-3'>
+                    <DestroyFacts />
+                </div>
+            </details>
+        </>
     );
 }
 
@@ -419,10 +489,8 @@ function NoScriptWarning() {
     return (
         <noscript>
             <Message variant='warning'>
-                <p class='font-semibold'>JavaScript is required</p>
-                <p class='mt-1 text-sm'>
-                    Notes are decrypted in your browser, never on the server, and that needs JavaScript. Enable it in
-                    your browser settings to continue.{' '}
+                <p class='text-sm'>
+                    JavaScript is required to open this note - it is decrypted in your browser.{' '}
                     <a
                         href='https://www.enable-javascript.com/'
                         target='_blank'
