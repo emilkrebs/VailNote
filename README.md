@@ -75,12 +75,6 @@ The system has been compromised and is marked with (!).
 
 <img width="1059" height="809" alt="architecture diagram" src="https://github.com/user-attachments/assets/90d13e22-5888-4b2e-8120-6ce43d532a6f" />
 
-## Known Issues
-
-(None)
-
-[Add Issue](https://github.com/emilkrebs/VailNote/issues/new)
-
 ## Installation & Development
 
 ### Prerequisites
@@ -134,12 +128,7 @@ vailnote --help
 
 Or install from a local clone: `deno task install:cli`.
 
-**Option 3 - Single binary (no Deno needed):** download the prebuilt binary for your platform from the
-[GitHub Releases](https://github.com/emilkrebs/VailNote/releases) page (`vailnote-x86_64-unknown-linux-gnu`,
-`vailnote-aarch64-apple-darwin`, `vailnote-x86_64-pc-windows-msvc`, ...). They are built automatically whenever a `v*`
-tag is pushed. To build one yourself: `deno task build:cli` (produces `./vailnote-cli`).
-
-**Option 4 - Run without installing:** the CLI is dependency-free, so it runs straight from the repo or GitHub:
+**Option 3 - Run without installing:** the CLI is dependency-free, so it runs straight from the repo or GitHub:
 
 ```bash
 deno task cli <command>                                    # from a clone
@@ -213,6 +202,13 @@ Notes on this pattern:
 Notes are limited to 46 KB of plaintext (the encrypted value must fit Deno KV's 64 KiB limit).
 [llms.txt](https://vailnote.com/llms.txt) documents the HTTP API, encryption protocol, and CLI for AI agents.
 
+## Known Issues
+
+(None)
+
+[Add Issue](https://github.com/emilkrebs/VailNote/issues/new)
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+
